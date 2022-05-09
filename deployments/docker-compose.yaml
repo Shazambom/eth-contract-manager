@@ -1,0 +1,63 @@
+version: '3.8'
+services:
+  redis:
+    image: "redis:alpine"
+    command: redis-server
+    ports:
+      - "6379:6379"
+    volumes:
+      - $PWD/redis-data:/var/lib/redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    networks:
+      - backend
+
+  s3:
+    image: localstack/localstack:latest-arm64
+    environment:
+      SERVICES: s3
+      AWS_ACCESS_KEY_ID: xxx
+      AWS_SECRET_ACCESS_KEY: yyy
+      DATA_DIR: /tmp/localstack/data
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      CacheControl: no-cache
+    ports:
+      - "4566:4566"
+    networks:
+      - backend
+    volumes:
+      - ./aws:/docker-entrypoint-initaws.d
+    healthcheck:
+      test: ["CMD", "bash", "-c", "awslocal s3 ls"]
+      interval: 5s
+      timeout: 10s
+      start_period: 10s
+
+  listener:
+    build:
+      context: ..
+      dockerfile: ./build/listener/Dockerfile
+    restart: always
+    environment:
+      RDS_ENDPOINT: "redis:6379"
+      RDS_PWD: ""
+      AWS_ENDPOINT: "s3:4566"
+      AWS_REGION: "us-east-1"
+      BUCKET_NAME: "tokens"
+      AWS_ACCESS_KEY_ID: "xxx"
+      AWS_SECRET_ACCESS_KEY: "yyy"
+      SSL_ENABLED: "false"
+    networks:
+      - backend
+    depends_on:
+      redis:
+        condition: service_healthy
+      s3:
+        condition: service_healthy
+
+
+networks:
+  backend: {}

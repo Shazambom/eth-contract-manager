@@ -1,6 +1,7 @@
 package main
 
 import (
+	"contract-service/storage"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -8,7 +9,7 @@ import (
 	"os"
 )
 
-var s3, s3Err = NewS3(&aws.Config{
+var s3, s3Err = storage.NewS3(&aws.Config{
 	Endpoint: aws.String(os.Getenv("AWS_ENDPOINT")),
 	Region: aws.String(os.Getenv("AWS_REGION")),
 	Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"), ""),
@@ -38,7 +39,7 @@ func main() {
 		log.Fatal(s3initErr)
 	}
 	fmt.Println("Connecting to Redis client")
-	rds := NewRedis(os.Getenv("RDS_ENDPOINT"), os.Getenv("RDS_PWD"))
+	rds := storage.NewRedis(os.Getenv("RDS_ENDPOINT"), os.Getenv("RDS_PWD"))
 	defer rds.Close()
 	fmt.Println("Initializing events")
 	if initErr := rds.InitEvents(); initErr != nil {

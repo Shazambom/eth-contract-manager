@@ -2,6 +2,11 @@ package main
 
 import (
 	"context"
+	"contract-service/external"
+	"contract-service/signing"
+	"contract-service/storage"
+	"contract-service/utils"
+	"contract-service/web"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,26 +28,26 @@ type Event struct {
 
 
 
-var rdsEndpoint, rdsPwd, secretKey, gURL, siteKey, projectID, contractAddress, signingKey, abi, maxCount, maxIncr, validOrigins, envErr = GetEnvVars()
-var rds = NewRedis(rdsEndpoint, rdsPwd, "COUNT")
+var rdsEndpoint, rdsPwd, secretKey, gURL, siteKey, projectID, contractAddress, signingKey, abi, maxCount, maxIncr, validOrigins, envErr = utils.GetEnvVars()
+var rds = storage.NewRedis(rdsEndpoint, rdsPwd, "COUNT")
 
 
 func HandleRequest(ctx context.Context, e events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var event Event
 	fmt.Println(e.Headers)
-	response := NewErrResponse(GetOriginFromHeaders(e.Headers), validOrigins)
+	response := web.NewErrResponse(web.GetOriginFromHeaders(e.Headers), validOrigins)
 	eventUnmarshalErr := json.Unmarshal([]byte(e.Body), &event)
 	if eventUnmarshalErr != nil {
 		return response, eventUnmarshalErr
 	}
 	fmt.Printf("Context: %+v\n\nEvent from Body: %+v\n", ctx, event)
 	if rdsVerifyErr := rds.VerifyValidAddress(ctx, event.Address); rdsVerifyErr != nil {
-		return response, ConstructErrorResponse(&response, rdsVerifyErr)
+		return response, utils.ConstructErrorResponse(&response, rdsVerifyErr)
 	}
 	fmt.Println("Verified address")
 
 	if rdsCountCheckErr := rds.GetReservedCount(ctx, event.NumAvatars, maxCount); rdsCountCheckErr != nil {
-		return response, ConstructErrorResponse(&response, rdsCountCheckErr)
+		return response, utils.ConstructErrorResponse(&response, rdsCountCheckErr)
 	}
 
 	fmt.Println("Reserved Count has not reached the max")
@@ -54,14 +59,14 @@ func HandleRequest(ctx context.Context, e events.APIGatewayProxyRequest) (events
 	fmt.Println("Valid amount of NFTs were selected")
 
 	var nonceErr error
-	event.Nonce, nonceErr = GetNonce()
+	event.Nonce, nonceErr = utils.GetNonce()
 	if nonceErr != nil {
 		return response, nonceErr
 	}
 
 	fmt.Println("Nonce generated")
 
-	googleResponse, googleErr:= VerifyCaptcha(gURL, projectID, secretKey, siteKey, event.Token, event.IP, event.UserAgent, e.Headers["Referer"])
+	googleResponse, googleErr:= external.VerifyCaptcha(gURL, projectID, secretKey, siteKey, event.Token, event.IP, event.UserAgent, e.Headers["Referer"])
 	if googleErr != nil {
 		return response, googleErr
 	}
@@ -72,7 +77,7 @@ func HandleRequest(ctx context.Context, e events.APIGatewayProxyRequest) (events
 	}
 	fmt.Println("User is not a bot")
 
-	hash, signature, signingErr := SignTxn(event, signingKey)
+	hash, signature, signingErr := utils.SignTxn(event, signingKey)
 	if signingErr != nil {
 		return response, signingErr
 	}
@@ -83,7 +88,7 @@ func HandleRequest(ctx context.Context, e events.APIGatewayProxyRequest) (events
 	}
 	fmt.Println("Queue number retrieved")
 
-	signedRequest := NewSignedRequest(event, signature, hash, contractAddress, abi, queueNum + 1)
+	signedRequest := signing.NewSignedRequest(event, signature, hash, contractAddress, abi, queueNum + 1)
 
 	token, encodingErr := signedRequest.Gzip()
 	if encodingErr != nil {
@@ -102,7 +107,7 @@ func HandleRequest(ctx context.Context, e events.APIGatewayProxyRequest) (events
 	}
 	fmt.Println("Incremented Counter")
 
-	return NewResponse(GetOriginFromHeaders(e.Headers), validOrigins, queueNum)
+	return web.NewResponse(web.GetOriginFromHeaders(e.Headers), validOrigins, queueNum)
 }
 
 func main() {

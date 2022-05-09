@@ -48,3 +48,15 @@ Thumbs.db
 *.mov
 *.wmv
 
+
+.idea
+.serverless
+*.pem
+private.pem
+public.pem
+private.txt
+public.txt
+cmd/captcha/captcha
+cmd/listener/listener
+.DS_Store
+report*

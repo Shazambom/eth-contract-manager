@@ -39,7 +39,7 @@ func main() {
 		log.Fatal(s3initErr)
 	}
 	fmt.Println("Connecting to Redis client")
-	rds := storage.NewRedis(os.Getenv("RDS_ENDPOINT"), os.Getenv("RDS_PWD"))
+	rds := storage.NewRedisListener(os.Getenv("RDS_ENDPOINT"), os.Getenv("RDS_PWD"))
 	defer rds.Close()
 	fmt.Println("Initializing events")
 	if initErr := rds.InitEvents(); initErr != nil {

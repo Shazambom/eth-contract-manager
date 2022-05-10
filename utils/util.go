@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"contract-service/web"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
@@ -50,7 +51,7 @@ func GetEnvVars() (rdsEndpoint, rdsPwd, secretKey, gURL, siteKey, projectID, con
 		envErr
 }
 
-func HashEvent(event main.Event) common.Hash {
+func HashEvent(event web.Event) common.Hash {
 	//Nonce, Address, NumAvatars, TransactionNumber, IP
 	nonce, _ := hex.DecodeString(event.Nonce[2:])
 	hash := crypto.Keccak256Hash(
@@ -70,7 +71,7 @@ func WrapHash(h common.Hash) common.Hash {
 	return hash
 }
 
-func SignTxn(event main.Event, signingKey string) (string, string, error) {
+func SignTxn(event web.Event, signingKey string) (string, string, error) {
 	hash := WrapHash(HashEvent(event))
 
 	key, keyParseErr := crypto.HexToECDSA(signingKey)

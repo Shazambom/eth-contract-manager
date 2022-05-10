@@ -3,13 +3,14 @@ package signing
 import (
 	"bytes"
 	"compress/gzip"
+	"contract-service/web"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 )
 
 type SignedRequest struct {
-	Event     main.Event `json:"event"`
+	Event     web.Event `json:"event"`
 	Signature string     `json:"signature"`
 	Hash string `json:"hash"`
 	ContractAddress string `json:"contract_address"`
@@ -17,7 +18,7 @@ type SignedRequest struct {
 	QueueNumber int64 `json:"queue_number"`
 }
 
-func NewSignedRequest(event main.Event, signature , hash , contractAddress string, ABI []string, queueNumber int64) SignedRequest {
+func NewSignedRequest(event web.Event, signature , hash , contractAddress string, ABI []string, queueNumber int64) SignedRequest {
 	return SignedRequest{
 		Event: event,
 		Signature: signature,

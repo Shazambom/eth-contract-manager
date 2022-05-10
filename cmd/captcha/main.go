@@ -29,7 +29,7 @@ type Event struct {
 
 
 var rdsEndpoint, rdsPwd, secretKey, gURL, siteKey, projectID, contractAddress, signingKey, abi, maxCount, maxIncr, validOrigins, envErr = utils.GetEnvVars()
-var rds = storage.NewRedis(rdsEndpoint, rdsPwd, "COUNT")
+var rds = storage.NewRedisWriter(rdsEndpoint, rdsPwd, "COUNT")
 
 
 func HandleRequest(ctx context.Context, e events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

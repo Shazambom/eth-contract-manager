@@ -13,7 +13,7 @@ type Redis struct {
 	countKey string
 }
 
-func NewRedis(endpoint, pwd, countKey string) *Redis {
+func NewRedisWriter(endpoint, pwd, countKey string) RedisWriter {
 	return &Redis{client: redis.NewClient(&redis.Options{
 		Addr:     endpoint,
 		Password: pwd,
@@ -21,6 +21,14 @@ func NewRedis(endpoint, pwd, countKey string) *Redis {
 	}),
 	countKey: countKey,
 	}
+}
+
+func NewRedisListener(endpoint, pwd string) RedisListener {
+	return &Redis{client: redis.NewClient(&redis.Options{
+		Addr: endpoint,
+		Password: pwd,
+		DB: 0,
+	})}
 }
 
 func (r *Redis) VerifyValidAddress(ctx context.Context, address string) error {
@@ -57,15 +65,15 @@ func (r *Redis) GetReservedCount(ctx context.Context, avatarsRequested, maxMinta
 }
 
 func (r *Redis) MarkAddressAsUsed(ctx context.Context, address, token string) error {
-	return main.rds.client.Set(ctx, address, token, 0).Err()
+	return r.client.Set(ctx, address, token, 0).Err()
 }
 
 func (r *Redis) GetQueueNum(ctx context.Context) (int64, error) {
-	return main.rds.client.DBSize(ctx).Result()
+	return r.client.DBSize(ctx).Result()
 }
 
 func (r *Redis) IncrementCounter(ctx context.Context, avatarsRequested, maxMintable int) error {
-	newMax, rdsCountIncrErr := main.rds.client.IncrBy(ctx, r.countKey, int64(avatarsRequested)).Result()
+	newMax, rdsCountIncrErr := r.client.IncrBy(ctx, r.countKey, int64(avatarsRequested)).Result()
 	if rdsCountIncrErr != nil {
 		return rdsCountIncrErr
 	}
@@ -81,4 +89,27 @@ func (r *Redis) Ping() (string, error) {
 
 func (r *Redis) Close() {
 	_ = r.client.Close()
+}
+
+func (r *Redis) InitEvents() error {
+	return r.client.Do(context.Background(), "CONFIG", "SET", "notify-keyspace-events", "KEA").Err()
+}
+func (r *Redis) Listen(handler func(string, string, error) error) error{
+	ctx := context.Background()
+	stream := r.client.PSubscribe(ctx, "__keyevent*__:set*")
+	if pingErr := stream.Ping(ctx, "test ping"); pingErr != nil {
+		return pingErr
+	}
+	fmt.Printf("Stream: %+v\n", stream)
+	for {
+		msg, err := stream.ReceiveMessage(ctx)
+		val, getErr := r.client.Get(ctx, msg.Payload).Result()
+		if err == nil {
+			err = getErr
+		}
+		if handleErr := handler(msg.Payload, val, err); handleErr != nil {
+			return handleErr
+		}
+
+	}
 }

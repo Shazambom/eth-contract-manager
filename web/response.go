@@ -13,6 +13,10 @@ type Response struct {
 	QueueNumber int64 `json:"queue_number"`
 }
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 func NewResponse(origin string, originList []string, queueNumber int64) (events.APIGatewayProxyResponse, error) {
 	resp := Response{
 		Token:       "",
@@ -56,4 +60,13 @@ func GetOriginFromHeaders(headers map[string]string) string {
 		return lilO
 	}
 	return ""
+}
+
+func ConstructErrorResponse(response *events.APIGatewayProxyResponse, err error) error {
+	errBody, marshErr := json.Marshal(ErrorResponse{err.Error()})
+	if marshErr != nil {
+		return marshErr
+	}
+	response.Body = string(errBody)
+	return nil
 }

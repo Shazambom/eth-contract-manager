@@ -9,6 +9,9 @@ import (
 	"fmt"
 )
 
+//TODO Move this functionality to the contract-manager service to build the transaction
+
+
 type SignedRequest struct {
 	Event     web.Event `json:"event"`
 	Signature string     `json:"signature"`

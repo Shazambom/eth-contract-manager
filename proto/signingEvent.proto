@@ -4,12 +4,8 @@ syntax = "proto3";
 option go_package = "./;pb";
 
 message SignatureRequest {
-    string abi = 1;
     repeated bytes args = 2;
-    repeated string arg_names = 3;
     string signing_key = 4;
-    string contract_address = 5;
-    string function = 6;
 }
 
 message BatchSignatureRequest {

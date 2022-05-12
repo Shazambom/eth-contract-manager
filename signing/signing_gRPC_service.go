@@ -39,17 +39,17 @@ func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService)
 
 
 func (sRPC *SignerRPCService) SignTxn(ctx context.Context, req *pb.SignatureRequest) (*pb.SignatureResponse, error) {
-	//TODO Add logging here
+	log.Printf("Signing transaction\ncontext: %+v\nargs: %+v\n", ctx, req.Args)
 	hash, signature, err := sRPC.Handler.SignTxn(req.SigningKey, req.Args)
 	if err != nil {
-		//TODO Add logging here
+		log.Println(err)
 		return nil, err
 	}
 	return &pb.SignatureResponse{Signature: signature, Hash: hash}, nil
 }
 
 func (sRPC *SignerRPCService) BatchSignTxn(ctx context.Context, req *pb.BatchSignatureRequest) (*pb.BatchSignatureResponse, error) {
-	//TODO Add logging here
+	log.Printf("Starting batch with context: %+v\nProcessing %d requests\n", ctx, len(req.SignatureRequests))
 	responses := []*pb.SignatureResponse{}
 	for _, request := range req.SignatureRequests {
 		signedResponse, err := sRPC.SignTxn(ctx, request)

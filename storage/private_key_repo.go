@@ -24,7 +24,7 @@ func NewPrivateKeyRepository(tableName string, sess *session.Session, cfg ...*aw
 	return &PrivateKeyRepo{dynamodb.New(sess, cfg...), tableName}
 }
 
-
+// GetPrivateKey ---- WARNING ---- NEVER CALL OUTSIDE OF SIGNER SERVICE DUE TO SECURITY CONCERNS
 func (pkr *PrivateKeyRepo) GetPrivateKey(ctx context.Context, contractAddress string) (string, error) {
 	result, err := pkr.db.GetItemWithContext(ctx, &dynamodb.GetItemInput{
 		TableName: aws.String(pkr.tableName),

@@ -18,3 +18,9 @@ type RedisWriter interface {
 	Ping() (string, error)
 	Close()
 }
+
+type PrivateKeyRepository interface {
+	GetPrivateKey(ctx context.Context, contractAddress string) (string, error)
+	UpsertPrivateKey(ctx context.Context, contractAddress, key string) error
+	DeletePrivateKey(ctx context.Context, contractAddress string) error
+}

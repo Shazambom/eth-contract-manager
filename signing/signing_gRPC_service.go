@@ -3,6 +3,7 @@ package signing
 import (
 	"context"
 	pb "contract-service/proto"
+	"contract-service/storage"
 	"errors"
 	"fmt"
 	"google.golang.org/grpc"
@@ -15,17 +16,18 @@ type SignerRPCService struct {
 	Channel chan string
 	pb.UnimplementedSigningServiceServer
 	Handler SigningService
+	Repo storage.PrivateKeyRepository
 }
 
 
-func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService) (*SignerRPCService, error) {
+func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService, repo storage.PrivateKeyRepository) (*SignerRPCService, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
 		return nil, err
 	}
 	log.Printf("Successfully listening on port: %d\n", port)
 
-	server := &SignerRPCService{Server: grpc.NewServer(opts...), Channel: make(chan string), Handler: handler}
+	server := &SignerRPCService{Server: grpc.NewServer(opts...), Channel: make(chan string), Handler: handler, Repo: repo}
 	pb.RegisterSigningServiceServer(server.Server, server)
 	log.Println("GRPC Server registered")
 	go func() {
@@ -40,7 +42,12 @@ func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService)
 
 func (sRPC *SignerRPCService) SignTxn(ctx context.Context, req *pb.SignatureRequest) (*pb.SignatureResponse, error) {
 	log.Printf("Signing transaction\ncontext: %+v\nargs: %+v\n", ctx, req.Args)
-	hash, signature, err := sRPC.Handler.SignTxn(req.SigningKey, req.Args)
+	key, keyErr := sRPC.Repo.GetPrivateKey(ctx, req.ContractAddress)
+	if keyErr != nil {
+		log.Println(keyErr)
+		return nil, keyErr
+	}
+	hash, signature, err := sRPC.Handler.SignTxn(key, req.Args)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -62,4 +69,12 @@ func (sRPC *SignerRPCService) BatchSignTxn(ctx context.Context, req *pb.BatchSig
 		return nil, errors.New("none of the signing requests could be fulfilled")
 	}
 	return &pb.BatchSignatureResponse{SignatureResponses: responses}, nil
+}
+
+func (sRPC *SignerRPCService) GenerateNewKey(ctx context.Context, req *pb.KeyManagementRequest)  (*pb.KeyManagementResponse, error) {
+	return nil, nil
+}
+
+func (sRPC *SignerRPCService) DeleteKey(ctx context.Context, req *pb.KeyManagementRequest)  (*pb.KeyManagementResponse, error) {
+	return nil, nil
 }

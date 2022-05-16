@@ -71,6 +71,6 @@ func (s *Signer) GenerateKey() (privateKey, address string, err error) {
 	if !ok {
 		return "", "", errors.New("error building public key")
 	}
-	addr := crypto.PubkeyToAddress(*publicKeyECDSA)
-	return hexutil.Encode(privateKeyBytes)[2:], addr.Hex(), nil
+	addr := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
+	return hexutil.Encode(privateKeyBytes)[2:], addr, nil
 }

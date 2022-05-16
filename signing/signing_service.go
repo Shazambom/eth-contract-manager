@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -58,4 +59,18 @@ func (s *Signer) VerifyPublicKey(signature []byte, hash common.Hash, key *ecdsa.
 		return errors.New("signature public key verification failure")
 	}
 	return nil
+}
+
+func (s *Signer) GenerateKey() (privateKey, address string, err error) {
+	key, err := crypto.GenerateKey()
+	if err != nil {
+		return "", "", err
+	}
+	privateKeyBytes := crypto.FromECDSA(key)
+	publicKeyECDSA, ok := key.Public().(*ecdsa.PublicKey)
+	if !ok {
+		return "", "", errors.New("error building public key")
+	}
+	addr := crypto.PubkeyToAddress(*publicKeyECDSA)
+	return hexutil.Encode(privateKeyBytes)[2:], addr.Hex(), nil
 }

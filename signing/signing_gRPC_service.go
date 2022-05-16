@@ -17,18 +17,17 @@ type SignerRPCService struct {
 	pb.UnimplementedSigningServiceServer
 	Handler SigningService
 	Repo storage.PrivateKeyRepository
-	KeyManager KeyManagerService
 }
 
 
-func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService, repo storage.PrivateKeyRepository, keyManager KeyManagerService) (*SignerRPCService, error) {
+func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService, repo storage.PrivateKeyRepository) (*SignerRPCService, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
 		return nil, err
 	}
 	log.Printf("Successfully listening on port: %d\n", port)
 
-	server := &SignerRPCService{Server: grpc.NewServer(opts...), Channel: make(chan string), Handler: handler, Repo: repo, KeyManager: keyManager}
+	server := &SignerRPCService{Server: grpc.NewServer(opts...), Channel: make(chan string), Handler: handler, Repo: repo}
 	pb.RegisterSigningServiceServer(server.Server, server)
 	log.Println("GRPC Server registered")
 	go func() {
@@ -73,7 +72,7 @@ func (sRPC *SignerRPCService) BatchSignTxn(ctx context.Context, req *pb.BatchSig
 }
 
 func (sRPC *SignerRPCService) GenerateNewKey(ctx context.Context, req *pb.KeyManagementRequest)  (*pb.KeyManagementResponse, error) {
-	privKey, addr, err := sRPC.KeyManager.GenerateKey()
+	privKey, addr, err := sRPC.Handler.GenerateKey()
 	if err != nil {
 		log.Println(err)
 		return nil, err

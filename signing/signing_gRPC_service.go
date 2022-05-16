@@ -17,17 +17,18 @@ type SignerRPCService struct {
 	pb.UnimplementedSigningServiceServer
 	Handler SigningService
 	Repo storage.PrivateKeyRepository
+	KeyManager KeyManagerService
 }
 
 
-func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService, repo storage.PrivateKeyRepository) (*SignerRPCService, error) {
+func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService, repo storage.PrivateKeyRepository, keyManager KeyManagerService) (*SignerRPCService, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
 		return nil, err
 	}
 	log.Printf("Successfully listening on port: %d\n", port)
 
-	server := &SignerRPCService{Server: grpc.NewServer(opts...), Channel: make(chan string), Handler: handler, Repo: repo}
+	server := &SignerRPCService{Server: grpc.NewServer(opts...), Channel: make(chan string), Handler: handler, Repo: repo, KeyManager: keyManager}
 	pb.RegisterSigningServiceServer(server.Server, server)
 	log.Println("GRPC Server registered")
 	go func() {
@@ -72,9 +73,24 @@ func (sRPC *SignerRPCService) BatchSignTxn(ctx context.Context, req *pb.BatchSig
 }
 
 func (sRPC *SignerRPCService) GenerateNewKey(ctx context.Context, req *pb.KeyManagementRequest)  (*pb.KeyManagementResponse, error) {
-	return nil, nil
+	privKey, addr, err := sRPC.KeyManager.GenerateKey()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	putErr := sRPC.Repo.UpsertPrivateKey(ctx, req.ContractAddress, privKey)
+	if putErr != nil {
+		log.Println(putErr)
+		return nil, putErr
+	}
+	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: addr}, nil
 }
 
 func (sRPC *SignerRPCService) DeleteKey(ctx context.Context, req *pb.KeyManagementRequest)  (*pb.KeyManagementResponse, error) {
-	return nil, nil
+	err := sRPC.Repo.DeletePrivateKey(ctx, req.ContractAddress)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: ""}, nil
 }

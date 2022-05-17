@@ -34,8 +34,8 @@ func NewRedisListener(endpoint, pwd string) RedisListener {
 
 //TODO Implement contract specific counting and verification/validation
 
-func (r *Redis) VerifyValidAddress(ctx context.Context, address string) error {
-	rdsRes, rdsErr := r.client.Get(ctx, address).Result()
+func (r *Redis) VerifyValidAddress(ctx context.Context, address, contractAddress string) error {
+	rdsRes, rdsErr := r.client.Get(ctx, r.getUserKey(contractAddress, address)).Result()
 	if rdsErr != nil && rdsErr != redis.Nil {
 		fmt.Println(rdsErr.Error())
 		return rdsErr
@@ -48,8 +48,8 @@ func (r *Redis) VerifyValidAddress(ctx context.Context, address string) error {
 	return nil
 }
 
-func (r *Redis) GetReservedCount(ctx context.Context, avatarsRequested, maxMintable int) (error) {
-	rdsCountResp, rdsCountErr := r.client.Get(ctx, r.countKey).Result()
+func (r *Redis) GetReservedCount(ctx context.Context, numRequested, maxMintable int, contractAddress string) error {
+	rdsCountResp, rdsCountErr := r.client.Get(ctx, r.getCountKey(contractAddress)).Result()
 	if rdsCountErr != nil && rdsCountErr != redis.Nil {
 		return rdsCountErr
 	}
@@ -60,7 +60,7 @@ func (r *Redis) GetReservedCount(ctx context.Context, avatarsRequested, maxMinta
 		if strconvErr != nil {
 			return strconvErr
 		}
-		if count + avatarsRequested > maxMintable {
+		if count + numRequested > maxMintable {
 			return errors.New("the amount of tokens requested exceeds capacity")
 		}
 		return nil
@@ -72,15 +72,15 @@ func (r *Redis) MarkAddressAsUsed(ctx context.Context, token *Token) error {
 	if err != nil {
 		return err
 	}
-	return r.client.Set(ctx, token.ContractAddress + "_" + token.UserAddress, str, 0).Err()
+	return r.client.Set(ctx, r.getUserKey(token.ContractAddress, token.UserAddress), str, 0).Err()
 }
 
 func (r *Redis) GetQueueNum(ctx context.Context) (int64, error) {
 	return r.client.DBSize(ctx).Result()
 }
 
-func (r *Redis) IncrementCounter(ctx context.Context, avatarsRequested, maxMintable int) error {
-	newMax, rdsCountIncrErr := r.client.IncrBy(ctx, r.countKey, int64(avatarsRequested)).Result()
+func (r *Redis) IncrementCounter(ctx context.Context, numRequested, maxMintable int, contractAddress string) error {
+	newMax, rdsCountIncrErr := r.client.IncrBy(ctx, r.getCountKey(contractAddress), int64(numRequested)).Result()
 	if rdsCountIncrErr != nil {
 		return rdsCountIncrErr
 	}
@@ -119,4 +119,12 @@ func (r *Redis) Listen(handler func(string, string, error) error) error{
 		}
 
 	}
+}
+
+func (r *Redis) getCountKey(contractAddress string) string {
+	return r.countKey + "_" + contractAddress
+}
+
+func (r *Redis) getUserKey(contractAddress, address string) string {
+	return contractAddress + "_" + address
 }

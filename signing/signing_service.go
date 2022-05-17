@@ -66,8 +66,7 @@ func (s *Signer) GenerateKey() (privateKey, address string, err error) {
 	if err != nil {
 		return "", "", err
 	}
-	privateKeyBytes := crypto.FromECDSA(key)
-	privateKeyStr := hexutil.Encode(privateKeyBytes)[2:]
+	privateKeyStr := hexutil.Encode(crypto.FromECDSA(key))[2:]
 	address, addrErr := s.PrivateKeyToAddress(privateKeyStr)
 	if addrErr != nil {
 		return "", "", addrErr

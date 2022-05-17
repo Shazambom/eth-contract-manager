@@ -32,8 +32,6 @@ func NewRedisListener(endpoint, pwd string) RedisListener {
 }
 
 
-//TODO Implement contract specific counting and verification/validation
-
 func (r *Redis) VerifyValidAddress(ctx context.Context, address, contractAddress string) error {
 	rdsRes, rdsErr := r.client.Get(ctx, r.getUserKey(contractAddress, address)).Result()
 	if rdsErr != nil && rdsErr != redis.Nil {

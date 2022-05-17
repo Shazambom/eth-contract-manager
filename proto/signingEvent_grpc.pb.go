@@ -22,6 +22,7 @@ type SigningServiceClient interface {
 	BatchSignTxn(ctx context.Context, in *BatchSignatureRequest, opts ...grpc.CallOption) (*BatchSignatureResponse, error)
 	GenerateNewKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error)
 	DeleteKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error)
+	GetKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error)
 }
 
 type signingServiceClient struct {
@@ -68,6 +69,15 @@ func (c *signingServiceClient) DeleteKey(ctx context.Context, in *KeyManagementR
 	return out, nil
 }
 
+func (c *signingServiceClient) GetKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error) {
+	out := new(KeyManagementResponse)
+	err := c.cc.Invoke(ctx, "/SigningService/GetKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SigningServiceServer is the server API for SigningService service.
 // All implementations must embed UnimplementedSigningServiceServer
 // for forward compatibility
@@ -76,6 +86,7 @@ type SigningServiceServer interface {
 	BatchSignTxn(context.Context, *BatchSignatureRequest) (*BatchSignatureResponse, error)
 	GenerateNewKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error)
 	DeleteKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error)
+	GetKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error)
 	mustEmbedUnimplementedSigningServiceServer()
 }
 
@@ -94,6 +105,9 @@ func (UnimplementedSigningServiceServer) GenerateNewKey(context.Context, *KeyMan
 }
 func (UnimplementedSigningServiceServer) DeleteKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteKey not implemented")
+}
+func (UnimplementedSigningServiceServer) GetKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetKey not implemented")
 }
 func (UnimplementedSigningServiceServer) mustEmbedUnimplementedSigningServiceServer() {}
 
@@ -180,6 +194,24 @@ func _SigningService_DeleteKey_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SigningService_GetKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KeyManagementRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SigningServiceServer).GetKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SigningService/GetKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SigningServiceServer).GetKey(ctx, req.(*KeyManagementRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SigningService_ServiceDesc is the grpc.ServiceDesc for SigningService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -202,6 +234,10 @@ var SigningService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteKey",
 			Handler:    _SigningService_DeleteKey_Handler,
+		},
+		{
+			MethodName: "GetKey",
+			Handler:    _SigningService_GetKey_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

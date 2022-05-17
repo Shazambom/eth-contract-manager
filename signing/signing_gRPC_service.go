@@ -93,3 +93,18 @@ func (sRPC *SignerRPCService) DeleteKey(ctx context.Context, req *pb.KeyManageme
 	}
 	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: ""}, nil
 }
+
+func (sRPC *SignerRPCService) GetKey(ctx context.Context, req *pb.KeyManagementRequest)  (*pb.KeyManagementResponse, error) {
+	privKey, getErr := sRPC.Repo.GetPrivateKey(ctx, req.ContractAddress)
+	if getErr != nil {
+		log.Println(getErr)
+		return nil, getErr
+	}
+
+	address, err := sRPC.Handler.PrivateKeyToAddress(privKey)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: address}, nil
+}

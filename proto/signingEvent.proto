@@ -35,4 +35,5 @@ service SigningService {
     rpc BatchSignTxn(BatchSignatureRequest) returns (BatchSignatureResponse) {}
     rpc GenerateNewKey(KeyManagementRequest) returns (KeyManagementResponse) {}
     rpc DeleteKey(KeyManagementRequest) returns (KeyManagementResponse) {}
+    rpc GetKey(KeyManagementRequest) returns (KeyManagementResponse) {}
 }

@@ -67,11 +67,12 @@ func (s *Signer) GenerateKey() (privateKey, address string, err error) {
 		return "", "", err
 	}
 	privateKeyBytes := crypto.FromECDSA(key)
-	publicKeyECDSA, ok := key.Public().(*ecdsa.PublicKey)
-	if !ok {
-		return "", "", errors.New("error building public key")
+	privateKeyStr := hexutil.Encode(privateKeyBytes)[2:]
+	address, addrErr := s.PrivateKeyToAddress(privateKeyStr)
+	if addrErr != nil {
+		return "", "", addrErr
 	}
-	return hexutil.Encode(privateKeyBytes)[2:], crypto.PubkeyToAddress(*publicKeyECDSA).Hex(), nil
+	return privateKeyStr, address, nil
 }
 
 func (s *Signer) PrivateKeyToAddress(privateKey string) (address string, err error) {

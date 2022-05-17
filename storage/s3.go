@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	s3bucket "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"path"
 	"strings"
 )
 
@@ -37,12 +38,16 @@ func (s3 *S3) InitBucket() error {
 	return nil
 }
 
-func (s3 *S3) StorePair(key, val string) error {
+func (s3 *S3) StoreToken(token *Token) error {
+	payload, zipErr := token.Gzip()
+	if zipErr != nil {
+		return fmt.Errorf("failed to upload file, %v", zipErr)
+	}
 	result, err := s3.client.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(s3.bucket),
-		Key: aws.String(key),
+		Key: aws.String(path.Join(token.ContractAddress, token.UserAddress)),
 		ACL: aws.String("public-read"),
-		Body: strings.NewReader(val),
+		Body: strings.NewReader(payload),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to upload file, %v", err)

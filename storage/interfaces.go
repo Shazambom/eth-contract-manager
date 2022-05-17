@@ -12,7 +12,7 @@ type RedisListener interface {
 type RedisWriter interface {
 	VerifyValidAddress(ctx context.Context, address string) error
 	GetReservedCount(ctx context.Context, avatarsRequested, maxMintable int) (error)
-	MarkAddressAsUsed(ctx context.Context, address, token string) error
+	MarkAddressAsUsed(ctx context.Context, token *Token) error
 	GetQueueNum(ctx context.Context) (int64, error)
 	IncrementCounter(ctx context.Context, avatarsRequested, maxMintable int) error
 	Ping() (string, error)

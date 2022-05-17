@@ -31,6 +31,9 @@ func NewRedisListener(endpoint, pwd string) RedisListener {
 	})}
 }
 
+
+//TODO Implement contract specific counting and verification/validation
+
 func (r *Redis) VerifyValidAddress(ctx context.Context, address string) error {
 	rdsRes, rdsErr := r.client.Get(ctx, address).Result()
 	if rdsErr != nil && rdsErr != redis.Nil {
@@ -64,8 +67,12 @@ func (r *Redis) GetReservedCount(ctx context.Context, avatarsRequested, maxMinta
 	}
 }
 
-func (r *Redis) MarkAddressAsUsed(ctx context.Context, address, token string) error {
-	return r.client.Set(ctx, address, token, 0).Err()
+func (r *Redis) MarkAddressAsUsed(ctx context.Context, token *Token) error {
+	str, err := token.ToString()
+	if err != nil {
+		return err
+	}
+	return r.client.Set(ctx, token.ContractAddress + "_" + token.UserAddress, str, 0).Err()
 }
 
 func (r *Redis) GetQueueNum(ctx context.Context) (int64, error) {

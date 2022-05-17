@@ -1,39 +1,39 @@
-package signing
+package storage
 
 import (
 	"bytes"
 	"compress/gzip"
-	"contract-service/web"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 )
 
-//TODO Destroy this struct/file it is redundant and no longer needed, only around as a reference
-
-
-type SignedRequest struct {
-	Event     web.Event `json:"event"`
-	Signature string     `json:"signature"`
-	Hash string `json:"hash"`
+type Token struct {
 	ContractAddress string `json:"contract_address"`
+	ABIPackedTxn []byte `json:"abi_packed_txn"`
 	ABI []string `json:"abi"`
-	QueueNumber int64 `json:"queue_number"`
+	UserAddress string `json:"user_address"`
+	Hash string `json:"hash"`
 }
 
-func NewSignedRequest(event web.Event, signature , hash , contractAddress string, ABI []string, queueNumber int64) SignedRequest {
-	return SignedRequest{
-		Event: event,
-		Signature: signature,
-		Hash: hash,
+func NewToken(contractAddress, userAddress, hash string, abi []string, txn []byte) *Token {
+	return &Token{
 		ContractAddress: contractAddress,
-		ABI: ABI,
-		QueueNumber: queueNumber,
+		ABIPackedTxn: txn,
+		ABI: abi,
+		UserAddress: userAddress,
+		Hash: hash,
 	}
 }
 
-func (sr *SignedRequest) Gzip() (string, error) {
-	raw, respMarshalErr := json.Marshal(sr)
+
+func (token *Token) ToString() (string, error) {
+	byteArr, err := json.Marshal(token)
+	return string(byteArr), err
+}
+
+func (token *Token) Gzip() (string, error) {
+	raw, respMarshalErr := json.Marshal(token)
 	if respMarshalErr != nil {
 		return "", respMarshalErr
 	}

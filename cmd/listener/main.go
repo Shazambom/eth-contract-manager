@@ -10,7 +10,7 @@ import (
 	"log"
 	"os"
 )
-
+//TODO Clean up env variable management & struct initialization. Move struct initialization to wire
 func main() {
 	fmt.Println("Getting environment variables")
 	var awsEndpoint, awsRegion, awsKeyId, awsSecret, sslEnabled, bucketName string

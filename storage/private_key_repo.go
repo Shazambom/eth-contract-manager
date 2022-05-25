@@ -15,8 +15,8 @@ type PrivateKeyRepo struct {
 }
 
 type ContractKeyPair struct {
-	ContractAddress string
-	PrivateKey string
+	ContractAddress string `json:"ContractAddress"`
+	PrivateKey string `json:"PrivateKey"`
 }
 
 

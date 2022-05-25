@@ -24,3 +24,9 @@ type PrivateKeyRepository interface {
 	UpsertPrivateKey(ctx context.Context, contractAddress, key string) error
 	DeletePrivateKey(ctx context.Context, contractAddress string) error
 }
+
+type ContractRepository interface {
+	GetContract(ctx context.Context, contractAddress string) (*Contract, error)
+	UpsertContract(ctx context.Context, contract *Contract) error
+	DeleteContract(ctx context.Context, contractAddress string) error
+}

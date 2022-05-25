@@ -41,6 +41,26 @@ func GetEnvVars() (rdsEndpoint, rdsPwd, secretKey, gURL, siteKey, projectID, con
 		envErr
 }
 
+func GetEnvVar(key string) (string, error) {
+	val := os.Getenv(key)
+	if val == "" {
+		return "", errors.New("environment variable doesn't exist")
+	}
+	return val, nil
+}
+
+func GetEnvVarBatch(keys []string, vars... *string) error {
+	for i, key := range keys {
+		val, keyErr := GetEnvVar(key)
+		if keyErr != nil {
+			return keyErr
+		}
+		*vars[i] = val
+
+	}
+	return nil
+}
+
 func StrInStrList(str string, strList []string) bool {
 	for _, val := range strList {
 		if val == str {

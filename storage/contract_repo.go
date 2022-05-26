@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"strconv"
 )
 
 type ContractRepo struct {
@@ -16,7 +17,10 @@ type ContractRepo struct {
 
 type Contract struct {
 	Address string `json:"Address"`
-	ABI []*string `json:"ABI"`
+	ABI string `json:"ABI"`
+	Functions []*string `json:"Functions"`
+	MaxMintable int `json:"MaxMintable"`
+	MaxIncrement int `json:"MaxIncrement"`
 }
 
 func NewContractRepository(tableName string, sess *session.Session, cfg ...*aws.Config) ContractRepository {
@@ -47,6 +51,8 @@ func (cr *ContractRepo) GetContract(ctx context.Context, contractAddress string)
 	return &contract, nil
 }
 func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) error {
+	maxMint := strconv.FormatInt(int64(contract.MaxMintable), 10)
+	maxIncr := strconv.FormatInt(int64(contract.MaxIncrement), 10)
 	_, err := cr.db.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(cr.tableName),
 		Item: map[string]*dynamodb.AttributeValue{
@@ -54,7 +60,16 @@ func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) 
 				S: aws.String(contract.Address),
 			},
 			"ABI": {
-				SS: contract.ABI,
+				S: aws.String(contract.ABI),
+			},
+			"Functions": {
+				SS: contract.Functions,
+			},
+			"MaxMintable": {
+				N: aws.String(maxMint),
+			},
+			"MaxIncrement": {
+				N: aws.String(maxIncr),
 			},
 		},
 	})

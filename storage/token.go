@@ -11,18 +11,20 @@ import (
 type Token struct {
 	ContractAddress string `json:"contract_address"`
 	ABIPackedTxn []byte `json:"abi_packed_txn"`
-	ABI []string `json:"abi"`
+	ABI string `json:"abi"`
 	UserAddress string `json:"user_address"`
 	Hash string `json:"hash"`
+	NumRequested int `json:"num_requested"`
 }
 
-func NewToken(contractAddress, userAddress, hash string, abi []string, txn []byte) *Token {
+func NewToken(contractAddress, userAddress, hash string, abi string, txn []byte, numRequested int) *Token {
 	return &Token{
 		ContractAddress: contractAddress,
 		ABIPackedTxn: txn,
 		ABI: abi,
 		UserAddress: userAddress,
 		Hash: hash,
+		NumRequested: numRequested,
 	}
 }
 

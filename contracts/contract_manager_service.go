@@ -1,21 +1,80 @@
 package contracts
 
-import "contract-service/storage"
+import (
+	"context"
+	pb "contract-service/proto"
+	"contract-service/storage"
+	"errors"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"log"
+	"strings"
+)
 
 type ContractManagerService struct {
 	writer storage.RedisWriter
+	repo storage.ContractRepo
+	signer pb.SigningServiceClient
 }
 
 
 
-func (cms *ContractManagerService) GetContract() (*storage.Contract, error) {
-	return nil, nil
+func (cms *ContractManagerService) GetContract(ctx context.Context, address string) (*storage.Contract, error) {
+	return cms.repo.GetContract(ctx, address)
 }
 
-func (cms *ContractManagerService) BuildTransaction(contract *storage.Contract) (*storage.Token, error) {
-	return nil, nil
+func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, numRequested int, arguments []interface{}, contract storage.Contract) (*storage.Token, error) {
+	//Not sure if this is the correct way to do this. An alternative would be to just convert the args array into a []string and then just convert it
+	//to a [][]byte, then pass it into the signing request. We might have to go this route and find a different function for packing.
+
+	log.Println("Unpacking ABI")
+	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
+	if abiErr != nil {
+		return nil, abiErr
+	}
+	log.Println("Packing arguments")
+	args := arguments
+	packed, packingErr := funcDef.Pack(functionName, args...)
+	if packingErr != nil {
+		return nil, packingErr
+	}
+	log.Println("Sending Signature Request")
+	signature, signingErr := cms.signer.SignTxn(ctx, &pb.SignatureRequest{ContractAddress: contract.Address, Args: [][]byte{packed}})
+	if signingErr != nil {
+		return nil, signingErr
+	}
+	log.Println("Appending Signature to arguments and packing")
+	args = append(args, signature.Signature)
+
+	repacked, repackingErr := funcDef.Pack(functionName, args...)
+	if repackingErr != nil {
+		return nil, repackingErr
+	}
+
+	log.Println("Token created")
+	return storage.NewToken(contract.Address, msgSender, signature.Hash, contract.ABI, repacked, numRequested), nil
 }
 
-func (cms *ContractManagerService) StoreToken(token *storage.Token) error {
-	return nil
+func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Token, contract *storage.Contract) error {
+	err := cms.writer.MarkAddressAsUsed(ctx, token)
+	if err != nil {
+		return err
+	}
+	if token.NumRequested < 1 {
+		return nil
+	}
+	return cms.writer.IncrementCounter(ctx, token.NumRequested, contract.MaxMintable, contract.Address)
+}
+
+func (cms *ContractManagerService) CheckIfValidRequest(ctx context.Context, msgSender string, numRequested int, contract *storage.Contract) error{
+	if numRequested > contract.MaxIncrement {
+		return errors.New("max increment exceeded with request")
+	}
+	invalid := cms.writer.VerifyValidAddress(ctx, msgSender, contract.Address)
+	if invalid != nil {
+		return invalid
+	}
+	if numRequested < 1 {
+		return nil
+	}
+	return cms.writer.GetReservedCount(ctx, numRequested, contract.MaxMintable, contract.Address)
 }

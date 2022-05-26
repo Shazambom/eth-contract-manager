@@ -12,14 +12,36 @@ import (
 
 type ContractManagerService struct {
 	writer storage.RedisWriter
-	repo storage.ContractRepo
+	repo storage.ContractRepository
 	signer pb.SigningServiceClient
 }
 
+func NewContractTransactionHandler(writer storage.RedisWriter, repo storage.ContractRepository, signer pb.SigningServiceClient) ContractTransactionHandler {
+	return &ContractManagerService{
+		writer: writer,
+		repo:   repo,
+		signer: signer,
+	}
+}
 
+func NewContractManagerHandler(repo storage.ContractRepository) ContractManagerHandler {
+	return &ContractManagerService{repo: repo}
+}
 
 func (cms *ContractManagerService) GetContract(ctx context.Context, address string) (*storage.Contract, error) {
 	return cms.repo.GetContract(ctx, address)
+}
+
+func (cms *ContractManagerService) StoreContract(ctx context.Context, contract *storage.Contract) error {
+	return cms.repo.UpsertContract(ctx, contract)
+}
+
+func (cms *ContractManagerService) DeleteContract(ctx context.Context, address string) error {
+	return cms.repo.DeleteContract(ctx, address)
+}
+
+func (cms *ContractManagerService) ListContracts(ctx context.Context, owner string) ([]*storage.Contract, error) {
+	return cms.repo.GetContractsByOwner(ctx, owner)
 }
 
 func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, numRequested int, arguments []interface{}, contract storage.Contract) (*storage.Token, error) {

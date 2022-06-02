@@ -15,6 +15,6 @@ type ContractTransactionHandler interface {
 type ContractManagerHandler interface {
 	GetContract(ctx context.Context, address string) (*storage.Contract, error)
 	StoreContract(ctx context.Context, contract *storage.Contract) error
-	DeleteContract(ctx context.Context, address string) error
+	DeleteContract(ctx context.Context, address, owner string) error
 	ListContracts(ctx context.Context, owner string) ([]*storage.Contract, error)
 }

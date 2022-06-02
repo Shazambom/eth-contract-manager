@@ -36,8 +36,8 @@ func (cms *ContractManagerService) StoreContract(ctx context.Context, contract *
 	return cms.repo.UpsertContract(ctx, contract)
 }
 
-func (cms *ContractManagerService) DeleteContract(ctx context.Context, address string) error {
-	return cms.repo.DeleteContract(ctx, address)
+func (cms *ContractManagerService) DeleteContract(ctx context.Context, address, owner string) error {
+	return cms.repo.DeleteContract(ctx, address, owner)
 }
 
 func (cms *ContractManagerService) ListContracts(ctx context.Context, owner string) ([]*storage.Contract, error) {

@@ -6,7 +6,6 @@ function cleanup {
 }
 trap cleanup EXIT
 
-
 ./scripts/build.sh
 
 docker-compose -f ./deployments/docker-compose.yaml up --force-recreate --build

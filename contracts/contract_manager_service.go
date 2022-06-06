@@ -68,6 +68,7 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 	if argParseErr != nil {
 		return nil, argParseErr
 	}
+
 	packed, packingErr := funcDef.Pack(functionName, args...)
 	if packingErr != nil {
 		return nil, packingErr

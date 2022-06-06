@@ -6,7 +6,9 @@ import (
 	"contract-service/storage"
 	"errors"
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common/math"
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -19,11 +21,6 @@ type ContractManagerService struct {
 type ABIArg struct {
 	Type string `json:"type"`
 	Name string `json:"name"`
-	Indexed bool `json:"indexed"`
-}
-
-type ABIArgs struct {
-	Inputs []ABIArg `json:"inputs"`
 }
 
 func NewContractTransactionHandler(writer storage.RedisWriter, repo storage.ContractRepository, signer pb.SigningServiceClient) ContractTransactionHandler {
@@ -91,12 +88,124 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 }
 
 func (cms *ContractManagerService) UnpackArgs(arguments []string, functionName string, funcDef abi.ABI) ([]interface{}, error) {
-	//method := funcDef.Methods[functionName]
-	//argTypes := method.Inputs
+	method := funcDef.Methods[functionName]
+
+	//All of this splitting logic is to nicely organize the arguments, names and types
+	split := strings.Split(method.String(), "(")
+	otherSplit := strings.Split(split[1], ")")
+	argStrs := strings.Split(otherSplit[0], ",")
+	abiArgs := []ABIArg{}
+	for _, str := range argStrs {
+		abiArg := strings.Split(strings.TrimLeft(str, " "), " ")
+		abiArgs = append(abiArgs, ABIArg{Type: abiArg[0], Name: abiArg[1]})
+	}
+
+	if len(abiArgs) != len(arguments) {
+		return nil, errors.New("argument length mismatch")
+	}
+
 
 	args := []interface{}{}
-	for _, arg := range arguments {
-		args = append(args, arg)
+	for i, arg := range arguments {
+		var finalArg interface {}
+		switch abiArgs[i].Type {
+		case "uint":
+			bigInt, ok := math.ParseBig256(arg)
+			if !ok {
+				return nil, errors.New("Unable to parse uint256")
+			}
+			finalArg = bigInt
+		case "uint8" :
+			intVar, intConvErr := strconv.Atoi(arg)
+			if intConvErr != nil {
+				return nil, intConvErr
+			}
+			finalArg = uint8(intVar)
+
+		case "uint16" :
+			intVar, intConvErr := strconv.Atoi(arg)
+			if intConvErr != nil {
+				return nil, intConvErr
+			}
+			finalArg =  uint16(intVar)
+		case "uint32" :
+			intVar, intConvErr := strconv.Atoi(arg)
+			if intConvErr != nil {
+				return nil, intConvErr
+			}
+			finalArg = uint32(intVar)
+		case "uint64" :
+			intVar, intConvErr := strconv.Atoi(arg)
+			if intConvErr != nil {
+				return nil, intConvErr
+			}
+			args = append(args, uint64(intVar))
+		case "uint256" :
+			bigInt, ok := math.ParseBig256(arg)
+			if !ok {
+				return nil, errors.New("Unable to parse uint256")
+			}
+			finalArg = bigInt
+		case "int" :
+			intVar, intConvErr := strconv.Atoi(arg)
+			if intConvErr != nil {
+				return nil, intConvErr
+			}
+			finalArg = intVar
+		case "int8" :
+			intVar, intConvErr := strconv.Atoi(arg)
+			if intConvErr != nil {
+				return nil, intConvErr
+			}
+			finalArg = int8(intVar)
+		case "int16" :
+			intVar, intConvErr := strconv.Atoi(arg)
+			if intConvErr != nil {
+				return nil, intConvErr
+			}
+			finalArg = int16(intVar)
+		case "int32" :
+			intVar, intConvErr := strconv.Atoi(arg)
+			if intConvErr != nil {
+				return nil, intConvErr
+			}
+			finalArg = int32(intVar)
+		case "int64" :
+			intVar, intConvErr := strconv.Atoi(arg)
+			if intConvErr != nil {
+				return nil, intConvErr
+			}
+			finalArg = int64(intVar)
+		case "address" :
+			var address [160]byte
+			copy(address[:], arg)
+			finalArg = address
+		case "bool" :
+			finalArg = arg == "true"
+		case "bytes":
+			finalArg = []byte(arg)
+		case "bytes8":
+			var data [8]byte
+			copy(data[:], arg)
+			finalArg = data
+		case "bytes16":
+			var data [16]byte
+			copy(data[:], arg)
+			finalArg = data
+		case "function":
+			var data [24]byte
+			copy(data[:], arg)
+			finalArg = data
+		case "bytes4":
+			var data [4]byte
+			copy(data[:], arg)
+			finalArg = data
+		case "bytes32":
+			var data [32]byte
+			copy(data[:], arg)
+			finalArg = data
+		}
+		args = append(args, finalArg)
 	}
 	return args, nil
 }

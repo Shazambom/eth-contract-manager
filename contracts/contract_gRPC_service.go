@@ -10,6 +10,8 @@ import (
 	"net"
 )
 
+//TODO Add Ping route to gRPC to check if service is alive
+
 type ContractRPCService struct {
 	Server *grpc.Server
 	Channel chan string

@@ -13,7 +13,7 @@ services:
       timeout: 3s
       retries: 30
     networks:
-      - backend
+      - contract-service
 
   s3:
     image: localstack/localstack:latest-arm64
@@ -27,7 +27,7 @@ services:
     ports:
       - "4566:4566"
     networks:
-      - backend
+      - contract-service
     volumes:
       - ./aws:/docker-entrypoint-initaws.d
     healthcheck:
@@ -36,6 +36,28 @@ services:
       timeout: 10s
       start_period: 10s
 
+  dynamodb:
+    image: localstack/localstack:latest-arm64
+    environment:
+      SERVICES: dynamodb
+      AWS_ACCESS_KEY_ID: xxx
+      AWS_SECRET_ACCESS_KEY: yyy
+      DATA_DIR: /tmp/localstack/data
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      CacheControl: no-cache
+    ports:
+      - "8000:8000"
+    networks:
+      - contract-service
+    volumes:
+      - ./aws:/docker-entrypoint-initaws.d
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "awslocal dynamodb list-tables" ]
+      interval: 5s
+      timeout: 10s
+      start_period: 10s
+
+#TODO Implement health check on listener service
   listener:
     build:
       context: ..
@@ -51,13 +73,81 @@ services:
       AWS_SECRET_ACCESS_KEY: "yyy"
       SSL_ENABLED: "false"
     networks:
-      - backend
+      - contract-service
     depends_on:
       redis:
         condition: service_healthy
       s3:
         condition: service_healthy
 
+#TODO Implement health check on signer service
+  signer:
+    build:
+      context: ..
+      dockerfile: ./build/signer/Dockerfile
+    restart: always
+    environment:
+      TABLE_NAME: "ContractPrivateKeyRepository"
+      AWS_ENDPOINT: "dynamodb:8000"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "xxx"
+      AWS_SECRET_ACCESS_KEY: "yyy"
+      SSL_ENABLED: "false"
+      GRPC_PORT: 8081
+    networks:
+      - contract-service
+    depends_on:
+      dynamodb:
+        condition: service_healthy
+
+  contract-manager:
+    build:
+      context: ..
+      dockerfile: ./build/contract-manager/Dockerfile
+    restart: always
+    environment:
+      TABLE_NAME: "Contracts"
+      AWS_ENDPOINT: "dynamodb:8000"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "xxx"
+      AWS_SECRET_ACCESS_KEY: "yyy"
+      SSL_ENABLED: "false"
+      GRPC_PORT: 8082
+    networks:
+      - contract-service
+    depends_on:
+      dynamodb:
+        condition: service_healthy
+
+  transaction-manager:
+    build:
+      context: ..
+      dockerfile: ./build/transaction-manager/Dockerfile
+    restart: always
+    environment:
+      REDIS_HOST: "redis:6379"
+      TABLE_NAME: "Contracts"
+      SIGNER_HOST: "signer:8081"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "xxx"
+      AWS_SECRET_ACCESS_KEY: "yyy"
+      SSL_ENABLED: "false"
+      GPRC_PORT: 8083
+    networks:
+      - contract-service
+    depends_on:
+      dynamodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      signer:
+        condition: service_healthy
+      listener:
+        condition: service_healthy
+
+#TODO Spin up API service for external APIs
+
+
 
 networks:
-  backend: {}
+  contract-service: {}

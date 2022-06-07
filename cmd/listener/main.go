@@ -14,6 +14,7 @@ import (
 	"os"
 )
 //TODO Clean up env variable management & struct initialization. Move struct initialization to wire
+//TODO Add Ping route to container to check if service is alive
 func main() {
 	fmt.Println("Getting environment variables")
 	var awsEndpoint, awsRegion, awsKeyId, awsSecret, sslEnabled, bucketName string

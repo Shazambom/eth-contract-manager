@@ -14,7 +14,7 @@ import (
 func main() {
 	contractRepo := storage.NewContractRepository("Contracts", nil, nil)
 
-	signingClient, clientErr := signing.NewClient("signer:8081", []grpc.DialOption{grpc.WithInsecure()})
+	signingClient, clientErr := signing.NewClient("signer:8081", []grpc.DialOption{grpc.EmptyDialOption{}})
 	if clientErr != nil {
 		log.Fatal(clientErr)
 	}
@@ -23,10 +23,10 @@ func main() {
 
 	transactionHandler := contracts.NewContractTransactionHandler(writer, contractRepo, signingClient.SigningClient)
 
-	transactiongRPC, gRPCErr := contracts.NewTransactionServer(8083, nil, transactionHandler)
+	transactionRPC, gRPCErr := contracts.NewTransactionServer(8083, nil, transactionHandler)
 	if gRPCErr != nil {
 		log.Fatal(gRPCErr)
 	}
-	errorCode := <- transactiongRPC.Channel
+	errorCode := <- transactionRPC.Channel
 	log.Println(errorCode)
 }

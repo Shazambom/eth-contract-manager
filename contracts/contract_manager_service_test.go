@@ -309,6 +309,414 @@ var testAbi = `[
 	}
 ]`
 
+/*
+//Contract used for testing:
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Tester {
+    function TestInputsA(uint a) public pure returns (uint) {
+        return a;
+    }
+    function TestInputsB(uint8 b) public pure returns (uint8) {
+        return b;
+    }
+    function TestInputsC(uint16 c) public pure returns (uint16) {
+        return c;
+    }
+    function TestInputsD(uint32 d) public pure returns (uint32) {
+        return d;
+    }
+    function TestInputsE(uint64 e) public pure returns (uint64) {
+        return e;
+    }
+    function TestInputsF(uint256 f) public pure returns (uint256) {
+        return f;
+    }
+    function TestInputsG(int g) public pure returns (int) {
+        return g;
+    }
+    function TestInputsH(int8 h) public pure returns (int8) {
+        return h;
+    }
+    function TestInputsI(int16 i) public pure returns (int16) {
+        return i;
+    }
+    function TestInputsJ(int32 j) public pure returns (int32) {
+        return j;
+    }
+    function TestInputsK(int64 k) public pure returns (int64) {
+        return k;
+    }
+    function TestInputsL(address l) public pure returns (address) {
+        return l;
+    }
+    function TestInputsM(bool m) public pure returns (bool) {
+        return m;
+    }
+    function TestInputsO(bytes calldata o) public pure returns (bytes calldata) {
+        return o;
+    }
+    function TestInputsP(bytes8 p) public pure returns (bytes8) {
+        return p;
+    }
+    function TestInputsQ(bytes16 q) public pure returns (bytes16) {
+        return q;
+    }
+    function TestInputsR(bytes4 r) public pure returns (bytes4) {
+        return r;
+    }
+    function TestInputsS(bytes32 s) public pure returns (bytes32) {
+        return s;
+    }
+}
+ */
+
+var fullTestAbi =`[
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "a",
+				"type": "uint256"
+			}
+		],
+		"name": "TestInputsA",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint8",
+				"name": "b",
+				"type": "uint8"
+			}
+		],
+		"name": "TestInputsB",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint16",
+				"name": "c",
+				"type": "uint16"
+			}
+		],
+		"name": "TestInputsC",
+		"outputs": [
+			{
+				"internalType": "uint16",
+				"name": "",
+				"type": "uint16"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "d",
+				"type": "uint32"
+			}
+		],
+		"name": "TestInputsD",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint64",
+				"name": "e",
+				"type": "uint64"
+			}
+		],
+		"name": "TestInputsE",
+		"outputs": [
+			{
+				"internalType": "uint64",
+				"name": "",
+				"type": "uint64"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "f",
+				"type": "uint256"
+			}
+		],
+		"name": "TestInputsF",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "int256",
+				"name": "g",
+				"type": "int256"
+			}
+		],
+		"name": "TestInputsG",
+		"outputs": [
+			{
+				"internalType": "int256",
+				"name": "",
+				"type": "int256"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "int8",
+				"name": "h",
+				"type": "int8"
+			}
+		],
+		"name": "TestInputsH",
+		"outputs": [
+			{
+				"internalType": "int8",
+				"name": "",
+				"type": "int8"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "int16",
+				"name": "i",
+				"type": "int16"
+			}
+		],
+		"name": "TestInputsI",
+		"outputs": [
+			{
+				"internalType": "int16",
+				"name": "",
+				"type": "int16"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "int32",
+				"name": "j",
+				"type": "int32"
+			}
+		],
+		"name": "TestInputsJ",
+		"outputs": [
+			{
+				"internalType": "int32",
+				"name": "",
+				"type": "int32"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "int64",
+				"name": "k",
+				"type": "int64"
+			}
+		],
+		"name": "TestInputsK",
+		"outputs": [
+			{
+				"internalType": "int64",
+				"name": "",
+				"type": "int64"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "l",
+				"type": "address"
+			}
+		],
+		"name": "TestInputsL",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bool",
+				"name": "m",
+				"type": "bool"
+			}
+		],
+		"name": "TestInputsM",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes",
+				"name": "o",
+				"type": "bytes"
+			}
+		],
+		"name": "TestInputsO",
+		"outputs": [
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes8",
+				"name": "p",
+				"type": "bytes8"
+			}
+		],
+		"name": "TestInputsP",
+		"outputs": [
+			{
+				"internalType": "bytes8",
+				"name": "",
+				"type": "bytes8"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes16",
+				"name": "q",
+				"type": "bytes16"
+			}
+		],
+		"name": "TestInputsQ",
+		"outputs": [
+			{
+				"internalType": "bytes16",
+				"name": "",
+				"type": "bytes16"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes4",
+				"name": "r",
+				"type": "bytes4"
+			}
+		],
+		"name": "TestInputsR",
+		"outputs": [
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "s",
+				"type": "bytes32"
+			}
+		],
+		"name": "TestInputsS",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	}
+]`
+
 
 func TestContractManagerService_UnpackArgs(t *testing.T) {
 	someArgs := []string{"someArgs", "oh man these are so", "random", "wow", "so cool"}
@@ -332,6 +740,224 @@ func TestContractManagerService_UnpackArgs(t *testing.T) {
 	assert.Nil(t, argumentsErr)
 
 	packed, packingErr := abiDef.Pack("mint", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+
+func TestContractManagerService_UnpackArgsA(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsA", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsA", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsB(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsB", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsB", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsC(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsC", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsC", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsD(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsD", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsD", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsE(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsE", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsE", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsF(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsF", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsF", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsG(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsG", abiDef)
+	assert.Nil(t, argumentsErr)
+	fmt.Println(arguments)
+	packed, packingErr := abiDef.Pack("TestInputsG", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsH(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsH", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsH", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsI(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsI", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsI", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsJ(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsJ", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsJ", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsK(t *testing.T) {
+	args := []string{"10"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsK", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsK", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsL(t *testing.T) {
+	args := []string{"0xE2A7f3ADb39C5b11Acb35c02A80ea977D67E1ebc"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsL", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsL", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsM(t *testing.T) {
+	args := []string{"true"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsM", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsM", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsO(t *testing.T) {
+	args := []string{"Hey whats up nerds"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsO", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsO", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsP(t *testing.T) {
+	args := []string{"12345678"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsP", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsP", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsQ(t *testing.T) {
+	args := []string{"abcdefghijklmnop"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsQ", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsQ", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsR(t *testing.T) {
+	args := []string{"1234"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsR", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsR", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsS(t *testing.T) {
+	args := []string{"abcdefghijklmnopqrstuvwxyz123456"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsS", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsS", arguments...)
 	assert.Nil(t, packingErr)
 	fmt.Println(packed)
 }

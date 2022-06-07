@@ -52,9 +52,6 @@ func (cms *ContractManagerService) ListContracts(ctx context.Context, owner stri
 }
 
 func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, numRequested int, arguments []string, contract *storage.Contract) (*storage.Token, error) {
-	//Not sure if this is the correct way to do this. An alternative would be to just convert the args array into a []string and then just convert it
-	//to a [][]byte, then pass it into the signing request. We might have to go this route and find a different function for packing.
-
 	log.Println("Unpacking ABI")
 	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
 	if abiErr != nil {
@@ -139,19 +136,19 @@ func (cms *ContractManagerService) UnpackArgs(arguments []string, functionName s
 			if intConvErr != nil {
 				return nil, intConvErr
 			}
-			args = append(args, uint64(intVar))
+			finalArg = uint64(intVar)
 		case "uint256" :
 			bigInt, ok := math.ParseBig256(arg)
 			if !ok {
 				return nil, errors.New("Unable to parse uint256")
 			}
 			finalArg = bigInt
-		case "int" :
-			intVar, intConvErr := strconv.Atoi(arg)
-			if intConvErr != nil {
-				return nil, intConvErr
+		case "int256" :
+			bigInt, ok := math.ParseBig256(arg)
+			if !ok {
+				return nil, errors.New("Unable to parse uint256")
 			}
-			finalArg = intVar
+			finalArg = bigInt
 		case "int8" :
 			intVar, intConvErr := strconv.Atoi(arg)
 			if intConvErr != nil {
@@ -192,7 +189,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments []string, functionName s
 			var data [16]byte
 			copy(data[:], arg)
 			finalArg = data
-		case "function":
+		case "bytes24":
 			var data [24]byte
 			copy(data[:], arg)
 			finalArg = data
@@ -204,6 +201,8 @@ func (cms *ContractManagerService) UnpackArgs(arguments []string, functionName s
 			var data [32]byte
 			copy(data[:], arg)
 			finalArg = data
+		default :
+			finalArg = []byte(arg)
 		}
 		args = append(args, finalArg)
 	}

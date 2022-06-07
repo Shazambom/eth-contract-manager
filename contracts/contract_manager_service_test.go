@@ -354,6 +354,9 @@ contract Tester {
     function TestInputsM(bool m) public pure returns (bool) {
         return m;
     }
+    function TestInputsN(bytes24 n) public pure returns (bytes24) {
+        return n;
+    }
     function TestInputsO(bytes calldata o) public pure returns (bytes calldata) {
         return o;
     }
@@ -369,8 +372,7 @@ contract Tester {
     function TestInputsS(bytes32 s) public pure returns (bytes32) {
         return s;
     }
-}
- */
+} */
 
 var fullTestAbi =`[
 	{
@@ -615,6 +617,25 @@ var fullTestAbi =`[
 				"internalType": "bool",
 				"name": "",
 				"type": "bool"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes24",
+				"name": "n",
+				"type": "bytes24"
+			}
+		],
+		"name": "TestInputsN",
+		"outputs": [
+			{
+				"internalType": "bytes24",
+				"name": "",
+				"type": "bytes24"
 			}
 		],
 		"stateMutability": "pure",
@@ -898,6 +919,18 @@ func TestContractManagerService_UnpackArgsM(t *testing.T) {
 	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsM", abiDef)
 	assert.Nil(t, argumentsErr)
 	packed, packingErr := abiDef.Pack("TestInputsM", arguments...)
+	assert.Nil(t, packingErr)
+	fmt.Println(packed)
+}
+func TestContractManagerService_UnpackArgsN(t *testing.T) {
+	args := []string{"abcdefghijklmnopqrstuvwx"}
+	cms := &ContractManagerService{}
+	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
+	assert.Nil(t, err)
+
+	arguments, argumentsErr := cms.UnpackArgs(args, "TestInputsN", abiDef)
+	assert.Nil(t, argumentsErr)
+	packed, packingErr := abiDef.Pack("TestInputsN", arguments...)
 	assert.Nil(t, packingErr)
 	fmt.Println(packed)
 }

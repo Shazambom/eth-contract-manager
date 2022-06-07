@@ -65,3 +65,4 @@ cmd/api/api
 cmd/contract-manager/contract-manager
 cmd/listner/listener
 cmd/signer/signer
+cmd/transaction-manager/transaction-manager

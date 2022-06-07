@@ -4,6 +4,7 @@ import (
 	"contract-service/contracts"
 	"contract-service/signing"
 	"contract-service/storage"
+	"google.golang.org/grpc"
 	"log"
 )
 

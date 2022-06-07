@@ -17,7 +17,7 @@ type TransactionRPCService struct {
 	TransactionManager ContractTransactionHandler
 }
 
-func NewTransactionServer(port int, opts []grpc.ServerOption, handler ContractTransactionHandler, repo storage.PrivateKeyRepository) (*TransactionRPCService, error) {
+func NewTransactionServer(port int, opts []grpc.ServerOption, handler ContractTransactionHandler) (*TransactionRPCService, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
 		return nil, err

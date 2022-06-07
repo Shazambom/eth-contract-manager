@@ -1,5 +1,8 @@
 package main
 
+//TODO Implement config management
+//TODO Implement wire dependency injection
+
 import (
 	"contract-service/listener"
 	"contract-service/storage"

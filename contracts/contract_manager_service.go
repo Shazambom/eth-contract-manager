@@ -63,12 +63,9 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 		return nil, argParseErr
 	}
 
-	packed, packingErr := funcDef.Pack(functionName, args...)
-	if packingErr != nil {
-		return nil, packingErr
-	}
+	byteArgs := cms.ArgsToBytes(args)
 	log.Println("Sending Signature Request")
-	signature, signingErr := cms.signer.SignTxn(ctx, &pb.SignatureRequest{ContractAddress: contract.Address, Args: [][]byte{packed}})
+	signature, signingErr := cms.signer.SignTxn(ctx, &pb.SignatureRequest{ContractAddress: contract.Address, Args: byteArgs})
 	if signingErr != nil {
 		return nil, signingErr
 	}
@@ -82,6 +79,11 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 
 	log.Println("Token created")
 	return storage.NewToken(contract.Address, msgSender, signature.Hash, contract.ABI, repacked, numRequested), nil
+}
+
+func (cms *ContractManagerService) ArgsToBytes(args []interface{}) [][]byte {
+	//TODO convert every possible type to the correct []byte representation
+	return nil
 }
 
 func (cms *ContractManagerService) UnpackArgs(arguments []string, functionName string, funcDef abi.ABI) ([]interface{}, error) {

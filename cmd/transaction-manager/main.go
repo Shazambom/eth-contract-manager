@@ -4,26 +4,32 @@ import (
 	"contract-service/contracts"
 	"contract-service/signing"
 	"contract-service/storage"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"google.golang.org/grpc"
 	"log"
 )
 
-//TODO Implement config management
-//TODO Implement wire dependency injection
+//TODO Add Ping route to container to check if service is alive
 
 func main() {
-	contractRepo := storage.NewContractRepository("Contracts", nil, nil)
-
-	signingClient, clientErr := signing.NewClient("signer:8081", []grpc.DialOption{grpc.EmptyDialOption{}})
+	cfg, cfgErr := NewConfig()
+	if cfgErr != nil {
+		log.Fatal(cfgErr)
+	}
+	signingClient, clientErr := signing.NewClient(cfg.SignerEndpoint, []grpc.DialOption{grpc.EmptyDialOption{}})
 	if clientErr != nil {
 		log.Fatal(clientErr)
 	}
 
-	writer := storage.NewRedisWriter("redis:9999", "", "Count")
+	writer := storage.NewRedisWriter(cfg.RedisEndpoint, cfg.RedisPwd, cfg.CountKey)
 
-	transactionHandler := contracts.NewContractTransactionHandler(writer, contractRepo, signingClient.SigningClient)
-
-	transactionRPC, gRPCErr := contracts.NewTransactionServer(8083, nil, transactionHandler)
+	transactionRPC, gRPCErr := contracts.InitializeTransactionServer(cfg.Port, nil, writer, signingClient.SigningClient, cfg.TableName, &aws.Config{
+		Endpoint:         aws.String(cfg.AWSEndpoint),
+		Region:           aws.String(cfg.AWSRegion),
+		Credentials:      credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		DisableSSL:       aws.Bool(cfg.SSLEnabled),
+	})
 	if gRPCErr != nil {
 		log.Fatal(gRPCErr)
 	}

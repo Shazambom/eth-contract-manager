@@ -24,7 +24,14 @@ func NewS3(cfg *aws.Config, bucket string) (*S3, error) {
 
 	client := s3manager.NewUploader(sess)
 
-	return &S3{session: sess, client: client, bucket: bucket}, nil
+	s3 := &S3{session: sess, client: client, bucket: bucket}
+
+	initErr := s3.InitBucket()
+	if initErr != nil {
+		return nil, initErr
+	}
+
+	return s3, nil
 }
 
 func (s3 *S3) InitBucket() error {
@@ -33,6 +40,8 @@ func (s3 *S3) InitBucket() error {
 		fmt.Println(err.Error())
 		if err.Error() == s3bucket.ErrCodeBucketAlreadyExists || err.Error() == s3bucket.ErrCodeBucketAlreadyOwnedByYou {
 			return nil
+		} else {
+			return err
 		}
 	}
 	return nil

@@ -54,8 +54,12 @@ func (c *Contract) FromRPC(contract *pb.Contract) () {
 	c.Owner = contract.Owner
 }
 
-func NewContractRepository(tableName string, sess *session.Session, cfg ...*aws.Config) ContractRepository {
-	return &ContractRepo{dynamodb.New(sess, cfg...), tableName}
+func NewContractRepository(tableName string, cfg ...*aws.Config) (ContractRepository, error) {
+	sess, err := session.NewSession(cfg...)
+	if err != nil {
+		return nil, err
+	}
+	return &ContractRepo{dynamodb.New(sess, cfg...), tableName}, nil
 }
 
 func (cr *ContractRepo) GetContract(ctx context.Context, contractAddress string) (*Contract, error) {

@@ -20,8 +20,12 @@ type ContractKeyPair struct {
 }
 
 
-func NewPrivateKeyRepository(tableName string, sess *session.Session, cfg ...*aws.Config) PrivateKeyRepository {
-	return &PrivateKeyRepo{dynamodb.New(sess, cfg...), tableName}
+func NewPrivateKeyRepository(tableName string, cfg ...*aws.Config) (PrivateKeyRepository, error) {
+	sess, err := session.NewSession(cfg...)
+	if err != nil {
+		return nil, err
+	}
+	return &PrivateKeyRepo{dynamodb.New(sess, cfg...), tableName}, nil
 }
 
 // GetPrivateKey ---- WARNING ---- NEVER CALL OUTSIDE OF SIGNER SERVICE DUE TO SECURITY CONCERNS

@@ -2,23 +2,27 @@ package main
 
 import (
 	"contract-service/contracts"
-	"contract-service/storage"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"log"
 )
-
-//TODO Implement config management
-//TODO Implement wire dependency injection
+//TODO Add Ping route to container to check if service is alive
 
 func main() {
-	contractRepo := storage.NewContractRepository("Contracts", nil, nil)
-
-	contractHandler := contracts.NewContractManagerHandler(contractRepo)
-
-	contractgRPC, contractErr := contracts.NewContractServer(8082, nil, contractHandler)
+	cfg, cfgErr := NewConfig()
+	if cfgErr != nil {
+		log.Fatal(cfgErr)
+	}
+	contractRPC, contractErr := contracts.InitializeContractServer(cfg.Port, nil, cfg.TableName, &aws.Config{
+		Endpoint:         aws.String(cfg.AWSEndpoint),
+		Region:           aws.String(cfg.AWSRegion),
+		Credentials:      credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		DisableSSL:       aws.Bool(cfg.SSLEnabled),
+	})
 	if contractErr != nil {
 		log.Fatal(contractErr)
 	}
 
-	errorCode := <-contractgRPC.Channel
+	errorCode := <-contractRPC.Channel
 	log.Println(errorCode)
 }

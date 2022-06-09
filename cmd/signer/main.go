@@ -4,10 +4,10 @@ import (
 	"contract-service/signing"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"google.golang.org/grpc"
 	"log"
 )
 
-//TODO Add Ping route to container to check if service is alive
 
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	if cfgErr != nil {
 		log.Fatal(cfgErr)
 	}
-	server, err := signing.InitializeSigningServer(cfg.Port, nil, cfg.TableName, &aws.Config{
+	server, err := signing.InitializeSigningServer(cfg.Port, []grpc.ServerOption{grpc.EmptyServerOption{}}, cfg.TableName, &aws.Config{
 		Endpoint:         aws.String(cfg.AWSEndpoint),
 		Region:           aws.String(cfg.AWSRegion),
 		Credentials:      credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),

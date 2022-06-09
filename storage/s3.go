@@ -24,9 +24,7 @@ func NewS3(cfg *aws.Config, bucket string) (*S3, error) {
 
 	client := s3manager.NewUploader(sess)
 
-	s3 := &S3{session: sess, client: client, bucket: bucket}
-
-	return s3, nil
+	return &S3{session: sess, client: client, bucket: bucket}, nil
 }
 
 func (s3 *S3) InitBucket() error {

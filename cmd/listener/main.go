@@ -14,18 +14,12 @@ func main() {
 	if envErr != nil {
 		log.Fatal(envErr)
 	}
-	rds := storage.NewRedisListener(storage.RedisConfig{Endpoint: cfg.RedisEndpoint, Password: cfg.RedisPassword})
-	defer rds.Close()
-	log.Println("Initializing events")
-	if initErr := rds.InitEvents(); initErr != nil {
-		log.Fatal(initErr)
-	}
 	handler, handlerInitErr := listener.InitializeListenerService(&aws.Config{
 		Endpoint: aws.String(cfg.AWSEndpoint),
 		Region: aws.String(cfg.AWSRegion),
 		Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
 		S3ForcePathStyle: aws.Bool(true),
-		DisableSSL: aws.Bool(cfg.SSLEnabled),
+		DisableSSL: aws.Bool(!cfg.SSLEnabled),
 	}, cfg.TableName)
 	if handlerInitErr != nil {
 		log.Fatal(handlerInitErr)
@@ -33,6 +27,12 @@ func main() {
 	log.Println("Prepping handler dependencies")
 	if handlerDepErr := handler.InitService(); handlerDepErr != nil {
 		log.Fatal(handlerDepErr)
+	}
+	rds := storage.NewRedisListener(storage.RedisConfig{Endpoint: cfg.RedisEndpoint, Password: cfg.RedisPassword})
+	defer rds.Close()
+	log.Println("Initializing events")
+	if initErr := rds.InitEvents(); initErr != nil {
+		log.Fatal(initErr)
 	}
 	log.Println("Starting to listen to Redis event stream")
 	if err := rds.Listen(handler.Handle); err != nil {

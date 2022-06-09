@@ -32,7 +32,7 @@ services:
     volumes:
       - ./aws:/docker-entrypoint-initaws.d
     healthcheck:
-      test: ["CMD", "bash", "-c", "awslocal s3 ls"]
+      test: [ "CMD", "awslocal", "s3api", "wait", "bucket-exists", "--bucket", "tokens" ]
       interval: 5s
       timeout: 10s
       start_period: 10s
@@ -144,7 +144,7 @@ services:
       redis:
         condition: service_healthy
       signer:
-        condition: service_healthy
+        condition: service_started
       listener:
         condition: service_started
     healthcheck:

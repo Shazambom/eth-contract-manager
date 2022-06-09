@@ -7,24 +7,23 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 )
-
-//TODO Add Ping route to container to check if service is alive
 
 func main() {
 	cfg, cfgErr := NewConfig()
 	if cfgErr != nil {
 		log.Fatal(cfgErr)
 	}
-	signingClient, clientErr := signing.NewClient(cfg.SignerEndpoint, []grpc.DialOption{grpc.EmptyDialOption{}})
+	signingClient, clientErr := signing.NewClient(cfg.SignerEndpoint, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	if clientErr != nil {
 		log.Fatal(clientErr)
 	}
 
 	transactionRPC, gRPCErr := contracts.InitializeTransactionServer(
 		cfg.Port,
-		nil,
+		[]grpc.ServerOption{grpc.EmptyServerOption{}},
 		storage.RedisConfig{
 			Endpoint: cfg.RedisEndpoint,
 			Password: cfg.RedisPwd,

@@ -84,16 +84,18 @@ services:
       AWS_SECRET_ACCESS_KEY: "yyy"
       SSL_ENABLED: "false"
       PORT: 8081
+    ports:
+      - "8081:8081"
     networks:
       - contract-service
     depends_on:
       dynamodb:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "bin/grpc_health_probe-linux-amd64", "-addr=localhost:8081" ]
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=localhost:8081", "-v", "-service=SignerService"]
       interval: 5s
       timeout: 10s
-      start_period: 10s
+      start_period: 1s
 
   contract-manager:
     build:
@@ -108,16 +110,18 @@ services:
       AWS_SECRET_ACCESS_KEY: "yyy"
       SSL_ENABLED: "false"
       PORT: 8082
+    ports:
+      - "8082:8082"
     networks:
       - contract-service
     depends_on:
       dynamodb:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "bin/grpc_health_probe-linux-amd64", "-addr=localhost:8082" ]
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=localhost:8082", "-v", "-service=ContractManagementService"]
       interval: 5s
       timeout: 10s
-      start_period: 10s
+      start_period: 1s
 
   transaction-manager:
     build:
@@ -136,6 +140,8 @@ services:
       SSL_ENABLED: "false"
       PORT: 8083
       COUNT_KEY: "Count"
+    ports:
+      - "8083:8083"
     networks:
       - contract-service
     depends_on:
@@ -144,14 +150,14 @@ services:
       redis:
         condition: service_healthy
       signer:
-        condition: service_started
+        condition: service_healthy
       listener:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "bin/grpc_health_probe-linux-amd64", "-addr=localhost:8083" ]
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=localhost:8083", "-v", "-service=TransactionService"]
       interval: 5s
       timeout: 10s
-      start_period: 10s
+      start_period: 1s
 
 #TODO Spin up API service for external APIs
 

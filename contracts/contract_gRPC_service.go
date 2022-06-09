@@ -6,11 +6,11 @@ import (
 	"contract-service/storage"
 	"fmt"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"log"
 	"net"
 )
 
-//TODO Add Ping route to gRPC to check if service is alive
 
 type ContractRPCService struct {
 	Server *grpc.Server
@@ -29,8 +29,10 @@ func NewContractServer(port int, opts []grpc.ServerOption, handler ContractManag
 	server := &ContractRPCService{Server: grpc.NewServer(opts...), Channel: make(chan string), ContractManager: handler}
 	pb.RegisterContractManagementServer(server.Server, server)
 	log.Println("GRPC Server registered")
+	grpc_health_v1.RegisterHealthServer(server.Server, server)
+	log.Println("HealthServer registered")
 	go func() {
-		log.Println("SignerServer serving clients now")
+		log.Println("ContractManager serving clients now")
 		defer server.Server.GracefulStop()
 		serviceErr := server.Server.Serve(lis)
 		server.Channel <- serviceErr.Error()
@@ -77,12 +79,12 @@ func (cs *ContractRPCService) List(ctx context.Context, owner *pb.Owner) (*pb.Co
 	return &pb.Contracts{Contracts: protoContracts}, nil
 }
 
-func (cs *ContractRPCService) Check(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
+func (cs *ContractRPCService) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
 	log.Println("Health check ping to: " + req.Service)
-	return &pb.HealthCheckResponse{Status: pb.HealthCheckResponse_SERVING}, nil
+	return &grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_SERVING}, nil
 }
 
-func (cs *ContractRPCService) Watch(req *pb.HealthCheckRequest, server pb.ContractManagement_WatchServer) error {
+func (cs *ContractRPCService) Watch(req *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
 	log.Println("Health watcher for: " + req.Service)
-	return server.SendMsg(&pb.HealthCheckResponse{Status: pb.HealthCheckResponse_SERVING})
+	return server.SendMsg(&grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_SERVING})
 }

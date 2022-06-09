@@ -20,55 +20,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type HealthCheckResponse_ServingStatus int32
-
-const (
-	HealthCheckResponse_UNKNOWN     HealthCheckResponse_ServingStatus = 0
-	HealthCheckResponse_SERVING     HealthCheckResponse_ServingStatus = 1
-	HealthCheckResponse_NOT_SERVING HealthCheckResponse_ServingStatus = 2
-)
-
-// Enum value maps for HealthCheckResponse_ServingStatus.
-var (
-	HealthCheckResponse_ServingStatus_name = map[int32]string{
-		0: "UNKNOWN",
-		1: "SERVING",
-		2: "NOT_SERVING",
-	}
-	HealthCheckResponse_ServingStatus_value = map[string]int32{
-		"UNKNOWN":     0,
-		"SERVING":     1,
-		"NOT_SERVING": 2,
-	}
-)
-
-func (x HealthCheckResponse_ServingStatus) Enum() *HealthCheckResponse_ServingStatus {
-	p := new(HealthCheckResponse_ServingStatus)
-	*p = x
-	return p
-}
-
-func (x HealthCheckResponse_ServingStatus) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (HealthCheckResponse_ServingStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_contractManagement_proto_enumTypes[0].Descriptor()
-}
-
-func (HealthCheckResponse_ServingStatus) Type() protoreflect.EnumType {
-	return &file_contractManagement_proto_enumTypes[0]
-}
-
-func (x HealthCheckResponse_ServingStatus) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use HealthCheckResponse_ServingStatus.Descriptor instead.
-func (HealthCheckResponse_ServingStatus) EnumDescriptor() ([]byte, []int) {
-	return file_contractManagement_proto_rawDescGZIP(), []int{8, 0}
-}
-
 type Address struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -478,100 +429,6 @@ func (x *Contracts) GetContracts() []*Contract {
 	return nil
 }
 
-type HealthCheckRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Service string `protobuf:"bytes,1,opt,name=service,proto3" json:"service,omitempty"`
-}
-
-func (x *HealthCheckRequest) Reset() {
-	*x = HealthCheckRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_contractManagement_proto_msgTypes[7]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *HealthCheckRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*HealthCheckRequest) ProtoMessage() {}
-
-func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contractManagement_proto_msgTypes[7]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use HealthCheckRequest.ProtoReflect.Descriptor instead.
-func (*HealthCheckRequest) Descriptor() ([]byte, []int) {
-	return file_contractManagement_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *HealthCheckRequest) GetService() string {
-	if x != nil {
-		return x.Service
-	}
-	return ""
-}
-
-type HealthCheckResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Status HealthCheckResponse_ServingStatus `protobuf:"varint,1,opt,name=status,proto3,enum=HealthCheckResponse_ServingStatus" json:"status,omitempty"`
-}
-
-func (x *HealthCheckResponse) Reset() {
-	*x = HealthCheckResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_contractManagement_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *HealthCheckResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*HealthCheckResponse) ProtoMessage() {}
-
-func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contractManagement_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use HealthCheckResponse.ProtoReflect.Descriptor instead.
-func (*HealthCheckResponse) Descriptor() ([]byte, []int) {
-	return file_contractManagement_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *HealthCheckResponse) GetStatus() HealthCheckResponse_ServingStatus {
-	if x != nil {
-		return x.Status
-	}
-	return HealthCheckResponse_UNKNOWN
-}
-
 type SignatureRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -584,7 +441,7 @@ type SignatureRequest struct {
 func (x *SignatureRequest) Reset() {
 	*x = SignatureRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_contractManagement_proto_msgTypes[9]
+		mi := &file_contractManagement_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -597,7 +454,7 @@ func (x *SignatureRequest) String() string {
 func (*SignatureRequest) ProtoMessage() {}
 
 func (x *SignatureRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contractManagement_proto_msgTypes[9]
+	mi := &file_contractManagement_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -610,7 +467,7 @@ func (x *SignatureRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SignatureRequest.ProtoReflect.Descriptor instead.
 func (*SignatureRequest) Descriptor() ([]byte, []int) {
-	return file_contractManagement_proto_rawDescGZIP(), []int{9}
+	return file_contractManagement_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *SignatureRequest) GetArgs() [][]byte {
@@ -638,7 +495,7 @@ type BatchSignatureRequest struct {
 func (x *BatchSignatureRequest) Reset() {
 	*x = BatchSignatureRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_contractManagement_proto_msgTypes[10]
+		mi := &file_contractManagement_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -651,7 +508,7 @@ func (x *BatchSignatureRequest) String() string {
 func (*BatchSignatureRequest) ProtoMessage() {}
 
 func (x *BatchSignatureRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contractManagement_proto_msgTypes[10]
+	mi := &file_contractManagement_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -664,7 +521,7 @@ func (x *BatchSignatureRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchSignatureRequest.ProtoReflect.Descriptor instead.
 func (*BatchSignatureRequest) Descriptor() ([]byte, []int) {
-	return file_contractManagement_proto_rawDescGZIP(), []int{10}
+	return file_contractManagement_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *BatchSignatureRequest) GetSignatureRequests() []*SignatureRequest {
@@ -686,7 +543,7 @@ type SignatureResponse struct {
 func (x *SignatureResponse) Reset() {
 	*x = SignatureResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_contractManagement_proto_msgTypes[11]
+		mi := &file_contractManagement_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -699,7 +556,7 @@ func (x *SignatureResponse) String() string {
 func (*SignatureResponse) ProtoMessage() {}
 
 func (x *SignatureResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contractManagement_proto_msgTypes[11]
+	mi := &file_contractManagement_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -712,7 +569,7 @@ func (x *SignatureResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SignatureResponse.ProtoReflect.Descriptor instead.
 func (*SignatureResponse) Descriptor() ([]byte, []int) {
-	return file_contractManagement_proto_rawDescGZIP(), []int{11}
+	return file_contractManagement_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SignatureResponse) GetSignature() string {
@@ -740,7 +597,7 @@ type BatchSignatureResponse struct {
 func (x *BatchSignatureResponse) Reset() {
 	*x = BatchSignatureResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_contractManagement_proto_msgTypes[12]
+		mi := &file_contractManagement_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -753,7 +610,7 @@ func (x *BatchSignatureResponse) String() string {
 func (*BatchSignatureResponse) ProtoMessage() {}
 
 func (x *BatchSignatureResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contractManagement_proto_msgTypes[12]
+	mi := &file_contractManagement_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -766,7 +623,7 @@ func (x *BatchSignatureResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchSignatureResponse.ProtoReflect.Descriptor instead.
 func (*BatchSignatureResponse) Descriptor() ([]byte, []int) {
-	return file_contractManagement_proto_rawDescGZIP(), []int{12}
+	return file_contractManagement_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *BatchSignatureResponse) GetSignatureResponses() []*SignatureResponse {
@@ -787,7 +644,7 @@ type KeyManagementRequest struct {
 func (x *KeyManagementRequest) Reset() {
 	*x = KeyManagementRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_contractManagement_proto_msgTypes[13]
+		mi := &file_contractManagement_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -800,7 +657,7 @@ func (x *KeyManagementRequest) String() string {
 func (*KeyManagementRequest) ProtoMessage() {}
 
 func (x *KeyManagementRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contractManagement_proto_msgTypes[13]
+	mi := &file_contractManagement_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -813,7 +670,7 @@ func (x *KeyManagementRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeyManagementRequest.ProtoReflect.Descriptor instead.
 func (*KeyManagementRequest) Descriptor() ([]byte, []int) {
-	return file_contractManagement_proto_rawDescGZIP(), []int{13}
+	return file_contractManagement_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *KeyManagementRequest) GetContractAddress() string {
@@ -835,7 +692,7 @@ type KeyManagementResponse struct {
 func (x *KeyManagementResponse) Reset() {
 	*x = KeyManagementResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_contractManagement_proto_msgTypes[14]
+		mi := &file_contractManagement_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -848,7 +705,7 @@ func (x *KeyManagementResponse) String() string {
 func (*KeyManagementResponse) ProtoMessage() {}
 
 func (x *KeyManagementResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contractManagement_proto_msgTypes[14]
+	mi := &file_contractManagement_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -861,7 +718,7 @@ func (x *KeyManagementResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeyManagementResponse.ProtoReflect.Descriptor instead.
 func (*KeyManagementResponse) Descriptor() ([]byte, []int) {
-	return file_contractManagement_proto_rawDescGZIP(), []int{14}
+	return file_contractManagement_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *KeyManagementResponse) GetContractAddress() string {
@@ -919,19 +776,7 @@ var file_contractManagement_proto_rawDesc = []byte{
 	0x72, 0x22, 0x34, 0x0a, 0x09, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x73, 0x12, 0x27,
 	0x0a, 0x09, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
 	0x0b, 0x32, 0x09, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x52, 0x09, 0x63, 0x6f,
-	0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x73, 0x22, 0x2e, 0x0a, 0x12, 0x48, 0x65, 0x61, 0x6c, 0x74,
-	0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a,
-	0x07, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
-	0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x22, 0x8d, 0x01, 0x0a, 0x13, 0x48, 0x65, 0x61, 0x6c,
-	0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
-	0x3a, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32,
-	0x22, 0x2e, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x6e, 0x67, 0x53, 0x74, 0x61,
-	0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x3a, 0x0a, 0x0d, 0x53,
-	0x65, 0x72, 0x76, 0x69, 0x6e, 0x67, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x0b, 0x0a, 0x07,
-	0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x07, 0x53, 0x45, 0x52,
-	0x56, 0x49, 0x4e, 0x47, 0x10, 0x01, 0x12, 0x0f, 0x0a, 0x0b, 0x4e, 0x4f, 0x54, 0x5f, 0x53, 0x45,
-	0x52, 0x56, 0x49, 0x4e, 0x47, 0x10, 0x02, 0x22, 0x51, 0x0a, 0x10, 0x53, 0x69, 0x67, 0x6e, 0x61,
+	0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x73, 0x22, 0x51, 0x0a, 0x10, 0x53, 0x69, 0x67, 0x6e, 0x61,
 	0x74, 0x75, 0x72, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x61,
 	0x72, 0x67, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0c, 0x52, 0x04, 0x61, 0x72, 0x67, 0x73, 0x12,
 	0x29, 0x0a, 0x10, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x5f, 0x61, 0x64, 0x64, 0x72,
@@ -963,7 +808,7 @@ var file_contractManagement_proto_rawDesc = []byte{
 	0x09, 0x52, 0x0f, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x41, 0x64, 0x64, 0x72, 0x65,
 	0x73, 0x73, 0x12, 0x1d, 0x0a, 0x0a, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x5f, 0x6b, 0x65, 0x79,
 	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65,
-	0x79, 0x32, 0xb1, 0x03, 0x0a, 0x0e, 0x53, 0x69, 0x67, 0x6e, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72,
+	0x79, 0x32, 0xc3, 0x02, 0x0a, 0x0e, 0x53, 0x69, 0x67, 0x6e, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72,
 	0x76, 0x69, 0x63, 0x65, 0x12, 0x32, 0x0a, 0x07, 0x53, 0x69, 0x67, 0x6e, 0x54, 0x78, 0x6e, 0x12,
 	0x11, 0x2e, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x74, 0x75, 0x72, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x1a, 0x12, 0x2e, 0x53, 0x69, 0x67, 0x6e, 0x61, 0x74, 0x75, 0x72, 0x65, 0x52, 0x65,
@@ -983,45 +828,24 @@ var file_contractManagement_proto_rawDesc = []byte{
 	0x47, 0x65, 0x74, 0x4b, 0x65, 0x79, 0x12, 0x15, 0x2e, 0x4b, 0x65, 0x79, 0x4d, 0x61, 0x6e, 0x61,
 	0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e,
 	0x4b, 0x65, 0x79, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x34, 0x0a, 0x05, 0x43, 0x68, 0x65, 0x63, 0x6b,
-	0x12, 0x13, 0x2e, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x43, 0x68,
-	0x65, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x36, 0x0a,
-	0x05, 0x57, 0x61, 0x74, 0x63, 0x68, 0x12, 0x13, 0x2e, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x43,
-	0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x48, 0x65,
-	0x61, 0x6c, 0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x22, 0x00, 0x30, 0x01, 0x32, 0xdf, 0x01, 0x0a, 0x12, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61,
-	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x24, 0x0a, 0x0b,
-	0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x12, 0x08, 0x2e, 0x41, 0x64,
-	0x64, 0x72, 0x65, 0x73, 0x73, 0x1a, 0x09, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74,
-	0x22, 0x00, 0x12, 0x35, 0x0a, 0x14, 0x43, 0x6f, 0x6e, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x54,
-	0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x13, 0x2e, 0x54, 0x72, 0x61,
-	0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x06, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12, 0x34, 0x0a, 0x05, 0x43, 0x68, 0x65,
-	0x63, 0x6b, 0x12, 0x13, 0x2e, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68,
-	0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
-	0x36, 0x0a, 0x05, 0x57, 0x61, 0x74, 0x63, 0x68, 0x12, 0x13, 0x2e, 0x48, 0x65, 0x61, 0x6c, 0x74,
-	0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e,
-	0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x32, 0xff, 0x01, 0x0a, 0x12, 0x43, 0x6f, 0x6e, 0x74,
-	0x72, 0x61, 0x63, 0x74, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x1c,
-	0x0a, 0x03, 0x47, 0x65, 0x74, 0x12, 0x08, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x1a,
-	0x09, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x22, 0x00, 0x12, 0x1c, 0x0a, 0x05,
-	0x53, 0x74, 0x6f, 0x72, 0x65, 0x12, 0x09, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74,
-	0x1a, 0x06, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12, 0x21, 0x0a, 0x06, 0x44, 0x65,
-	0x6c, 0x65, 0x74, 0x65, 0x12, 0x0d, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x4f, 0x77,
-	0x6e, 0x65, 0x72, 0x1a, 0x06, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12, 0x1c, 0x0a,
-	0x04, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x06, 0x2e, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x1a, 0x0a, 0x2e,
-	0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x73, 0x22, 0x00, 0x12, 0x34, 0x0a, 0x05, 0x43,
-	0x68, 0x65, 0x63, 0x6b, 0x12, 0x13, 0x2e, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x43, 0x68, 0x65,
-	0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x48, 0x65, 0x61, 0x6c,
-	0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
-	0x00, 0x12, 0x36, 0x0a, 0x05, 0x57, 0x61, 0x74, 0x63, 0x68, 0x12, 0x13, 0x2e, 0x48, 0x65, 0x61,
-	0x6c, 0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x14, 0x2e, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x42, 0x07, 0x5a, 0x05, 0x2e, 0x2f, 0x3b,
-	0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x32, 0x71, 0x0a, 0x12, 0x54, 0x72, 0x61, 0x6e, 0x73,
+	0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x24, 0x0a,
+	0x0b, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x12, 0x08, 0x2e, 0x41,
+	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x1a, 0x09, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63,
+	0x74, 0x22, 0x00, 0x12, 0x35, 0x0a, 0x14, 0x43, 0x6f, 0x6e, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74,
+	0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x13, 0x2e, 0x54, 0x72,
+	0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x06, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x32, 0x91, 0x01, 0x0a, 0x12, 0x43,
+	0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e,
+	0x74, 0x12, 0x1c, 0x0a, 0x03, 0x47, 0x65, 0x74, 0x12, 0x08, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65,
+	0x73, 0x73, 0x1a, 0x09, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x22, 0x00, 0x12,
+	0x1c, 0x0a, 0x05, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x12, 0x09, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72,
+	0x61, 0x63, 0x74, 0x1a, 0x06, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12, 0x21, 0x0a,
+	0x06, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x12, 0x0d, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73,
+	0x73, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x1a, 0x06, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00,
+	0x12, 0x1c, 0x0a, 0x04, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x06, 0x2e, 0x4f, 0x77, 0x6e, 0x65, 0x72,
+	0x1a, 0x0a, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x73, 0x22, 0x00, 0x42, 0x07,
+	0x5a, 0x05, 0x2e, 0x2f, 0x3b, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1036,71 +860,54 @@ func file_contractManagement_proto_rawDescGZIP() []byte {
 	return file_contractManagement_proto_rawDescData
 }
 
-var file_contractManagement_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_contractManagement_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_contractManagement_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_contractManagement_proto_goTypes = []interface{}{
-	(HealthCheckResponse_ServingStatus)(0), // 0: HealthCheckResponse.ServingStatus
-	(*Address)(nil),                        // 1: Address
-	(*Owner)(nil),                          // 2: Owner
-	(*AddressOwner)(nil),                   // 3: AddressOwner
-	(*Contract)(nil),                       // 4: Contract
-	(*TransactionRequest)(nil),             // 5: TransactionRequest
-	(*Error)(nil),                          // 6: Error
-	(*Contracts)(nil),                      // 7: Contracts
-	(*HealthCheckRequest)(nil),             // 8: HealthCheckRequest
-	(*HealthCheckResponse)(nil),            // 9: HealthCheckResponse
-	(*SignatureRequest)(nil),               // 10: SignatureRequest
-	(*BatchSignatureRequest)(nil),          // 11: BatchSignatureRequest
-	(*SignatureResponse)(nil),              // 12: SignatureResponse
-	(*BatchSignatureResponse)(nil),         // 13: BatchSignatureResponse
-	(*KeyManagementRequest)(nil),           // 14: KeyManagementRequest
-	(*KeyManagementResponse)(nil),          // 15: KeyManagementResponse
+	(*Address)(nil),                // 0: Address
+	(*Owner)(nil),                  // 1: Owner
+	(*AddressOwner)(nil),           // 2: AddressOwner
+	(*Contract)(nil),               // 3: Contract
+	(*TransactionRequest)(nil),     // 4: TransactionRequest
+	(*Error)(nil),                  // 5: Error
+	(*Contracts)(nil),              // 6: Contracts
+	(*SignatureRequest)(nil),       // 7: SignatureRequest
+	(*BatchSignatureRequest)(nil),  // 8: BatchSignatureRequest
+	(*SignatureResponse)(nil),      // 9: SignatureResponse
+	(*BatchSignatureResponse)(nil), // 10: BatchSignatureResponse
+	(*KeyManagementRequest)(nil),   // 11: KeyManagementRequest
+	(*KeyManagementResponse)(nil),  // 12: KeyManagementResponse
 }
 var file_contractManagement_proto_depIdxs = []int32{
-	4,  // 0: TransactionRequest.contract:type_name -> Contract
-	4,  // 1: Contracts.contracts:type_name -> Contract
-	0,  // 2: HealthCheckResponse.status:type_name -> HealthCheckResponse.ServingStatus
-	10, // 3: BatchSignatureRequest.signature_requests:type_name -> SignatureRequest
-	12, // 4: BatchSignatureResponse.signature_responses:type_name -> SignatureResponse
-	10, // 5: SigningService.SignTxn:input_type -> SignatureRequest
-	11, // 6: SigningService.BatchSignTxn:input_type -> BatchSignatureRequest
-	14, // 7: SigningService.GenerateNewKey:input_type -> KeyManagementRequest
-	14, // 8: SigningService.DeleteKey:input_type -> KeyManagementRequest
-	14, // 9: SigningService.GetKey:input_type -> KeyManagementRequest
-	8,  // 10: SigningService.Check:input_type -> HealthCheckRequest
-	8,  // 11: SigningService.Watch:input_type -> HealthCheckRequest
-	1,  // 12: TransactionService.GetContract:input_type -> Address
-	5,  // 13: TransactionService.ConstructTransaction:input_type -> TransactionRequest
-	8,  // 14: TransactionService.Check:input_type -> HealthCheckRequest
-	8,  // 15: TransactionService.Watch:input_type -> HealthCheckRequest
-	1,  // 16: ContractManagement.Get:input_type -> Address
-	4,  // 17: ContractManagement.Store:input_type -> Contract
-	3,  // 18: ContractManagement.Delete:input_type -> AddressOwner
-	2,  // 19: ContractManagement.List:input_type -> Owner
-	8,  // 20: ContractManagement.Check:input_type -> HealthCheckRequest
-	8,  // 21: ContractManagement.Watch:input_type -> HealthCheckRequest
-	12, // 22: SigningService.SignTxn:output_type -> SignatureResponse
-	13, // 23: SigningService.BatchSignTxn:output_type -> BatchSignatureResponse
-	15, // 24: SigningService.GenerateNewKey:output_type -> KeyManagementResponse
-	15, // 25: SigningService.DeleteKey:output_type -> KeyManagementResponse
-	15, // 26: SigningService.GetKey:output_type -> KeyManagementResponse
-	9,  // 27: SigningService.Check:output_type -> HealthCheckResponse
-	9,  // 28: SigningService.Watch:output_type -> HealthCheckResponse
-	4,  // 29: TransactionService.GetContract:output_type -> Contract
-	6,  // 30: TransactionService.ConstructTransaction:output_type -> Error
-	9,  // 31: TransactionService.Check:output_type -> HealthCheckResponse
-	9,  // 32: TransactionService.Watch:output_type -> HealthCheckResponse
-	4,  // 33: ContractManagement.Get:output_type -> Contract
-	6,  // 34: ContractManagement.Store:output_type -> Error
-	6,  // 35: ContractManagement.Delete:output_type -> Error
-	7,  // 36: ContractManagement.List:output_type -> Contracts
-	9,  // 37: ContractManagement.Check:output_type -> HealthCheckResponse
-	9,  // 38: ContractManagement.Watch:output_type -> HealthCheckResponse
-	22, // [22:39] is the sub-list for method output_type
-	5,  // [5:22] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	3,  // 0: TransactionRequest.contract:type_name -> Contract
+	3,  // 1: Contracts.contracts:type_name -> Contract
+	7,  // 2: BatchSignatureRequest.signature_requests:type_name -> SignatureRequest
+	9,  // 3: BatchSignatureResponse.signature_responses:type_name -> SignatureResponse
+	7,  // 4: SigningService.SignTxn:input_type -> SignatureRequest
+	8,  // 5: SigningService.BatchSignTxn:input_type -> BatchSignatureRequest
+	11, // 6: SigningService.GenerateNewKey:input_type -> KeyManagementRequest
+	11, // 7: SigningService.DeleteKey:input_type -> KeyManagementRequest
+	11, // 8: SigningService.GetKey:input_type -> KeyManagementRequest
+	0,  // 9: TransactionService.GetContract:input_type -> Address
+	4,  // 10: TransactionService.ConstructTransaction:input_type -> TransactionRequest
+	0,  // 11: ContractManagement.Get:input_type -> Address
+	3,  // 12: ContractManagement.Store:input_type -> Contract
+	2,  // 13: ContractManagement.Delete:input_type -> AddressOwner
+	1,  // 14: ContractManagement.List:input_type -> Owner
+	9,  // 15: SigningService.SignTxn:output_type -> SignatureResponse
+	10, // 16: SigningService.BatchSignTxn:output_type -> BatchSignatureResponse
+	12, // 17: SigningService.GenerateNewKey:output_type -> KeyManagementResponse
+	12, // 18: SigningService.DeleteKey:output_type -> KeyManagementResponse
+	12, // 19: SigningService.GetKey:output_type -> KeyManagementResponse
+	3,  // 20: TransactionService.GetContract:output_type -> Contract
+	5,  // 21: TransactionService.ConstructTransaction:output_type -> Error
+	3,  // 22: ContractManagement.Get:output_type -> Contract
+	5,  // 23: ContractManagement.Store:output_type -> Error
+	5,  // 24: ContractManagement.Delete:output_type -> Error
+	6,  // 25: ContractManagement.List:output_type -> Contracts
+	15, // [15:26] is the sub-list for method output_type
+	4,  // [4:15] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_contractManagement_proto_init() }
@@ -1194,30 +1001,6 @@ func file_contractManagement_proto_init() {
 			}
 		}
 		file_contractManagement_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HealthCheckRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_contractManagement_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*HealthCheckResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_contractManagement_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SignatureRequest); i {
 			case 0:
 				return &v.state
@@ -1229,7 +1012,7 @@ func file_contractManagement_proto_init() {
 				return nil
 			}
 		}
-		file_contractManagement_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_contractManagement_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BatchSignatureRequest); i {
 			case 0:
 				return &v.state
@@ -1241,7 +1024,7 @@ func file_contractManagement_proto_init() {
 				return nil
 			}
 		}
-		file_contractManagement_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_contractManagement_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SignatureResponse); i {
 			case 0:
 				return &v.state
@@ -1253,7 +1036,7 @@ func file_contractManagement_proto_init() {
 				return nil
 			}
 		}
-		file_contractManagement_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+		file_contractManagement_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BatchSignatureResponse); i {
 			case 0:
 				return &v.state
@@ -1265,7 +1048,7 @@ func file_contractManagement_proto_init() {
 				return nil
 			}
 		}
-		file_contractManagement_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+		file_contractManagement_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*KeyManagementRequest); i {
 			case 0:
 				return &v.state
@@ -1277,7 +1060,7 @@ func file_contractManagement_proto_init() {
 				return nil
 			}
 		}
-		file_contractManagement_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+		file_contractManagement_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*KeyManagementResponse); i {
 			case 0:
 				return &v.state
@@ -1295,14 +1078,13 @@ func file_contractManagement_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_contractManagement_proto_rawDesc,
-			NumEnums:      1,
-			NumMessages:   15,
+			NumEnums:      0,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   3,
 		},
 		GoTypes:           file_contractManagement_proto_goTypes,
 		DependencyIndexes: file_contractManagement_proto_depIdxs,
-		EnumInfos:         file_contractManagement_proto_enumTypes,
 		MessageInfos:      file_contractManagement_proto_msgTypes,
 	}.Build()
 	File_contractManagement_proto = out.File

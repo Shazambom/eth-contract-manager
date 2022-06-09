@@ -30,6 +30,10 @@ func main() {
 	if handlerInitErr != nil {
 		log.Fatal(handlerInitErr)
 	}
+	log.Println("Prepping handler dependencies")
+	if handlerDepErr := handler.InitService(); handlerDepErr != nil {
+		log.Fatal(handlerDepErr)
+	}
 	log.Println("Starting to listen to Redis event stream")
 	if err := rds.Listen(handler.Handle); err != nil {
 		log.Fatal(err)

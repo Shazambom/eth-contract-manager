@@ -68,7 +68,12 @@ func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *
 	return nil, nil
 }
 
-func (ts *TransactionRPCService) Ping(ctx context.Context, pong *pb.Pong) (*pb.Pong, error) {
-	log.Println(pong.Ping)
-	return &pb.Pong{Ping: "pong"}, nil
+func (ts *TransactionRPCService) Check(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
+	log.Println("Health check ping to: " + req.Service)
+	return &pb.HealthCheckResponse{Status: pb.HealthCheckResponse_SERVING}, nil
+}
+
+func (ts *TransactionRPCService) Watch(req *pb.HealthCheckRequest, server pb.TransactionService_WatchServer) error {
+	log.Println("Health watcher for: " + req.Service)
+	return server.SendMsg(&pb.HealthCheckResponse{Status: pb.HealthCheckResponse_SERVING})
 }

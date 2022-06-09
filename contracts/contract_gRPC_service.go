@@ -77,7 +77,12 @@ func (cs *ContractRPCService) List(ctx context.Context, owner *pb.Owner) (*pb.Co
 	return &pb.Contracts{Contracts: protoContracts}, nil
 }
 
-func (cs *ContractRPCService) Ping(ctx context.Context, pong *pb.Pong) (*pb.Pong, error) {
-	log.Println(pong.Ping)
-	return &pb.Pong{Ping: "pong"}, nil
+func (cs *ContractRPCService) Check(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
+	log.Println("Health check ping to: " + req.Service)
+	return &pb.HealthCheckResponse{Status: pb.HealthCheckResponse_SERVING}, nil
+}
+
+func (cs *ContractRPCService) Watch(req *pb.HealthCheckRequest, server pb.ContractManagement_WatchServer) error {
+	log.Println("Health watcher for: " + req.Service)
+	return server.SendMsg(&pb.HealthCheckResponse{Status: pb.HealthCheckResponse_SERVING})
 }

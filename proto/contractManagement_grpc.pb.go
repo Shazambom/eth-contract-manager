@@ -14,13 +14,344 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+// SigningServiceClient is the client API for SigningService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SigningServiceClient interface {
+	SignTxn(ctx context.Context, in *SignatureRequest, opts ...grpc.CallOption) (*SignatureResponse, error)
+	BatchSignTxn(ctx context.Context, in *BatchSignatureRequest, opts ...grpc.CallOption) (*BatchSignatureResponse, error)
+	GenerateNewKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error)
+	DeleteKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error)
+	GetKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error)
+	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
+	Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (SigningService_WatchClient, error)
+}
+
+type signingServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSigningServiceClient(cc grpc.ClientConnInterface) SigningServiceClient {
+	return &signingServiceClient{cc}
+}
+
+func (c *signingServiceClient) SignTxn(ctx context.Context, in *SignatureRequest, opts ...grpc.CallOption) (*SignatureResponse, error) {
+	out := new(SignatureResponse)
+	err := c.cc.Invoke(ctx, "/SigningService/SignTxn", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *signingServiceClient) BatchSignTxn(ctx context.Context, in *BatchSignatureRequest, opts ...grpc.CallOption) (*BatchSignatureResponse, error) {
+	out := new(BatchSignatureResponse)
+	err := c.cc.Invoke(ctx, "/SigningService/BatchSignTxn", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *signingServiceClient) GenerateNewKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error) {
+	out := new(KeyManagementResponse)
+	err := c.cc.Invoke(ctx, "/SigningService/GenerateNewKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *signingServiceClient) DeleteKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error) {
+	out := new(KeyManagementResponse)
+	err := c.cc.Invoke(ctx, "/SigningService/DeleteKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *signingServiceClient) GetKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error) {
+	out := new(KeyManagementResponse)
+	err := c.cc.Invoke(ctx, "/SigningService/GetKey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *signingServiceClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
+	out := new(HealthCheckResponse)
+	err := c.cc.Invoke(ctx, "/SigningService/Check", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *signingServiceClient) Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (SigningService_WatchClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SigningService_ServiceDesc.Streams[0], "/SigningService/Watch", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &signingServiceWatchClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type SigningService_WatchClient interface {
+	Recv() (*HealthCheckResponse, error)
+	grpc.ClientStream
+}
+
+type signingServiceWatchClient struct {
+	grpc.ClientStream
+}
+
+func (x *signingServiceWatchClient) Recv() (*HealthCheckResponse, error) {
+	m := new(HealthCheckResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// SigningServiceServer is the server API for SigningService service.
+// All implementations must embed UnimplementedSigningServiceServer
+// for forward compatibility
+type SigningServiceServer interface {
+	SignTxn(context.Context, *SignatureRequest) (*SignatureResponse, error)
+	BatchSignTxn(context.Context, *BatchSignatureRequest) (*BatchSignatureResponse, error)
+	GenerateNewKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error)
+	DeleteKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error)
+	GetKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error)
+	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
+	Watch(*HealthCheckRequest, SigningService_WatchServer) error
+	mustEmbedUnimplementedSigningServiceServer()
+}
+
+// UnimplementedSigningServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedSigningServiceServer struct {
+}
+
+func (UnimplementedSigningServiceServer) SignTxn(context.Context, *SignatureRequest) (*SignatureResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignTxn not implemented")
+}
+func (UnimplementedSigningServiceServer) BatchSignTxn(context.Context, *BatchSignatureRequest) (*BatchSignatureResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BatchSignTxn not implemented")
+}
+func (UnimplementedSigningServiceServer) GenerateNewKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateNewKey not implemented")
+}
+func (UnimplementedSigningServiceServer) DeleteKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteKey not implemented")
+}
+func (UnimplementedSigningServiceServer) GetKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetKey not implemented")
+}
+func (UnimplementedSigningServiceServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
+}
+func (UnimplementedSigningServiceServer) Watch(*HealthCheckRequest, SigningService_WatchServer) error {
+	return status.Errorf(codes.Unimplemented, "method Watch not implemented")
+}
+func (UnimplementedSigningServiceServer) mustEmbedUnimplementedSigningServiceServer() {}
+
+// UnsafeSigningServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SigningServiceServer will
+// result in compilation errors.
+type UnsafeSigningServiceServer interface {
+	mustEmbedUnimplementedSigningServiceServer()
+}
+
+func RegisterSigningServiceServer(s grpc.ServiceRegistrar, srv SigningServiceServer) {
+	s.RegisterService(&SigningService_ServiceDesc, srv)
+}
+
+func _SigningService_SignTxn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignatureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SigningServiceServer).SignTxn(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SigningService/SignTxn",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SigningServiceServer).SignTxn(ctx, req.(*SignatureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SigningService_BatchSignTxn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BatchSignatureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SigningServiceServer).BatchSignTxn(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SigningService/BatchSignTxn",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SigningServiceServer).BatchSignTxn(ctx, req.(*BatchSignatureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SigningService_GenerateNewKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KeyManagementRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SigningServiceServer).GenerateNewKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SigningService/GenerateNewKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SigningServiceServer).GenerateNewKey(ctx, req.(*KeyManagementRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SigningService_DeleteKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KeyManagementRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SigningServiceServer).DeleteKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SigningService/DeleteKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SigningServiceServer).DeleteKey(ctx, req.(*KeyManagementRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SigningService_GetKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KeyManagementRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SigningServiceServer).GetKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SigningService/GetKey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SigningServiceServer).GetKey(ctx, req.(*KeyManagementRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SigningService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SigningServiceServer).Check(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SigningService/Check",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SigningServiceServer).Check(ctx, req.(*HealthCheckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SigningService_Watch_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(HealthCheckRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(SigningServiceServer).Watch(m, &signingServiceWatchServer{stream})
+}
+
+type SigningService_WatchServer interface {
+	Send(*HealthCheckResponse) error
+	grpc.ServerStream
+}
+
+type signingServiceWatchServer struct {
+	grpc.ServerStream
+}
+
+func (x *signingServiceWatchServer) Send(m *HealthCheckResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+// SigningService_ServiceDesc is the grpc.ServiceDesc for SigningService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SigningService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "SigningService",
+	HandlerType: (*SigningServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SignTxn",
+			Handler:    _SigningService_SignTxn_Handler,
+		},
+		{
+			MethodName: "BatchSignTxn",
+			Handler:    _SigningService_BatchSignTxn_Handler,
+		},
+		{
+			MethodName: "GenerateNewKey",
+			Handler:    _SigningService_GenerateNewKey_Handler,
+		},
+		{
+			MethodName: "DeleteKey",
+			Handler:    _SigningService_DeleteKey_Handler,
+		},
+		{
+			MethodName: "GetKey",
+			Handler:    _SigningService_GetKey_Handler,
+		},
+		{
+			MethodName: "Check",
+			Handler:    _SigningService_Check_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Watch",
+			Handler:       _SigningService_Watch_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "contractManagement.proto",
+}
+
 // TransactionServiceClient is the client API for TransactionService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TransactionServiceClient interface {
 	GetContract(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Contract, error)
 	ConstructTransaction(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*Error, error)
-	Ping(ctx context.Context, in *Pong, opts ...grpc.CallOption) (*Pong, error)
+	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
+	Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (TransactionService_WatchClient, error)
 }
 
 type transactionServiceClient struct {
@@ -49,13 +380,45 @@ func (c *transactionServiceClient) ConstructTransaction(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *transactionServiceClient) Ping(ctx context.Context, in *Pong, opts ...grpc.CallOption) (*Pong, error) {
-	out := new(Pong)
-	err := c.cc.Invoke(ctx, "/TransactionService/Ping", in, out, opts...)
+func (c *transactionServiceClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
+	out := new(HealthCheckResponse)
+	err := c.cc.Invoke(ctx, "/TransactionService/Check", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+func (c *transactionServiceClient) Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (TransactionService_WatchClient, error) {
+	stream, err := c.cc.NewStream(ctx, &TransactionService_ServiceDesc.Streams[0], "/TransactionService/Watch", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &transactionServiceWatchClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type TransactionService_WatchClient interface {
+	Recv() (*HealthCheckResponse, error)
+	grpc.ClientStream
+}
+
+type transactionServiceWatchClient struct {
+	grpc.ClientStream
+}
+
+func (x *transactionServiceWatchClient) Recv() (*HealthCheckResponse, error) {
+	m := new(HealthCheckResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // TransactionServiceServer is the server API for TransactionService service.
@@ -64,7 +427,8 @@ func (c *transactionServiceClient) Ping(ctx context.Context, in *Pong, opts ...g
 type TransactionServiceServer interface {
 	GetContract(context.Context, *Address) (*Contract, error)
 	ConstructTransaction(context.Context, *TransactionRequest) (*Error, error)
-	Ping(context.Context, *Pong) (*Pong, error)
+	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
+	Watch(*HealthCheckRequest, TransactionService_WatchServer) error
 	mustEmbedUnimplementedTransactionServiceServer()
 }
 
@@ -78,8 +442,11 @@ func (UnimplementedTransactionServiceServer) GetContract(context.Context, *Addre
 func (UnimplementedTransactionServiceServer) ConstructTransaction(context.Context, *TransactionRequest) (*Error, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConstructTransaction not implemented")
 }
-func (UnimplementedTransactionServiceServer) Ping(context.Context, *Pong) (*Pong, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+func (UnimplementedTransactionServiceServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
+}
+func (UnimplementedTransactionServiceServer) Watch(*HealthCheckRequest, TransactionService_WatchServer) error {
+	return status.Errorf(codes.Unimplemented, "method Watch not implemented")
 }
 func (UnimplementedTransactionServiceServer) mustEmbedUnimplementedTransactionServiceServer() {}
 
@@ -130,22 +497,43 @@ func _TransactionService_ConstructTransaction_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TransactionService_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Pong)
+func _TransactionService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthCheckRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TransactionServiceServer).Ping(ctx, in)
+		return srv.(TransactionServiceServer).Check(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TransactionService/Ping",
+		FullMethod: "/TransactionService/Check",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionServiceServer).Ping(ctx, req.(*Pong))
+		return srv.(TransactionServiceServer).Check(ctx, req.(*HealthCheckRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _TransactionService_Watch_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(HealthCheckRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TransactionServiceServer).Watch(m, &transactionServiceWatchServer{stream})
+}
+
+type TransactionService_WatchServer interface {
+	Send(*HealthCheckResponse) error
+	grpc.ServerStream
+}
+
+type transactionServiceWatchServer struct {
+	grpc.ServerStream
+}
+
+func (x *transactionServiceWatchServer) Send(m *HealthCheckResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // TransactionService_ServiceDesc is the grpc.ServiceDesc for TransactionService service.
@@ -164,11 +552,17 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TransactionService_ConstructTransaction_Handler,
 		},
 		{
-			MethodName: "Ping",
-			Handler:    _TransactionService_Ping_Handler,
+			MethodName: "Check",
+			Handler:    _TransactionService_Check_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Watch",
+			Handler:       _TransactionService_Watch_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "contractManagement.proto",
 }
 
@@ -180,7 +574,8 @@ type ContractManagementClient interface {
 	Store(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*Error, error)
 	Delete(ctx context.Context, in *AddressOwner, opts ...grpc.CallOption) (*Error, error)
 	List(ctx context.Context, in *Owner, opts ...grpc.CallOption) (*Contracts, error)
-	Ping(ctx context.Context, in *Pong, opts ...grpc.CallOption) (*Pong, error)
+	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
+	Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (ContractManagement_WatchClient, error)
 }
 
 type contractManagementClient struct {
@@ -227,13 +622,45 @@ func (c *contractManagementClient) List(ctx context.Context, in *Owner, opts ...
 	return out, nil
 }
 
-func (c *contractManagementClient) Ping(ctx context.Context, in *Pong, opts ...grpc.CallOption) (*Pong, error) {
-	out := new(Pong)
-	err := c.cc.Invoke(ctx, "/ContractManagement/Ping", in, out, opts...)
+func (c *contractManagementClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
+	out := new(HealthCheckResponse)
+	err := c.cc.Invoke(ctx, "/ContractManagement/Check", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+func (c *contractManagementClient) Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (ContractManagement_WatchClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ContractManagement_ServiceDesc.Streams[0], "/ContractManagement/Watch", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &contractManagementWatchClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ContractManagement_WatchClient interface {
+	Recv() (*HealthCheckResponse, error)
+	grpc.ClientStream
+}
+
+type contractManagementWatchClient struct {
+	grpc.ClientStream
+}
+
+func (x *contractManagementWatchClient) Recv() (*HealthCheckResponse, error) {
+	m := new(HealthCheckResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // ContractManagementServer is the server API for ContractManagement service.
@@ -244,7 +671,8 @@ type ContractManagementServer interface {
 	Store(context.Context, *Contract) (*Error, error)
 	Delete(context.Context, *AddressOwner) (*Error, error)
 	List(context.Context, *Owner) (*Contracts, error)
-	Ping(context.Context, *Pong) (*Pong, error)
+	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
+	Watch(*HealthCheckRequest, ContractManagement_WatchServer) error
 	mustEmbedUnimplementedContractManagementServer()
 }
 
@@ -264,8 +692,11 @@ func (UnimplementedContractManagementServer) Delete(context.Context, *AddressOwn
 func (UnimplementedContractManagementServer) List(context.Context, *Owner) (*Contracts, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedContractManagementServer) Ping(context.Context, *Pong) (*Pong, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+func (UnimplementedContractManagementServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
+}
+func (UnimplementedContractManagementServer) Watch(*HealthCheckRequest, ContractManagement_WatchServer) error {
+	return status.Errorf(codes.Unimplemented, "method Watch not implemented")
 }
 func (UnimplementedContractManagementServer) mustEmbedUnimplementedContractManagementServer() {}
 
@@ -352,22 +783,43 @@ func _ContractManagement_List_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ContractManagement_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Pong)
+func _ContractManagement_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthCheckRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ContractManagementServer).Ping(ctx, in)
+		return srv.(ContractManagementServer).Check(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ContractManagement/Ping",
+		FullMethod: "/ContractManagement/Check",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ContractManagementServer).Ping(ctx, req.(*Pong))
+		return srv.(ContractManagementServer).Check(ctx, req.(*HealthCheckRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _ContractManagement_Watch_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(HealthCheckRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ContractManagementServer).Watch(m, &contractManagementWatchServer{stream})
+}
+
+type ContractManagement_WatchServer interface {
+	Send(*HealthCheckResponse) error
+	grpc.ServerStream
+}
+
+type contractManagementWatchServer struct {
+	grpc.ServerStream
+}
+
+func (x *contractManagementWatchServer) Send(m *HealthCheckResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // ContractManagement_ServiceDesc is the grpc.ServiceDesc for ContractManagement service.
@@ -394,10 +846,16 @@ var ContractManagement_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ContractManagement_List_Handler,
 		},
 		{
-			MethodName: "Ping",
-			Handler:    _ContractManagement_Ping_Handler,
+			MethodName: "Check",
+			Handler:    _ContractManagement_Check_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Watch",
+			Handler:       _ContractManagement_Watch_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "contractManagement.proto",
 }

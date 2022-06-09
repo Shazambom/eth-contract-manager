@@ -17,7 +17,7 @@ type Config struct {
 
 func NewConfig() (Config, error) {
 	var port, awsEndpoint, awsRegion, awsKeyId, awsSecret, sslEnabled, tableName string
-	envErr := utils.GetEnvVarBatch([]string{"PORT", "AWS_ENDPOINT", "AWS_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "SSL_ENABLED", "TABLE_NAME"}, &awsEndpoint, &awsRegion, &awsKeyId, &awsSecret, &sslEnabled, &tableName)
+	envErr := utils.GetEnvVarBatch([]string{"PORT", "AWS_ENDPOINT", "AWS_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "SSL_ENABLED", "TABLE_NAME"}, &port, &awsEndpoint, &awsRegion, &awsKeyId, &awsSecret, &sslEnabled, &tableName)
 	if envErr != nil {
 		return Config{}, envErr
 	}

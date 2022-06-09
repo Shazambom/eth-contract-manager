@@ -111,7 +111,12 @@ func (sRPC *SignerRPCService) GetKey(ctx context.Context, req *pb.KeyManagementR
 	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: address}, nil
 }
 
-func (sRPC *SignerRPCService) Ping(ctx context.Context, pong *pb.Pong) (*pb.Pong, error) {
-	log.Println(pong.Ping)
-	return &pb.Pong{Ping: "pong"}, nil
+func (sRPC *SignerRPCService) Check(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
+	log.Println("Health check ping to: " + req.Service)
+	return &pb.HealthCheckResponse{Status: pb.HealthCheckResponse_SERVING}, nil
+}
+
+func (sRPC *SignerRPCService) Watch(req *pb.HealthCheckRequest, server pb.SigningService_WatchServer) error {
+	log.Println("Health watcher for: " + req.Service)
+	return server.SendMsg(&pb.HealthCheckResponse{Status: pb.HealthCheckResponse_SERVING})
 }

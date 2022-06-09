@@ -26,11 +26,6 @@ func NewS3(cfg *aws.Config, bucket string) (*S3, error) {
 
 	s3 := &S3{session: sess, client: client, bucket: bucket}
 
-	initErr := s3.InitBucket()
-	if initErr != nil {
-		return nil, initErr
-	}
-
 	return s3, nil
 }
 

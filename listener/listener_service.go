@@ -14,6 +14,10 @@ func NewEventHandlerService(s3 *storage.S3) EventHandlerService {
 	return &Service{s3: s3}
 }
 
+func (ls *Service) InitService() error {
+	return ls.s3.InitBucket()
+}
+
 func (ls *Service) Handle(key, val string, err error) error {
 	if err != nil {
 		fmt.Printf("Error with redis stream: %s\n", err)

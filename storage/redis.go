@@ -13,20 +13,26 @@ type Redis struct {
 	countKey string
 }
 
-func NewRedisWriter(endpoint, pwd, countKey string) RedisWriter {
+type RedisConfig struct {
+	Endpoint string
+	Password string
+	CountKey string
+}
+
+func NewRedisWriter(config RedisConfig) RedisWriter {
 	return &Redis{client: redis.NewClient(&redis.Options{
-		Addr:     endpoint,
-		Password: pwd,
+		Addr:     config.Endpoint,
+		Password: config.Password,
 		DB:       0,
 	}),
-	countKey: countKey,
+	countKey: config.CountKey,
 	}
 }
 
-func NewRedisListener(endpoint, pwd string) RedisListener {
+func NewRedisListener(config RedisConfig) RedisListener {
 	return &Redis{client: redis.NewClient(&redis.Options{
-		Addr: endpoint,
-		Password: pwd,
+		Addr: config.Endpoint,
+		Password: config.Password,
 		DB: 0,
 	})}
 }

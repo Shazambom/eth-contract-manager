@@ -76,3 +76,8 @@ func (cs *ContractRPCService) List(ctx context.Context, owner *pb.Owner) (*pb.Co
 	}
 	return &pb.Contracts{Contracts: protoContracts}, nil
 }
+
+func (cs *ContractRPCService) Ping(ctx context.Context, pong *pb.Pong) (*pb.Pong, error) {
+	log.Println(pong.Ping)
+	return &pb.Pong{Ping: "pong"}, nil
+}

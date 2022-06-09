@@ -110,3 +110,8 @@ func (sRPC *SignerRPCService) GetKey(ctx context.Context, req *pb.KeyManagementR
 	}
 	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: address}, nil
 }
+
+func (sRPC *SignerRPCService) Ping(ctx context.Context, pong *pb.Pong) (*pb.Pong, error) {
+	log.Println(pong.Ping)
+	return &pb.Pong{Ping: "pong"}, nil
+}

@@ -67,3 +67,8 @@ func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *
 	}
 	return nil, nil
 }
+
+func (ts *TransactionRPCService) Ping(ctx context.Context, pong *pb.Pong) (*pb.Pong, error) {
+	log.Println(pong.Ping)
+	return &pb.Pong{Ping: "pong"}, nil
+}

@@ -14,12 +14,13 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeContractTransactionHandler(writer storage.RedisWriter, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (ContractTransactionHandler, error) {
+func InitializeContractTransactionHandler(rdsCfg storage.RedisConfig, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (ContractTransactionHandler, error) {
+	redisWriter := storage.NewRedisWriter(rdsCfg)
 	contractRepository, err := storage.NewContractRepository(tableName, cfg...)
 	if err != nil {
 		return nil, err
 	}
-	contractTransactionHandler := NewContractTransactionHandler(writer, contractRepository, client)
+	contractTransactionHandler := NewContractTransactionHandler(redisWriter, contractRepository, client)
 	return contractTransactionHandler, nil
 }
 
@@ -32,8 +33,8 @@ func InitializeContractManagerHandler(tableName string, cfg ...*aws.Config) (Con
 	return contractManagerHandler, nil
 }
 
-func InitializeTransactionServer(port int, opts []grpc.ServerOption, writer storage.RedisWriter, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (*TransactionRPCService, error) {
-	contractTransactionHandler, err := InitializeContractTransactionHandler(writer, client, tableName, cfg...)
+func InitializeTransactionServer(port int, opts []grpc.ServerOption, rdsCfg storage.RedisConfig, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (*TransactionRPCService, error) {
+	contractTransactionHandler, err := InitializeContractTransactionHandler(rdsCfg, client, tableName, cfg...)
 	if err != nil {
 		return nil, err
 	}

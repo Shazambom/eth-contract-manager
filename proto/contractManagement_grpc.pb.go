@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type TransactionServiceClient interface {
 	GetContract(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Contract, error)
 	ConstructTransaction(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*Error, error)
+	Ping(ctx context.Context, in *Pong, opts ...grpc.CallOption) (*Pong, error)
 }
 
 type transactionServiceClient struct {
@@ -48,12 +49,22 @@ func (c *transactionServiceClient) ConstructTransaction(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *transactionServiceClient) Ping(ctx context.Context, in *Pong, opts ...grpc.CallOption) (*Pong, error) {
+	out := new(Pong)
+	err := c.cc.Invoke(ctx, "/TransactionService/Ping", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TransactionServiceServer is the server API for TransactionService service.
 // All implementations must embed UnimplementedTransactionServiceServer
 // for forward compatibility
 type TransactionServiceServer interface {
 	GetContract(context.Context, *Address) (*Contract, error)
 	ConstructTransaction(context.Context, *TransactionRequest) (*Error, error)
+	Ping(context.Context, *Pong) (*Pong, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
 
@@ -66,6 +77,9 @@ func (UnimplementedTransactionServiceServer) GetContract(context.Context, *Addre
 }
 func (UnimplementedTransactionServiceServer) ConstructTransaction(context.Context, *TransactionRequest) (*Error, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConstructTransaction not implemented")
+}
+func (UnimplementedTransactionServiceServer) Ping(context.Context, *Pong) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
 func (UnimplementedTransactionServiceServer) mustEmbedUnimplementedTransactionServiceServer() {}
 
@@ -116,6 +130,24 @@ func _TransactionService_ConstructTransaction_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TransactionService_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Pong)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TransactionService/Ping",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).Ping(ctx, req.(*Pong))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TransactionService_ServiceDesc is the grpc.ServiceDesc for TransactionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -131,6 +163,10 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "ConstructTransaction",
 			Handler:    _TransactionService_ConstructTransaction_Handler,
 		},
+		{
+			MethodName: "Ping",
+			Handler:    _TransactionService_Ping_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "contractManagement.proto",
@@ -144,6 +180,7 @@ type ContractManagementClient interface {
 	Store(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*Error, error)
 	Delete(ctx context.Context, in *AddressOwner, opts ...grpc.CallOption) (*Error, error)
 	List(ctx context.Context, in *Owner, opts ...grpc.CallOption) (*Contracts, error)
+	Ping(ctx context.Context, in *Pong, opts ...grpc.CallOption) (*Pong, error)
 }
 
 type contractManagementClient struct {
@@ -190,6 +227,15 @@ func (c *contractManagementClient) List(ctx context.Context, in *Owner, opts ...
 	return out, nil
 }
 
+func (c *contractManagementClient) Ping(ctx context.Context, in *Pong, opts ...grpc.CallOption) (*Pong, error) {
+	out := new(Pong)
+	err := c.cc.Invoke(ctx, "/ContractManagement/Ping", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ContractManagementServer is the server API for ContractManagement service.
 // All implementations must embed UnimplementedContractManagementServer
 // for forward compatibility
@@ -198,6 +244,7 @@ type ContractManagementServer interface {
 	Store(context.Context, *Contract) (*Error, error)
 	Delete(context.Context, *AddressOwner) (*Error, error)
 	List(context.Context, *Owner) (*Contracts, error)
+	Ping(context.Context, *Pong) (*Pong, error)
 	mustEmbedUnimplementedContractManagementServer()
 }
 
@@ -216,6 +263,9 @@ func (UnimplementedContractManagementServer) Delete(context.Context, *AddressOwn
 }
 func (UnimplementedContractManagementServer) List(context.Context, *Owner) (*Contracts, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (UnimplementedContractManagementServer) Ping(context.Context, *Pong) (*Pong, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
 func (UnimplementedContractManagementServer) mustEmbedUnimplementedContractManagementServer() {}
 
@@ -302,6 +352,24 @@ func _ContractManagement_List_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ContractManagement_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Pong)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContractManagementServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ContractManagement/Ping",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContractManagementServer).Ping(ctx, req.(*Pong))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ContractManagement_ServiceDesc is the grpc.ServiceDesc for ContractManagement service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -324,6 +392,10 @@ var ContractManagement_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "List",
 			Handler:    _ContractManagement_List_Handler,
+		},
+		{
+			MethodName: "Ping",
+			Handler:    _ContractManagement_Ping_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

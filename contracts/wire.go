@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-func InitializeContractTransactionHandler(writer storage.RedisWriter, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (ContractTransactionHandler, error) {
-	wire.Build(NewContractTransactionHandler, storage.NewContractRepository)
+func InitializeContractTransactionHandler(rdsCfg storage.RedisConfig, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (ContractTransactionHandler, error) {
+	wire.Build(NewContractTransactionHandler, storage.NewContractRepository, storage.NewRedisWriter)
 	return &ContractManagerService{}, nil
 }
 
@@ -20,7 +20,7 @@ func InitializeContractManagerHandler(tableName string, cfg ...*aws.Config) (Con
 	return &ContractManagerService{}, nil
 }
 
-func InitializeTransactionServer(port int, opts []grpc.ServerOption, writer storage.RedisWriter, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (*TransactionRPCService, error) {
+func InitializeTransactionServer(port int, opts []grpc.ServerOption, rdsCfg storage.RedisConfig, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (*TransactionRPCService, error) {
 	wire.Build(NewTransactionServer, InitializeContractTransactionHandler)
 	return &TransactionRPCService{}, nil
 }

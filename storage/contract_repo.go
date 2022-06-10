@@ -59,7 +59,55 @@ func NewContractRepository(tableName string, cfg ...*aws.Config) (ContractReposi
 	if err != nil {
 		return nil, err
 	}
-	return &ContractRepo{dynamodb.New(sess, cfg...), tableName}, nil
+	repo := &ContractRepo{dynamodb.New(sess, cfg...), tableName}
+	return repo, nil
+}
+
+func (cr *ContractRepo) Init() error {
+	log.Println("Attempting to Create Table: " + cr.tableName)
+	_, createErr := cr.db.CreateTable(&dynamodb.CreateTableInput{
+		AttributeDefinitions:   []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("Address"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("Owner"),
+				AttributeType: aws.String("S"),
+			},
+		},
+		KeySchema:              []*dynamodb.KeySchemaElement{
+			{
+				AttributeName: aws.String("Address"),
+				KeyType: aws.String("HASH"),
+			},
+		},
+		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex{
+			{
+				IndexName: aws.String("Owner"),
+				KeySchema: []*dynamodb.KeySchemaElement{
+					{
+						AttributeName: aws.String("Owner"),
+						KeyType: aws.String("HASH"),
+					},
+				},
+				Projection: &dynamodb.Projection{
+					NonKeyAttributes: nil,
+					ProjectionType:   aws.String("ALL"),
+				},
+			},
+		},
+		TableName:              aws.String(cr.tableName),
+	})
+
+	log.Println("Table Creation request complete")
+
+	if createErr.Error() == dynamodb.ErrCodeTableAlreadyExistsException ||
+		createErr.Error() == dynamodb.ErrCodeGlobalTableAlreadyExistsException {
+		return nil
+	}
+
+	return createErr
 }
 
 func (cr *ContractRepo) GetContract(ctx context.Context, contractAddress string) (*Contract, error) {

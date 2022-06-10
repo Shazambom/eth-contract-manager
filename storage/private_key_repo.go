@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"log"
 )
 
 type PrivateKeyRepo struct {
@@ -25,7 +26,32 @@ func NewPrivateKeyRepository(tableName string, cfg ...*aws.Config) (PrivateKeyRe
 	if err != nil {
 		return nil, err
 	}
-	return &PrivateKeyRepo{dynamodb.New(sess, cfg...), tableName}, nil
+	repo := &PrivateKeyRepo{dynamodb.New(sess, cfg...), tableName}
+	return repo, nil
+}
+
+func (pkr *PrivateKeyRepo) Init() error {
+	log.Println("Attempting to Create Table: " + pkr.tableName)
+	_, createErr := pkr.db.CreateTable(&dynamodb.CreateTableInput{
+		AttributeDefinitions:   []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("ContractAddress"),
+				AttributeType: aws.String("S"),
+			},
+		},
+		KeySchema:              []*dynamodb.KeySchemaElement{
+			{AttributeName: aws.String("ContractAddress"), KeyType: aws.String("HASH")},
+		},
+		TableName:              aws.String(pkr.tableName),
+	})
+	log.Println("Table Creation request complete")
+
+	if createErr.Error() == dynamodb.ErrCodeTableAlreadyExistsException ||
+		createErr.Error() == dynamodb.ErrCodeGlobalTableAlreadyExistsException {
+		return nil
+	}
+
+	return createErr
 }
 
 // GetPrivateKey ---- WARNING ---- NEVER CALL OUTSIDE OF SIGNER SERVICE DUE TO SECURITY CONCERNS

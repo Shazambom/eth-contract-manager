@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"log"
 	"strconv"
+	"strings"
 )
 
 type ContractRepo struct {
@@ -23,7 +24,7 @@ type Contract struct {
 	Functions []*string `json:"Functions"`
 	MaxMintable int `json:"MaxMintable"`
 	MaxIncrement int `json:"MaxIncrement"`
-	Owner string `json:"Owner"`
+	ContractOwner string `json:"ContractOwner"`
 }
 
 func (c *Contract) ToRPC() (*pb.Contract) {
@@ -37,7 +38,7 @@ func (c *Contract) ToRPC() (*pb.Contract) {
 		Functions: 	  functions,
 		MaxMintable:  int64(c.MaxMintable),
 		MaxIncrement: int64(c.MaxIncrement),
-		Owner:        c.Owner,
+		Owner:        c.ContractOwner,
 	}
 }
 
@@ -51,7 +52,7 @@ func (c *Contract) FromRPC(contract *pb.Contract) () {
 	c.Functions = functions
 	c.MaxMintable = int(contract.MaxMintable)
 	c.MaxIncrement = int(contract.MaxIncrement)
-	c.Owner = contract.Owner
+	c.ContractOwner = contract.Owner
 }
 
 func NewContractRepository(tableName string, cfg ...*aws.Config) (ContractRepository, error) {
@@ -72,7 +73,7 @@ func (cr *ContractRepo) Init() error {
 				AttributeType: aws.String("S"),
 			},
 			{
-				AttributeName: aws.String("Owner"),
+				AttributeName: aws.String("ContractOwner"),
 				AttributeType: aws.String("S"),
 			},
 		},
@@ -84,10 +85,10 @@ func (cr *ContractRepo) Init() error {
 		},
 		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex{
 			{
-				IndexName: aws.String("Owner"),
+				IndexName: aws.String("ContractOwner"),
 				KeySchema: []*dynamodb.KeySchemaElement{
 					{
-						AttributeName: aws.String("Owner"),
+						AttributeName: aws.String("ContractOwner"),
 						KeyType: aws.String("HASH"),
 					},
 				},
@@ -95,15 +96,24 @@ func (cr *ContractRepo) Init() error {
 					NonKeyAttributes: nil,
 					ProjectionType:   aws.String("ALL"),
 				},
+				ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+					ReadCapacityUnits: aws.Int64(5),
+					WriteCapacityUnits:  aws.Int64(5),
+				},
 			},
 		},
 		TableName:              aws.String(cr.tableName),
+		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+			ReadCapacityUnits: aws.Int64(5),
+			WriteCapacityUnits:  aws.Int64(5),
+		},
 	})
 
 	log.Println("Table Creation request complete")
 
-	if createErr.Error() == dynamodb.ErrCodeTableAlreadyExistsException ||
-		createErr.Error() == dynamodb.ErrCodeGlobalTableAlreadyExistsException {
+	if createErr == nil || strings.Contains(createErr.Error(), dynamodb.ErrCodeTableAlreadyExistsException) ||
+		strings.Contains(createErr.Error(), dynamodb.ErrCodeGlobalTableAlreadyExistsException) ||
+		strings.Contains(createErr.Error(), dynamodb.ErrCodeResourceInUseException) {
 		return nil
 	}
 
@@ -137,8 +147,8 @@ func (cr *ContractRepo) GetContract(ctx context.Context, contractAddress string)
 func (cr *ContractRepo) GetContractsByOwner(ctx context.Context, owner string) ([]*Contract, error) {
 	result, err := cr.db.QueryWithContext(ctx, &dynamodb.QueryInput{
 		TableName: aws.String(cr.tableName),
-		IndexName: aws.String("Owner"),
-		KeyConditionExpression: aws.String("Owner = :v_owner"),
+		IndexName: aws.String("ContractOwner"),
+		KeyConditionExpression: aws.String("ContractOwner = :v_owner"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":v_owner": {S: aws.String(owner)},
 		},
@@ -181,8 +191,8 @@ func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) 
 			"MaxIncrement": {
 				N: aws.String(maxIncr),
 			},
-			"Owner": {
-				S: aws.String(contract.Owner),
+			"ContractOwner": {
+				S: aws.String(contract.ContractOwner),
 			},
 		},
 	})
@@ -195,7 +205,7 @@ func (cr *ContractRepo) DeleteContract(ctx context.Context, contractAddress, own
 			"Address": {
 				S: aws.String(contractAddress),
 			},
-			"Owner": {
+			"ContractOwner": {
 				S: aws.String(owner),
 			},
 		},

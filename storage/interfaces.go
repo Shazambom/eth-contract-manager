@@ -15,6 +15,7 @@ type RedisWriter interface {
 	MarkAddressAsUsed(ctx context.Context, token *Token) error
 	GetQueueNum(ctx context.Context) (int64, error)
 	IncrementCounter(ctx context.Context, numRequested, maxMintable int, contractAddress string) error
+	Get(ctx context.Context, address, contractAddres string) (*Token, error)
 	Ping() (string, error)
 	Close()
 }

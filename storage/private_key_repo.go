@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"log"
+	"strings"
 )
 
 type PrivateKeyRepo struct {
@@ -43,11 +44,16 @@ func (pkr *PrivateKeyRepo) Init() error {
 			{AttributeName: aws.String("ContractAddress"), KeyType: aws.String("HASH")},
 		},
 		TableName:              aws.String(pkr.tableName),
+		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+			ReadCapacityUnits: aws.Int64(5),
+			WriteCapacityUnits:  aws.Int64(5),
+		},
 	})
 	log.Println("Table Creation request complete")
 
-	if createErr.Error() == dynamodb.ErrCodeTableAlreadyExistsException ||
-		createErr.Error() == dynamodb.ErrCodeGlobalTableAlreadyExistsException {
+	if createErr == nil || strings.Contains(createErr.Error(), dynamodb.ErrCodeTableAlreadyExistsException) ||
+		strings.Contains(createErr.Error(), dynamodb.ErrCodeGlobalTableAlreadyExistsException) ||
+		strings.Contains(createErr.Error(), dynamodb.ErrCodeResourceInUseException) {
 		return nil
 	}
 

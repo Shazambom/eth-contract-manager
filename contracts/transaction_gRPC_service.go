@@ -67,7 +67,7 @@ func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *
 	if storeErr != nil {
 		return &pb.Error{Err: storeErr.Error()}, storeErr
 	}
-	return nil, nil
+	return &pb.Error{Err: ""}, nil
 }
 
 func (ts *TransactionRPCService) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {

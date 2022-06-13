@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
@@ -92,6 +93,18 @@ func (r *Redis) IncrementCounter(ctx context.Context, numRequested, maxMintable 
 		return errors.New("NFTs are sold out, for now")
 	}
 	return nil
+}
+
+func (r *Redis) Get(ctx context.Context, address, contractAddress string) (*Token, error) {
+	val, err := r.client.Get(ctx, r.getUserKey(contractAddress, address)).Result()
+	if err != nil {
+		return nil, err
+	}
+	token := Token{}
+	if unmarshalErr := json.Unmarshal([]byte(val), &token); unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+	return &token, nil
 }
 
 func (r *Redis) Ping() (string, error) {

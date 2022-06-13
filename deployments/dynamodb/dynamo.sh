@@ -8,14 +8,14 @@ aws $AWS_ENDPOINT \
       --table-name Contracts \
       --attribute-definitions \
         AttributeName=Address,AttributeType=S \
-        AttributeName=Owner,AttributeType=S \
+        AttributeName=ContractOwner,AttributeType=S \
       --key-schema AttributeName=Address,KeyType=HASH \
       --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
       --global-secondary-indexes \
             "[
               {
-                \"IndexName\": \"Owner\",
-                \"KeySchema\": [{\"AttributeName\":\"Owner\",\"KeyType\":\"HASH\"}],
+                \"IndexName\": \"ContractOwner\",
+                \"KeySchema\": [{\"AttributeName\":\"ContractOwner\",\"KeyType\":\"HASH\"}],
                 \"Projection\":{
                     \"ProjectionType\":\"ALL\"
                 },
@@ -41,5 +41,8 @@ aws $AWS_ENDPOINT \
 
 aws $AWS_ENDPOINT \
     dynamodb describe-table --table-name ContractPrivateKeyRepository --output table --region us-east-1
+
+aws $AWS_ENDPOINT \
+    dynamodb list-tables --region us-east-1
 
 set +x

@@ -54,14 +54,14 @@ func (cms *ContractManagerService) ListContracts(ctx context.Context, owner stri
 	return cms.repo.GetContractsByOwner(ctx, owner)
 }
 
-func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, numRequested int, arguments []string, contract *storage.Contract) (*storage.Token, error) {
+func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, numRequested int, arguments [][]byte, contract *storage.Contract) (*storage.Token, error) {
 	log.Println("Unpacking ABI")
 	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
 	if abiErr != nil {
 		return nil, abiErr
 	}
 	log.Println("Packing arguments")
-	args, byteArgs, argParseErr := cms.UnpackArgs(arguments, functionName, funcDef)
+	args, byteArgs, argParseErr := cms.UnpackArgs(msgSender, arguments, funcDef.Methods[functionName], contract.Functions.Functions[functionName])
 	if argParseErr != nil {
 		return nil, argParseErr
 	}
@@ -72,20 +72,23 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 		return nil, signingErr
 	}
 	log.Println("Appending Signature to arguments and packing")
-	args[len(args) - 1] = []byte(signature.Signature)
+	sigBytes, decodeErr := hex.DecodeString(signature.Signature[2:])
+	if decodeErr != nil {
+		return nil, decodeErr
+	}
+	args = append(args, sigBytes)
 
-	repacked, repackingErr := funcDef.Pack(functionName, args...)
-	if repackingErr != nil {
-		return nil, repackingErr
+	packed, packingErr := funcDef.Pack(functionName, args...)
+	if packingErr != nil {
+		return nil, packingErr
 	}
 
 	log.Println("Token created")
-	return storage.NewToken(contract.Address, msgSender, signature.Hash, contract.ABI, repacked, numRequested), nil
+	return storage.NewToken(contract.Address, msgSender, signature.Hash, contract.ABI, packed, numRequested), nil
 }
 
 
-func (cms *ContractManagerService) UnpackArgs(arguments []string, functionName string, funcDef abi.ABI) ([]interface{}, [][]byte, error) {
-	method := funcDef.Methods[functionName]
+func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]byte, method abi.Method, hashibleFunc storage.Function) ([]interface{}, [][]byte, error) {
 
 	//All of this splitting logic is to nicely organize the arguments, names and types
 	split := strings.Split(method.String(), "(")
@@ -97,144 +100,193 @@ func (cms *ContractManagerService) UnpackArgs(arguments []string, functionName s
 		abiArgs = append(abiArgs, ABIArg{Type: abiArg[0], Name: abiArg[1]})
 	}
 
-	if len(abiArgs) != len(arguments) {
+	if len(abiArgs) - 1 != len(arguments) {
 		return nil, nil, errors.New("argument length mismatch")
+	}
+
+	argBytes := [][]byte{}
+	hashArgMap := map[string]int{}
+	for i, arg := range hashibleFunc.Arguments {
+
+		argBytes = append(argBytes, []byte{})
+		hashArgMap[arg.Name] = i
+		if arg.Name == "msg.sender" {
+			argBytes[i] = common.HexToAddress(msgSender).Bytes()
+		}
 	}
 
 
 	args := []interface{}{}
-	argBytes := [][]byte{}
 	for i, arg := range arguments {
 		var finalArg interface {}
 		switch abiArgs[i].Type {
 		case "uint":
-			bigInt, ok := math.ParseBig256(arg)
+			bigInt, ok := math.ParseBig256(string(arg))
 			if !ok {
 				return nil, nil, errors.New("Unable to parse uint256")
 			}
 			finalArg = bigInt
-			argBytes = append(argBytes, common.LeftPadBytes(bigInt.Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(bigInt.Bytes(), 32)
+			}
 		case "uint8" :
-			intVar, intConvErr := strconv.Atoi(arg)
+			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
 			}
 			finalArg = uint8(intVar)
-			argBytes = append(argBytes, common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
+			}
 		case "uint16" :
-			intVar, intConvErr := strconv.Atoi(arg)
+			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
 			}
 			finalArg =  uint16(intVar)
-			argBytes = append(argBytes, common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
+			}
 		case "uint32" :
-			intVar, intConvErr := strconv.Atoi(arg)
+			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
 			}
 			finalArg = uint32(intVar)
-			argBytes = append(argBytes, common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
+			}
 		case "uint64" :
-			intVar, intConvErr := strconv.Atoi(arg)
+			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
 			}
 			finalArg = uint64(intVar)
-			argBytes = append(argBytes, common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
+			}
 		case "uint256" :
-			bigInt, ok := math.ParseBig256(arg)
+			bigInt, ok := math.ParseBig256(string(arg))
 			if !ok {
 				return nil, nil, errors.New("Unable to parse uint256")
 			}
 			finalArg = bigInt
-			argBytes = append(argBytes, common.LeftPadBytes(bigInt.Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(bigInt.Bytes(), 32)
+			}
 		case "int256" :
-			bigInt, ok := math.ParseBig256(arg)
+			bigInt, ok := math.ParseBig256(string(arg))
 			if !ok {
 				return nil, nil, errors.New("Unable to parse uint256")
 			}
 			finalArg = bigInt
-			argBytes = append(argBytes, common.LeftPadBytes(bigInt.Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(bigInt.Bytes(), 32)
+			}
 		case "int8" :
-			intVar, intConvErr := strconv.Atoi(arg)
+			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
 			}
 			finalArg = int8(intVar)
-			argBytes = append(argBytes, common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
+			}
 		case "int16" :
-			intVar, intConvErr := strconv.Atoi(arg)
+			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
 			}
 			finalArg = int16(intVar)
-			argBytes = append(argBytes, common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
+			}
 		case "int32" :
-			intVar, intConvErr := strconv.Atoi(arg)
+			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
 			}
 			finalArg = int32(intVar)
-			argBytes = append(argBytes, common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
+			}
 		case "int64" :
-			intVar, intConvErr := strconv.Atoi(arg)
+			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
 			}
 			finalArg = int64(intVar)
-			argBytes = append(argBytes, common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
+			}
 		case "address" :
-			var address [160]byte
-			copy(address[:], arg)
-			finalArg = address
-			argBytes = append(argBytes, common.HexToAddress(arg).Bytes())
+			finalArg = arg
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = arg
+			}
 		case "bool" :
-			finalArg = arg == "true"
-			if arg == "true" {
-				byteVal, decodeErr := hex.DecodeString("01")
-				if decodeErr != nil {
-					return nil, nil, decodeErr
+			//TODO this is likely wrong, pls fix
+			finalArg = string(arg) == "true"
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				if string(arg) == "true" {
+					byteVal, decodeErr := hex.DecodeString("01")
+					if decodeErr != nil {
+						return nil, nil, decodeErr
+					}
+					argBytes[hashInd] = byteVal
+				} else {
+					byteVal, decodeErr := hex.DecodeString("00")
+					if decodeErr != nil {
+						return nil, nil, decodeErr
+					}
+					argBytes[hashInd] = byteVal
 				}
-				argBytes = append(argBytes, byteVal)
-			} else {
-				byteVal, decodeErr := hex.DecodeString("00")
-				if decodeErr != nil {
-					return nil, nil, decodeErr
-				}
-				argBytes = append(argBytes, byteVal)
 			}
 		case "bytes":
-			finalArg = []byte(arg)
-			argBytes = append(argBytes, []byte(arg))
+			finalArg = arg
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = arg
+			}
 		case "bytes8":
 			var data [8]byte
-			copy(data[:], arg)
+			copy(data[:], common.LeftPadBytes(arg, 8))
 			finalArg = data
-			argBytes = append(argBytes, []byte(arg))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = arg
+			}
 		case "bytes16":
 			var data [16]byte
-			copy(data[:], arg)
+			copy(data[:], common.LeftPadBytes(arg, 16))
 			finalArg = data
-			argBytes = append(argBytes, []byte(arg))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = arg
+			}
 		case "bytes24":
 			var data [24]byte
-			copy(data[:], arg)
+			copy(data[:], common.LeftPadBytes(arg, 24))
 			finalArg = data
-			argBytes = append(argBytes, []byte(arg))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = arg
+			}
 		case "bytes4":
 			var data [4]byte
-			copy(data[:], arg)
+			copy(data[:], common.LeftPadBytes(arg, 4))
 			finalArg = data
-			argBytes = append(argBytes, []byte(arg))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = arg
+			}
 		case "bytes32":
 			var data [32]byte
-			copy(data[:], arg)
+			copy(data[:], common.LeftPadBytes(arg, 32))
 			finalArg = data
-			argBytes = append(argBytes, []byte(arg))
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = arg
+			}
 		default :
-			finalArg = []byte(arg)
-			argBytes = append(argBytes, []byte(arg))
+			finalArg = arg
+			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
+				argBytes[hashInd] = arg
+			}
 		}
 		args = append(args, finalArg)
 	}

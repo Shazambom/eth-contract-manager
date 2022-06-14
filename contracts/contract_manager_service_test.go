@@ -2,7 +2,9 @@ package contracts
 
 import (
 	"contract-service/signing"
+	"contract-service/storage"
 	"contract-service/utils"
+	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/stretchr/testify/assert"
@@ -740,39 +742,72 @@ var fullTestAbi =`[
 
 
 func TestContractManagerService_UnpackArgs(t *testing.T) {
-	someArgs := []string{"someArgs", "oh man these are so", "random", "wow", "so cool"}
-	byteArrs := [][]byte{}
-	for _, str := range someArgs {
-		byteArrs = append(byteArrs, []byte(str))
-	}
 	s := signing.NewSigningService()
 	key, _, keyErr := s.GenerateKey()
 	assert.Nil(t, keyErr)
-	_, signature, signingErr := s.SignTxn(key, byteArrs)
-	assert.Nil(t, signingErr)
-
 
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(testAbi))
 	assert.Nil(t, err)
 	nonce, nonceErr := utils.GetNonce()
 	assert.Nil(t, nonceErr)
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs([]string{nonce, "2", "100", signature}, "mint", abiDef)
+	nonceDecoded, decodeErr := hex.DecodeString(nonce[2:])
+	assert.Nil(t, decodeErr)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", [][]byte{nonceDecoded, []byte("3"), []byte("1")}, abiDef.Methods["mint"], storage.Function{Arguments: []storage.Argument{
+		{Name: "nonce", Type: "bytes16"},
+		{Name: "msg.sender", Type: "address"},
+		{Name: "numberOfTokens", Type: "uint256"},
+		{Name: "transactionNumber", Type: "uint256"},
+	}})
 	assert.Nil(t, argumentsErr)
+	_, signature, signingErr := s.SignTxn(key, byteArgs)
+	assert.Nil(t, signingErr)
+	decodedSignature, decodeSigErr := hex.DecodeString(signature[2:])
+	assert.Nil(t, decodeSigErr)
 	fmt.Println(byteArgs)
+
+	arguments = append(arguments, decodedSignature)
+	fmt.Println(arguments)
+	fmt.Printf("Signature byte length: %d\n", len(decodedSignature))
+
+
 
 	packed, packingErr := abiDef.Pack("mint", arguments...)
 	assert.Nil(t, packingErr)
 	fmt.Println(packed)
+	fmt.Printf("Length of packed bytes: %d\n", len(packed))
+
+	fmt.Println(string(packed))
+	packedHex := hex.EncodeToString(packed)
+	fmt.Println(packedHex)
+
+	decodedSig, sigDecodeErr := hex.DecodeString(packedHex[:8])
+	assert.Nil(t, sigDecodeErr)
+	fmt.Println(decodedSig)
+	method, methodErr := abiDef.MethodById(decodedSig)
+	assert.Nil(t, methodErr)
+
+	decodedData, decodedErr := hex.DecodeString(packedHex[8:])
+	assert.Nil(t, decodedErr)
+
+	unpacked, unpackErr := method.Inputs.Unpack(decodedData)
+	assert.Nil(t, unpackErr)
+	fmt.Println(unpacked)
+
+	unpackedSignature := hex.EncodeToString((unpacked[len(unpacked) - 1]).([]byte))
+	fmt.Println(unpackedSignature)
+	fmt.Println(signature)
+	assert.Equal(t, signature[2:], unpackedSignature)
+
 }
 
 func TestContractManagerService_UnpackArgsA(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsA", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsA"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsA", arguments...)
@@ -780,12 +815,12 @@ func TestContractManagerService_UnpackArgsA(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsB(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsB", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsB"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsB", arguments...)
@@ -793,12 +828,12 @@ func TestContractManagerService_UnpackArgsB(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsC(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsC", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsC"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsC", arguments...)
@@ -806,12 +841,12 @@ func TestContractManagerService_UnpackArgsC(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsD(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsD", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsD"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsD", arguments...)
@@ -819,12 +854,12 @@ func TestContractManagerService_UnpackArgsD(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsE(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsE", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsE"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsE", arguments...)
@@ -832,12 +867,12 @@ func TestContractManagerService_UnpackArgsE(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsF(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsF", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsF"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsF", arguments...)
@@ -845,12 +880,12 @@ func TestContractManagerService_UnpackArgsF(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsG(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsG", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsG"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	fmt.Println(arguments)
@@ -859,12 +894,12 @@ func TestContractManagerService_UnpackArgsG(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsH(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsH", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsH"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsH", arguments...)
@@ -872,12 +907,12 @@ func TestContractManagerService_UnpackArgsH(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsI(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsI", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsI"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsI", arguments...)
@@ -885,12 +920,12 @@ func TestContractManagerService_UnpackArgsI(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsJ(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsJ", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsJ"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsJ", arguments...)
@@ -898,12 +933,12 @@ func TestContractManagerService_UnpackArgsJ(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsK(t *testing.T) {
-	args := []string{"10"}
+	args := [][]byte{[]byte("10")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsK", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsK"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsK", arguments...)
@@ -911,12 +946,12 @@ func TestContractManagerService_UnpackArgsK(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsL(t *testing.T) {
-	args := []string{"0xE2A7f3ADb39C5b11Acb35c02A80ea977D67E1ebc"}
+	args := [][]byte{[]byte("0xE2A7f3ADb39C5b11Acb35c02A80ea977D67E1ebc")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsL", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsL"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsL", arguments...)
@@ -924,12 +959,12 @@ func TestContractManagerService_UnpackArgsL(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsM(t *testing.T) {
-	args := []string{"true"}
+	args := [][]byte{[]byte("true")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsM", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsM"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsM", arguments...)
@@ -937,12 +972,12 @@ func TestContractManagerService_UnpackArgsM(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsN(t *testing.T) {
-	args := []string{"abcdefghijklmnopqrstuvwx"}
+	args := [][]byte{[]byte("abcdefghijklmnopqrstuvwx")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsN", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsN"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsN", arguments...)
@@ -950,12 +985,12 @@ func TestContractManagerService_UnpackArgsN(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsO(t *testing.T) {
-	args := []string{"Hey whats up nerds"}
+	args := [][]byte{[]byte("Hey whats up nerds")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsO", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsO"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsO", arguments...)
@@ -963,12 +998,12 @@ func TestContractManagerService_UnpackArgsO(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsP(t *testing.T) {
-	args := []string{"12345678"}
+	args := [][]byte{[]byte("12345678")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsP", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsP"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsP", arguments...)
@@ -976,12 +1011,12 @@ func TestContractManagerService_UnpackArgsP(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsQ(t *testing.T) {
-	args := []string{"abcdefghijklmnop"}
+	args := [][]byte{[]byte("abcdefghijklmnop")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsQ", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsQ"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsQ", arguments...)
@@ -989,12 +1024,12 @@ func TestContractManagerService_UnpackArgsQ(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsR(t *testing.T) {
-	args := []string{"1234"}
+	args := [][]byte{[]byte("1234")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsR", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsR"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsR", arguments...)
@@ -1002,12 +1037,12 @@ func TestContractManagerService_UnpackArgsR(t *testing.T) {
 	fmt.Println(packed)
 }
 func TestContractManagerService_UnpackArgsS(t *testing.T) {
-	args := []string{"abcdefghijklmnopqrstuvwxyz123456"}
+	args := [][]byte{[]byte("abcdefghijklmnopqrstuvwxyz123456")}
 	cms := &ContractManagerService{}
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, "TestInputsS", abiDef)
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsS"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	packed, packingErr := abiDef.Pack("TestInputsS", arguments...)

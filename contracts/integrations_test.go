@@ -8,16 +8,19 @@ import (
 	"contract-service/utils"
 	"encoding/hex"
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"math/big"
+	"strings"
 	"testing"
 )
 
 func TestStore_And_TransactionFlow(t *testing.T) {
+	ctx := context.Background()
 
 	rds := storage.NewRedisWriter(storage.RedisConfig{
 		Endpoint: "localhost:6379",
@@ -42,50 +45,99 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 
 	contract := &pb.Contract{
 		Address:      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-		Abi:          "[\n\t{\n\t\t\"inputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"address payable\",\n\t\t\t\t\"name\": \"artieCharAddress\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"internalType\": \"address payable\",\n\t\t\t\t\"name\": \"withdrawAddress\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"internalType\": \"address\",\n\t\t\t\t\"name\": \"signer\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"nonpayable\",\n\t\t\"type\": \"constructor\"\n\t},\n\t{\n\t\t\"anonymous\": false,\n\t\t\"inputs\": [\n\t\t\t{\n\t\t\t\t\"indexed\": true,\n\t\t\t\t\"internalType\": \"address\",\n\t\t\t\t\"name\": \"previousOwner\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"indexed\": true,\n\t\t\t\t\"internalType\": \"address\",\n\t\t\t\t\"name\": \"newOwner\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t}\n\t\t],\n\t\t\"name\": \"OwnershipTransferred\",\n\t\t\"type\": \"event\"\n\t},\n\t{\n\t\t\"anonymous\": false,\n\t\t\"inputs\": [\n\t\t\t{\n\t\t\t\t\"indexed\": false,\n\t\t\t\t\"internalType\": \"address\",\n\t\t\t\t\"name\": \"to\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"indexed\": false,\n\t\t\t\t\"internalType\": \"uint256\",\n\t\t\t\t\"name\": \"amount\",\n\t\t\t\t\"type\": \"uint256\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"indexed\": false,\n\t\t\t\t\"internalType\": \"uint256\",\n\t\t\t\t\"name\": \"current\",\n\t\t\t\t\"type\": \"uint256\"\n\t\t\t}\n\t\t],\n\t\t\"name\": \"Season01Mint\",\n\t\t\"type\": \"event\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"MAX_TOKEN\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"uint256\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"uint256\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"PURCHASE_LIMIT\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"uint256\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"uint256\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"artie\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"contract Artie\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"current\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"uint256\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"uint256\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"bytes16\",\n\t\t\t\t\"name\": \"nonce\",\n\t\t\t\t\"type\": \"bytes16\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"internalType\": \"uint256\",\n\t\t\t\t\"name\": \"numberOfTokens\",\n\t\t\t\t\"type\": \"uint256\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"internalType\": \"uint256\",\n\t\t\t\t\"name\": \"transactionNumber\",\n\t\t\t\t\"type\": \"uint256\"\n\t\t\t},\n\t\t\t{\n\t\t\t\t\"internalType\": \"bytes\",\n\t\t\t\t\"name\": \"signature\",\n\t\t\t\t\"type\": \"bytes\"\n\t\t\t}\n\t\t],\n\t\t\"name\": \"mint\",\n\t\t\"outputs\": [],\n\t\t\"stateMutability\": \"payable\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"owner\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"address\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"price\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"uint256\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"uint256\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"renounceOwnership\",\n\t\t\"outputs\": [],\n\t\t\"stateMutability\": \"nonpayable\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"saleStarted\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"bool\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"bool\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"address\",\n\t\t\t\t\"name\": \"signer\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t}\n\t\t],\n\t\t\"name\": \"setSignerAddress\",\n\t\t\"outputs\": [],\n\t\t\"stateMutability\": \"nonpayable\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"address payable\",\n\t\t\t\t\"name\": \"givenWithdrawalAddress\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t}\n\t\t],\n\t\t\"name\": \"setWithdrawalAddress\",\n\t\t\"outputs\": [],\n\t\t\"stateMutability\": \"nonpayable\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"signingAddress\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"address\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"startSale\",\n\t\t\"outputs\": [],\n\t\t\"stateMutability\": \"nonpayable\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"stopSale\",\n\t\t\"outputs\": [],\n\t\t\"stateMutability\": \"nonpayable\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"address\",\n\t\t\t\t\"name\": \"newOwner\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t}\n\t\t],\n\t\t\"name\": \"transferOwnership\",\n\t\t\"outputs\": [],\n\t\t\"stateMutability\": \"nonpayable\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"bytes16\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"bytes16\"\n\t\t\t}\n\t\t],\n\t\t\"name\": \"usedNonces\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"bool\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"bool\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"withdrawEth\",\n\t\t\"outputs\": [],\n\t\t\"stateMutability\": \"nonpayable\",\n\t\t\"type\": \"function\"\n\t},\n\t{\n\t\t\"inputs\": [],\n\t\t\"name\": \"withdrawalAddress\",\n\t\t\"outputs\": [\n\t\t\t{\n\t\t\t\t\"internalType\": \"address payable\",\n\t\t\t\t\"name\": \"\",\n\t\t\t\t\"type\": \"address\"\n\t\t\t}\n\t\t],\n\t\t\"stateMutability\": \"view\",\n\t\t\"type\": \"function\"\n\t}\n]",
-		Functions:    []string{"mint"},
+		Abi: testAbi,
+		HashableFunctions:    &pb.Functions{Functions: map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "msg.sender", Type: "address"},
+			{Name: "numberOfTokens", Type: "uint256"},
+			{Name: "transactionNumber", Type: "uint256"},
+		}}}},
 		MaxMintable:  1000,
 		MaxIncrement: 3,
 		Owner:        "Owner",
 	}
 	
-	storeErr, storeErrr := contractClient.Client.Store(context.Background(), contract)
+	storeErr, storeErrr := contractClient.Client.Store(ctx, contract)
+	if storeErrr != nil {
+		fmt.Println(storeErrr)
+	}
 	assert.Nil(t, storeErrr)
 	assert.NotNil(t, storeErr)
 	assert.Equal(t, "", storeErr.Err)
 
-	newKey, keyErr := signerClient.SigningClient.GenerateNewKey(context.Background(), &pb.KeyManagementRequest{ContractAddress: contract.Address})
+	newKey, keyErr := signerClient.SigningClient.GenerateNewKey(ctx, &pb.KeyManagementRequest{ContractAddress: contract.Address})
 	assert.Nil(t, keyErr)
 	fmt.Println("New signing public address: " + newKey.PublicKey)
 
 	nonce, nonceErr := utils.GetNonce()
 	assert.Nil(t, nonceErr)
+	nonceBytes, decodeErr := hex.DecodeString(nonce[2:])
+	assert.Nil(t, decodeErr)
 
 	msgSender := "0x0fA37C622C7E57A06ba12afF48c846F42241F7F0"
 
-	transactionResponse, transactionErr := transactionClient.Client.ConstructTransaction(context.Background(), &pb.TransactionRequest{
+	transactionResponse, transactionErr := transactionClient.Client.ConstructTransaction(ctx, &pb.TransactionRequest{
 		MessageSender: msgSender,
 		FunctionName:  "mint",
 		NumRequested:  3,
-		Args:          []string{nonce, "3", "1", ""},
+		Args:          [][]byte{nonceBytes, []byte("3"), []byte("1")},
 		Contract:      contract,
 	})
+	if transactionErr != nil {
+		fmt.Println(transactionErr)
+	}
 	assert.Nil(t, transactionErr)
 	assert.NotNil(t, transactionResponse)
 	assert.Equal(t, "", transactionResponse.Err)
 
 
-	token, tokenErr := rds.Get(context.Background(), msgSender, contract.Address)
+	token, tokenErr := rds.Get(ctx, msgSender, contract.Address)
 	assert.Nil(t, tokenErr)
+	fmt.Printf("Token: %+v\n", token)
+	args := [][]byte{nonceBytes, common.HexToAddress(msgSender).Bytes(), common.LeftPadBytes(big.NewInt(int64(3)).Bytes(),32), common.LeftPadBytes(big.NewInt(int64(1)).Bytes(),32)}
 
+	fmt.Println(len(args))
+	for _, arg := range args {
+		fmt.Println(string(arg))
+	}
+
+	signer := signing.Signer{}
+
+	builtHash := signer.WrapHash(crypto.Keccak256Hash(args...)).String()
+	assert.Equal(t, builtHash, token.Hash)
+	fmt.Println("Hashes:")
 	fmt.Println(token.Hash)
-	decoded, decodeErr := hex.DecodeString(nonce[2:])
-	assert.Nil(t, decodeErr)
+	fmt.Println(builtHash)
 
-	fmt.Println(crypto.Keccak256Hash(
-		decoded,
-		//common.HexToAddress(msgSender).Bytes(),
-		common.LeftPadBytes(big.NewInt(int64(3)).Bytes(),32),
-		common.LeftPadBytes(big.NewInt(int64(1)).Bytes(),32),
-		))
+
+	resp, signatureErr := signerClient.SigningClient.SignTxn(ctx, &pb.SignatureRequest{ContractAddress: contract.Address, Args: args})
+	assert.Nil(t, signatureErr)
+	fmt.Printf("%+v\n", resp)
+
+
+	funcDef, abiErr := abi.JSON(strings.NewReader(testAbi))
+	assert.Nil(t, abiErr)
+
+	packedHex := hex.EncodeToString(token.ABIPackedTxn)
+	fmt.Println(packedHex)
+
+	decodedSig, sigDecodeErr := hex.DecodeString(packedHex[:8])
+	assert.Nil(t, sigDecodeErr)
+	fmt.Println(decodedSig)
+	method, methodErr := funcDef.MethodById(decodedSig)
+	assert.Nil(t, methodErr)
+
+	decodedData, decodedErr := hex.DecodeString(packedHex[8:])
+	assert.Nil(t, decodedErr)
+
+	unpacked, unpackErr := method.Inputs.Unpack(decodedData)
+	assert.Nil(t, unpackErr)
+	fmt.Println(unpacked)
+
+	unpackedSignature := hex.EncodeToString((unpacked[len(unpacked) - 1]).([]byte))
+	fmt.Println(unpackedSignature)
+	fmt.Println(resp.Signature[2:])
+	assert.Equal(t, resp.Signature[2:], unpackedSignature)
+
 }
+

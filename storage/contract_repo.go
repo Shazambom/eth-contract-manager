@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	pb "contract-service/proto"
+	"encoding/json"
 	"errors"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -21,21 +22,28 @@ type ContractRepo struct {
 type Contract struct {
 	Address string `json:"Address"`
 	ABI string `json:"ABI"`
-	Functions []*string `json:"Functions"`
+	Functions Functions `json:"HashableFunctions"`
 	MaxMintable int `json:"MaxMintable"`
 	MaxIncrement int `json:"MaxIncrement"`
 	ContractOwner string `json:"ContractOwner"`
 }
 
 func (c *Contract) ToRPC() (*pb.Contract) {
-	functions := []string{}
-	for _, str := range c.Functions {
-		functions = append(functions, *str)
+	functions := &pb.Functions{Functions: map[string]*pb.Function{}}
+	for key, val := range c.Functions.Functions {
+		function := &pb.Function{}
+		for _, arg := range val.Arguments {
+			function.Arguments = append(function.Arguments, &pb.Argument{
+				Name: arg.Name,
+				Type: arg.Type,
+			})
+		}
+		functions.Functions[key] = function
 	}
 	return &pb.Contract{
 		Address:      c.Address,
 		Abi:          c.ABI,
-		Functions: 	  functions,
+		HashableFunctions: 	  functions,
 		MaxMintable:  int64(c.MaxMintable),
 		MaxIncrement: int64(c.MaxIncrement),
 		Owner:        c.ContractOwner,
@@ -43,9 +51,16 @@ func (c *Contract) ToRPC() (*pb.Contract) {
 }
 
 func (c *Contract) FromRPC(contract *pb.Contract) () {
-	functions := []*string{}
-	for _, str := range contract.Functions {
-		functions = append(functions, &str)
+	functions := Functions{Functions: map[string]Function{}}
+	for key, val := range contract.HashableFunctions.Functions {
+		function := Function{}
+		for _, arg := range val.Arguments {
+			function.Arguments = append(function.Arguments, Argument{
+				Name: arg.Name,
+				Type: arg.Type,
+			})
+		}
+		functions.Functions[key] = function
 	}
 	c.Address = contract.Address
 	c.ABI = contract.Abi
@@ -173,6 +188,10 @@ func (cr *ContractRepo) GetContractsByOwner(ctx context.Context, owner string) (
 func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) error {
 	maxMint := strconv.FormatInt(int64(contract.MaxMintable), 10)
 	maxIncr := strconv.FormatInt(int64(contract.MaxIncrement), 10)
+	funcStr, marshalErr := json.Marshal(contract.Functions)
+	if marshalErr != nil {
+		return marshalErr
+	}
 	_, err := cr.db.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(cr.tableName),
 		Item: map[string]*dynamodb.AttributeValue{
@@ -183,7 +202,7 @@ func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) 
 				S: aws.String(contract.ABI),
 			},
 			"Functions": {
-				SS: contract.Functions,
+				S: aws.String(string(funcStr)),
 			},
 			"MaxMintable": {
 				N: aws.String(maxMint),

@@ -17,10 +17,23 @@ message AddressOwner {
     string owner = 2;
 }
 
+message Argument {
+    string name = 1;
+    string type = 2;
+}
+
+message Function {
+    repeated Argument arguments = 1;
+}
+
+message Functions {
+    map<string, Function> functions = 1;
+}
+
 message Contract {
     string address = 1;
     string abi = 2;
-    repeated string functions = 3;
+    Functions hashable_functions = 3;
     int64 max_mintable = 4;
     int64 max_increment = 5;
     string owner = 6;
@@ -30,7 +43,7 @@ message TransactionRequest {
     string message_sender = 1;
     string function_name = 2;
     int64 num_requested = 3;
-    repeated string args = 4;
+    repeated bytes args = 4;
     Contract contract = 5;
 }
 

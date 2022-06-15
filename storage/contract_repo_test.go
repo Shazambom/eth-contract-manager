@@ -11,7 +11,7 @@ import (
 )
 
 var awsCfg = &aws.Config{
-	Endpoint:         aws.String("dynamo:8000"),
+	Endpoint:         aws.String("localhost:8000"),
 	Region:           aws.String("us-east-1"),
 	Credentials:      credentials.NewStaticCredentials("xxx","yyy", ""),
 	DisableSSL:       aws.Bool(true),

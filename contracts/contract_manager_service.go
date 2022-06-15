@@ -220,7 +220,9 @@ func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]by
 				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
 			}
 		case "address" :
-			finalArg = arg
+			var data [160]byte
+			copy(data[:], arg)
+			finalArg = data
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = arg
 			}

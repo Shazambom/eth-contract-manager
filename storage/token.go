@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 )
 
 type Token struct {
@@ -54,4 +55,31 @@ func (token *Token) Gzip() (string, error) {
 		return "", closeErr
 	}
 	return base64.StdEncoding.EncodeToString(buff.Bytes()), nil
+}
+
+func (token *Token) UnZip(payload []byte) error {
+	data, decodeErr := base64.StdEncoding.DecodeString(string(payload))
+	if decodeErr != nil {
+		return decodeErr
+	}
+	gz, err := gzip.NewReader(bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	unzipped, unzipErr := ioutil.ReadAll(gz)
+	if unzipErr != nil {
+		return unzipErr
+	}
+	var tok Token
+	marshalErr := json.Unmarshal(unzipped, &tok)
+	if marshalErr != nil {
+		return marshalErr
+	}
+	token.ContractAddress = tok.ContractAddress
+	token.UserAddress = tok.UserAddress
+	token.ABI = tok.ABI
+	token.Hash = tok.Hash
+	token.ABIPackedTxn = tok.ABIPackedTxn
+	token.NumRequested = tok.NumRequested
+	return nil
 }

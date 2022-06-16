@@ -28,6 +28,30 @@ type Contract struct {
 	ContractOwner string `json:"ContractOwner"`
 }
 
+type dynamoContract struct {
+	Address string `json:"Address"`
+	ABI string `json:"ABI"`
+	Functions string `json:"HashableFunctions"`
+	MaxMintable int `json:"MaxMintable"`
+	MaxIncrement int `json:"MaxIncrement"`
+	ContractOwner string `json:"ContractOwner"`
+}
+
+func (c *Contract) fromDynamo(dContract *dynamoContract) error {
+	functions := Functions{}
+	err := json.Unmarshal([]byte(dContract.Functions), &functions)
+	if err != nil {
+		return err
+	}
+	c.Address = dContract.Address
+	c.ABI = dContract.ABI
+	c.Functions = functions
+	c.MaxMintable = dContract.MaxMintable
+	c.MaxIncrement = dContract.MaxIncrement
+	c.ContractOwner = dContract.ContractOwner
+	return nil
+}
+
 func (c *Contract) ToRPC() (*pb.Contract) {
 	functions := &pb.Functions{Functions: map[string]*pb.Function{}}
 	for key, val := range c.Functions.Functions {
@@ -151,10 +175,14 @@ func (cr *ContractRepo) GetContract(ctx context.Context, contractAddress string)
 		return nil, errors.New("could not find key for contract: " + contractAddress)
 	}
 	contract := Contract{}
+	dContract := dynamoContract{}
 
-	unmarshalErr := dynamodbattribute.UnmarshalMap(result.Item, &contract)
-	if unmarshalErr != nil {
+
+	if unmarshalErr := dynamodbattribute.UnmarshalMap(result.Item, &dContract); unmarshalErr != nil {
 		return nil, unmarshalErr
+	}
+	if convertErr := contract.fromDynamo(&dContract); convertErr != nil {
+		return nil, convertErr
 	}
 	return &contract, nil
 }
@@ -174,9 +202,14 @@ func (cr *ContractRepo) GetContractsByOwner(ctx context.Context, owner string) (
 	contracts := []*Contract{}
 	for _, item := range result.Items {
 		contract := Contract{}
-		marshalErr := dynamodbattribute.UnmarshalMap(item, &contract)
+		dContract := dynamoContract{}
+		marshalErr := dynamodbattribute.UnmarshalMap(item, &dContract)
 		if marshalErr != nil {
 			log.Println(marshalErr.Error())
+			continue
+		}
+		if convertErr := contract.fromDynamo(&dContract); convertErr != nil {
+			log.Println(convertErr.Error())
 			continue
 		}
 		contracts = append(contracts, &contract)
@@ -201,7 +234,7 @@ func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) 
 			"ABI": {
 				S: aws.String(contract.ABI),
 			},
-			"Functions": {
+			"HashableFunctions": {
 				S: aws.String(string(funcStr)),
 			},
 			"MaxMintable": {
@@ -224,10 +257,11 @@ func (cr *ContractRepo) DeleteContract(ctx context.Context, contractAddress, own
 			"Address": {
 				S: aws.String(contractAddress),
 			},
-			"ContractOwner": {
-				S: aws.String(owner),
-			},
 		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":owner": {S: aws.String(owner)},
+		},
+		ConditionExpression: aws.String("ContractOwner = :owner"),
 	})
 	return err
 }

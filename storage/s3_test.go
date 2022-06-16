@@ -1,39 +1,27 @@
 package storage
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/stretchr/testify/assert"
 	"path"
 	"testing"
 )
 
-var cfg = &aws.Config{
-	Endpoint: aws.String("localhost:4566"),
-	Region: aws.String("us-east-1"),
-	Credentials: credentials.NewStaticCredentials("xxx", "yyy", ""),
-	S3ForcePathStyle: aws.Bool(true),
-	DisableSSL: aws.Bool(true),
-}
-var testBucketName = "bucket"
-
 
 func TestNewS3(t *testing.T) {
-	s3, err := NewS3(cfg, testBucketName)
+	s3, err := NewS3(s3cfg, testBucketName)
 	assert.Nil(t, err)
 	assert.IsType(t, &S3{}, s3)
 }
 
 func TestS3_InitBucket(t *testing.T) {
-	s3, err := NewS3(cfg, testBucketName)
+	s3, err := NewS3(s3cfg, testBucketName)
 	assert.Nil(t, err)
 	assert.Nil(t, s3.InitBucket())
 }
 
 func TestS3_StoreToken(t *testing.T) {
-	s3, err := NewS3(cfg, testBucketName)
+	s3, err := NewS3(s3cfg, testBucketName)
 	assert.Nil(t, err)
-	assert.Nil(t, s3.InitBucket())
 	token := NewToken(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"0x0fA37C622C7E57A06ba12afF48c846F42241F7F0",
@@ -46,9 +34,8 @@ func TestS3_StoreToken(t *testing.T) {
 }
 
 func TestS3_GetToken(t *testing.T) {
-	s3, err := NewS3(cfg, testBucketName)
+	s3, err := NewS3(s3cfg, testBucketName)
 	assert.Nil(t, err)
-	assert.Nil(t, s3.InitBucket())
 	token := NewToken(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"0x0fA37C622C7E57A06ba12afF48c846F42241F7F0",
@@ -66,9 +53,8 @@ func TestS3_GetToken(t *testing.T) {
 
 
 func TestS3_ListKeys(t *testing.T) {
-	s3, err := NewS3(cfg, testBucketName)
+	s3, err := NewS3(s3cfg, testBucketName)
 	assert.Nil(t, err)
-	assert.Nil(t, s3.InitBucket())
 	token := NewToken(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"0x0fA37C622C7E57A06ba12afF48c846F42241F7F0",

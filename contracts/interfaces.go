@@ -10,6 +10,7 @@ type ContractTransactionHandler interface {
 	BuildTransaction(ctx context.Context, msgSender, functionName string, numRequested int, arguments [][]byte, contract *storage.Contract) (*storage.Token, error)
 	StoreToken(ctx context.Context, token *storage.Token, contract *storage.Contract) error
 	CheckIfValidRequest(ctx context.Context, msgSender string, numRequested int, contract *storage.Contract) error
+	Close()
 }
 
 type ContractManagerHandler interface {

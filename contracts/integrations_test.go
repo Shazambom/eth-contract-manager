@@ -31,6 +31,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 		Password: "pass",
 		CountKey: "Count",
 	})
+	defer rds.Close()
 
 	s3Bucket, bucketErr := storage.NewS3(&aws.Config{
 		Endpoint: aws.String("localhost:4566"),

@@ -319,3 +319,7 @@ func (cms *ContractManagerService) CheckIfValidRequest(ctx context.Context, msgS
 	}
 	return cms.writer.GetReservedCount(ctx, numRequested, contract.MaxMintable, contract.Address)
 }
+
+func (cms *ContractManagerService) Close() {
+	cms.writer.Close()
+}

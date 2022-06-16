@@ -34,6 +34,7 @@ func NewTransactionServer(port int, opts []grpc.ServerOption, handler ContractTr
 	go func() {
 		log.Println("TransactionService serving clients now")
 		defer server.Server.GracefulStop()
+		defer server.TransactionManager.Close()
 		serviceErr := server.Server.Serve(lis)
 		server.Channel <- serviceErr.Error()
 	}()

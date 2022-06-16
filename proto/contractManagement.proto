@@ -55,40 +55,6 @@ message Contracts {
     repeated Contract contracts = 1;
 }
 
-message SignatureRequest {
-    repeated bytes args = 1;
-    string contract_address = 2;
-}
-
-message BatchSignatureRequest {
-    repeated SignatureRequest signature_requests = 1;
-}
-
-message SignatureResponse {
-    string signature = 1;
-    string hash = 2;
-}
-
-message BatchSignatureResponse {
-    repeated SignatureResponse signature_responses = 1;
-}
-
-message KeyManagementRequest {
-    string contract_address = 1;
-}
-
-message KeyManagementResponse {
-    string contract_address = 1;
-    string public_key = 2;
-}
-
-service SigningService {
-    rpc SignTxn(SignatureRequest) returns (SignatureResponse) {}
-    rpc BatchSignTxn(BatchSignatureRequest) returns (BatchSignatureResponse) {}
-    rpc GenerateNewKey(KeyManagementRequest) returns (KeyManagementResponse) {}
-    rpc DeleteKey(KeyManagementRequest) returns (KeyManagementResponse) {}
-    rpc GetKey(KeyManagementRequest) returns (KeyManagementResponse) {}
-}
 
 service TransactionService {
     rpc GetContract(Address) returns(Contract) {}

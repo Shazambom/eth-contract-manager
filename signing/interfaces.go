@@ -10,4 +10,6 @@ type SigningService interface {
 	VerifyPublicKey(signature []byte, hash common.Hash, key *ecdsa.PrivateKey) error
 	GenerateKey() (privateKey, address string, err error)
 	PrivateKeyToAddress(privateKey string) (address string, err error)
+	AddressToEIP55(address string) (string, error)
+	Verify(message, signature, address string) (err error)
 }

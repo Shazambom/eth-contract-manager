@@ -121,7 +121,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 		fmt.Println(string(arg))
 	}
 
-	signer := signing.Signer{}
+	signer := signing.SignatureHandler{}
 
 	//Checking the hashes to ensure the signer hashes the transaction properly
 	builtHash := signer.WrapHash(crypto.Keccak256Hash(args...)).String()

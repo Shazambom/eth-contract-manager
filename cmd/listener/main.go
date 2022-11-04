@@ -3,45 +3,39 @@ package main
 import (
 	"contract-service/listener"
 	"contract-service/storage"
-	"contract-service/utils"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"log"
-	"os"
 )
-//TODO Clean up env variable management & struct initialization. Move struct initialization to wire
+//TODO Add Ping route to container to check if service is alive
 func main() {
-	fmt.Println("Getting environment variables")
-	var awsEndpoint, awsRegion, awsKeyId, awsSecret, sslEnabled, bucketName string
-	envErr := utils.GetEnvVarBatch([]string{"AWS_ENDPOINT", "AWS_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "SSL_ENABLED", "BUCKET_NAME"}, &awsEndpoint, &awsRegion, &awsKeyId, &awsSecret, &sslEnabled, &bucketName)
+	log.Println("Getting environment variables")
+	cfg, envErr := NewConfig()
 	if envErr != nil {
 		log.Fatal(envErr)
 	}
-	fmt.Println("Building S3 connection")
-	var s3, s3Err = storage.NewS3(&aws.Config{
-		Endpoint: aws.String(awsEndpoint),
-		Region: aws.String(awsRegion),
-		Credentials: credentials.NewStaticCredentials(awsKeyId, awsSecret, ""),
+	log.Printf("Loading Listener with Config: \n%+v\n", cfg)
+	handler, handlerInitErr := listener.InitializeListenerService(&aws.Config{
+		Endpoint: aws.String(cfg.AWSEndpoint),
+		Region: aws.String(cfg.AWSRegion),
+		Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
 		S3ForcePathStyle: aws.Bool(true),
-		DisableSSL: aws.Bool(sslEnabled != "true"),
-	}, bucketName)
-	if s3Err != nil {
-		log.Fatal(s3Err)
+		DisableSSL: aws.Bool(!cfg.SSLEnabled),
+	}, cfg.TableName)
+	if handlerInitErr != nil {
+		log.Fatal(handlerInitErr)
 	}
-	if s3initErr := s3.InitBucket(); s3initErr != nil {
-		log.Fatal(s3initErr)
+	log.Println("Prepping handler dependencies")
+	if handlerDepErr := handler.InitService(); handlerDepErr != nil {
+		log.Fatal(handlerDepErr)
 	}
-	fmt.Println("Connecting to Redis client")
-	rds := storage.NewRedisListener(os.Getenv("RDS_ENDPOINT"), os.Getenv("RDS_PWD"))
+	rds := storage.NewRedisListener(storage.RedisConfig{Endpoint: cfg.RedisEndpoint, Password: cfg.RedisPassword})
 	defer rds.Close()
-	fmt.Println("Initializing events")
+	log.Println("Initializing events")
 	if initErr := rds.InitEvents(); initErr != nil {
-		fmt.Println(initErr)
+		log.Fatal(initErr)
 	}
-	fmt.Println("Building EventHandlerService")
-	handler := listener.NewEventHandlerService(s3)
-	fmt.Println("Starting to listen to Redis event stream")
+	log.Println("Starting to listen to Redis event stream")
 	if err := rds.Listen(handler.Handle); err != nil {
 		log.Fatal(err)
 	}

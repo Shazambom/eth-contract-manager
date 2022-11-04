@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
@@ -13,20 +14,26 @@ type Redis struct {
 	countKey string
 }
 
-func NewRedisWriter(endpoint, pwd, countKey string) RedisWriter {
+type RedisConfig struct {
+	Endpoint string
+	Password string
+	CountKey string
+}
+
+func NewRedisWriter(config RedisConfig) RedisWriter {
 	return &Redis{client: redis.NewClient(&redis.Options{
-		Addr:     endpoint,
-		Password: pwd,
+		Addr:     config.Endpoint,
+		Password: config.Password,
 		DB:       0,
 	}),
-	countKey: countKey,
+	countKey: config.CountKey,
 	}
 }
 
-func NewRedisListener(endpoint, pwd string) RedisListener {
+func NewRedisListener(config RedisConfig) RedisListener {
 	return &Redis{client: redis.NewClient(&redis.Options{
-		Addr: endpoint,
-		Password: pwd,
+		Addr: config.Endpoint,
+		Password: config.Password,
 		DB: 0,
 	})}
 }
@@ -86,6 +93,18 @@ func (r *Redis) IncrementCounter(ctx context.Context, numRequested, maxMintable 
 		return errors.New("NFTs are sold out, for now")
 	}
 	return nil
+}
+
+func (r *Redis) Get(ctx context.Context, address, contractAddress string) (*Token, error) {
+	val, err := r.client.Get(ctx, r.getUserKey(contractAddress, address)).Result()
+	if err != nil {
+		return nil, err
+	}
+	token := Token{}
+	if unmarshalErr := json.Unmarshal([]byte(val), &token); unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+	return &token, nil
 }
 
 func (r *Redis) Ping() (string, error) {

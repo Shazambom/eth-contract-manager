@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"log"
+	"strings"
 )
 
 type PrivateKeyRepo struct {
@@ -15,13 +17,47 @@ type PrivateKeyRepo struct {
 }
 
 type ContractKeyPair struct {
-	ContractAddress string
-	PrivateKey string
+	ContractAddress string `json:"ContractAddress"`
+	PrivateKey string `json:"PrivateKey"`
 }
 
 
-func NewPrivateKeyRepository(tableName string, sess *session.Session, cfg ...*aws.Config) PrivateKeyRepository {
-	return &PrivateKeyRepo{dynamodb.New(sess, cfg...), tableName}
+func NewPrivateKeyRepository(tableName string, cfg ...*aws.Config) (PrivateKeyRepository, error) {
+	sess, err := session.NewSession(cfg...)
+	if err != nil {
+		return nil, err
+	}
+	repo := &PrivateKeyRepo{dynamodb.New(sess, cfg...), tableName}
+	return repo, nil
+}
+
+func (pkr *PrivateKeyRepo) Init() error {
+	log.Println("Attempting to Create Table: " + pkr.tableName)
+	_, createErr := pkr.db.CreateTable(&dynamodb.CreateTableInput{
+		AttributeDefinitions:   []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("ContractAddress"),
+				AttributeType: aws.String("S"),
+			},
+		},
+		KeySchema:              []*dynamodb.KeySchemaElement{
+			{AttributeName: aws.String("ContractAddress"), KeyType: aws.String("HASH")},
+		},
+		TableName:              aws.String(pkr.tableName),
+		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+			ReadCapacityUnits: aws.Int64(5),
+			WriteCapacityUnits:  aws.Int64(5),
+		},
+	})
+	log.Println("Table Creation request complete")
+
+	if createErr == nil || strings.Contains(createErr.Error(), dynamodb.ErrCodeTableAlreadyExistsException) ||
+		strings.Contains(createErr.Error(), dynamodb.ErrCodeGlobalTableAlreadyExistsException) ||
+		strings.Contains(createErr.Error(), dynamodb.ErrCodeResourceInUseException) {
+		return nil
+	}
+
+	return createErr
 }
 
 // GetPrivateKey ---- WARNING ---- NEVER CALL OUTSIDE OF SIGNER SERVICE DUE TO SECURITY CONCERNS

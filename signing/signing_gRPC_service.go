@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"log"
 	"net"
 )
@@ -30,6 +31,8 @@ func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService,
 	server := &SignerRPCService{Server: grpc.NewServer(opts...), Channel: make(chan string), Handler: handler, Repo: repo}
 	pb.RegisterSigningServiceServer(server.Server, server)
 	log.Println("GRPC Server registered")
+	grpc_health_v1.RegisterHealthServer(server.Server, server)
+	log.Println("HealthServer registered")
 	go func() {
 		log.Println("SignerServer serving clients now")
 		defer server.Server.GracefulStop()
@@ -107,4 +110,14 @@ func (sRPC *SignerRPCService) GetKey(ctx context.Context, req *pb.KeyManagementR
 		return nil, err
 	}
 	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: address}, nil
+}
+
+func (sRPC *SignerRPCService) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
+	log.Println("Health check ping to: " + req.Service)
+	return &grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_SERVING}, nil
+}
+
+func (sRPC *SignerRPCService) Watch(req *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
+	log.Println("Health watcher for: " + req.Service)
+	return server.SendMsg(&grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_SERVING})
 }

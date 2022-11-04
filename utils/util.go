@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -53,6 +54,7 @@ func GetEnvVarBatch(keys []string, vars... *string) error {
 	for i, key := range keys {
 		val, keyErr := GetEnvVar(key)
 		if keyErr != nil {
+			log.Println("Key: " + key)
 			return keyErr
 		}
 		*vars[i] = val

@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+
+option go_package = "./;pb";
+
+
+message Address {
+    string address = 1;
+}
+
+message Owner {
+    string owner = 1;
+}
+
+message AddressOwner {
+    string address = 1;
+    string owner = 2;
+}
+
+message Argument {
+    string name = 1;
+    string type = 2;
+}
+
+message Function {
+    repeated Argument arguments = 1;
+}
+
+message Functions {
+    map<string, Function> functions = 1;
+}
+
+message Contract {
+    string address = 1;
+    string abi = 2;
+    Functions hashable_functions = 3;
+    int64 max_mintable = 4;
+    int64 max_increment = 5;
+    string owner = 6;
+}
+
+message TransactionRequest {
+    string message_sender = 1;
+    string function_name = 2;
+    int64 num_requested = 3;
+    repeated bytes args = 4;
+    Contract contract = 5;
+}
+
+message Error {
+    string err = 1;
+}
+
+message Contracts {
+    repeated Contract contracts = 1;
+}
+
+
+service TransactionService {
+    rpc GetContract(Address) returns(Contract) {}
+    rpc ConstructTransaction(TransactionRequest) returns (Error) {}
+}
+
+service ContractManagement {
+    rpc Get(Address) returns(Contract) {}
+    rpc Store(Contract) returns (Error) {}
+    rpc Delete(AddressOwner) returns (Error) {}
+    rpc List(Owner) returns (Contracts) {}
+}

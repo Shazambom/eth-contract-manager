@@ -15,6 +15,7 @@ type RedisWriter interface {
 	MarkAddressAsUsed(ctx context.Context, token *Token) error
 	GetQueueNum(ctx context.Context) (int64, error)
 	IncrementCounter(ctx context.Context, numRequested, maxMintable int, contractAddress string) error
+	Get(ctx context.Context, address, contractAddres string) (*Token, error)
 	Ping() (string, error)
 	Close()
 }
@@ -23,4 +24,13 @@ type PrivateKeyRepository interface {
 	GetPrivateKey(ctx context.Context, contractAddress string) (string, error)
 	UpsertPrivateKey(ctx context.Context, contractAddress, key string) error
 	DeletePrivateKey(ctx context.Context, contractAddress string) error
+	Init() error
+}
+
+type ContractRepository interface {
+	GetContract(ctx context.Context, contractAddress string) (*Contract, error)
+	UpsertContract(ctx context.Context, contract *Contract) error
+	DeleteContract(ctx context.Context, contractAddress, owner string) error
+	GetContractsByOwner(ctx context.Context, owner string) ([]*Contract, error)
+	Init() error
 }

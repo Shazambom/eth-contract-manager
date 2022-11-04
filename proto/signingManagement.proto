@@ -30,6 +30,7 @@ message KeyManagementResponse {
     string public_key = 2;
 }
 
+
 service SigningService {
     rpc SignTxn(SignatureRequest) returns (SignatureResponse) {}
     rpc BatchSignTxn(BatchSignatureRequest) returns (BatchSignatureResponse) {}

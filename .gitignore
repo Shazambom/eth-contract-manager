@@ -60,3 +60,11 @@ cmd/captcha/captcha
 cmd/listener/listener
 .DS_Store
 report*
+
+cmd/api/api
+cmd/contract-manager/contract-manager
+cmd/listner/listener
+cmd/signer/signer
+cmd/transaction-manager/transaction-manager
+
+coverage.*

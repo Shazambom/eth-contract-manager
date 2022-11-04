@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
@@ -13,26 +14,33 @@ type Redis struct {
 	countKey string
 }
 
-func NewRedisWriter(endpoint, pwd, countKey string) RedisWriter {
+type RedisConfig struct {
+	Endpoint string
+	Password string
+	CountKey string
+}
+
+func NewRedisWriter(config RedisConfig) RedisWriter {
 	return &Redis{client: redis.NewClient(&redis.Options{
-		Addr:     endpoint,
-		Password: pwd,
+		Addr:     config.Endpoint,
+		Password: config.Password,
 		DB:       0,
 	}),
-	countKey: countKey,
+	countKey: config.CountKey,
 	}
 }
 
-func NewRedisListener(endpoint, pwd string) RedisListener {
+func NewRedisListener(config RedisConfig) RedisListener {
 	return &Redis{client: redis.NewClient(&redis.Options{
-		Addr: endpoint,
-		Password: pwd,
+		Addr: config.Endpoint,
+		Password: config.Password,
 		DB: 0,
 	})}
 }
 
-func (r *Redis) VerifyValidAddress(ctx context.Context, address string) error {
-	rdsRes, rdsErr := r.client.Get(ctx, address).Result()
+
+func (r *Redis) VerifyValidAddress(ctx context.Context, address, contractAddress string) error {
+	rdsRes, rdsErr := r.client.Get(ctx, r.getUserKey(contractAddress, address)).Result()
 	if rdsErr != nil && rdsErr != redis.Nil {
 		fmt.Println(rdsErr.Error())
 		return rdsErr
@@ -45,8 +53,8 @@ func (r *Redis) VerifyValidAddress(ctx context.Context, address string) error {
 	return nil
 }
 
-func (r *Redis) GetReservedCount(ctx context.Context, avatarsRequested, maxMintable int) (error) {
-	rdsCountResp, rdsCountErr := r.client.Get(ctx, r.countKey).Result()
+func (r *Redis) GetReservedCount(ctx context.Context, numRequested, maxMintable int, contractAddress string) error {
+	rdsCountResp, rdsCountErr := r.client.Get(ctx, r.getCountKey(contractAddress)).Result()
 	if rdsCountErr != nil && rdsCountErr != redis.Nil {
 		return rdsCountErr
 	}
@@ -57,23 +65,27 @@ func (r *Redis) GetReservedCount(ctx context.Context, avatarsRequested, maxMinta
 		if strconvErr != nil {
 			return strconvErr
 		}
-		if count + avatarsRequested > maxMintable {
+		if count + numRequested > maxMintable {
 			return errors.New("the amount of tokens requested exceeds capacity")
 		}
 		return nil
 	}
 }
 
-func (r *Redis) MarkAddressAsUsed(ctx context.Context, address, token string) error {
-	return r.client.Set(ctx, address, token, 0).Err()
+func (r *Redis) MarkAddressAsUsed(ctx context.Context, token *Token) error {
+	str, err := token.ToString()
+	if err != nil {
+		return err
+	}
+	return r.client.Set(ctx, r.getUserKey(token.ContractAddress, token.UserAddress), str, 0).Err()
 }
 
 func (r *Redis) GetQueueNum(ctx context.Context) (int64, error) {
 	return r.client.DBSize(ctx).Result()
 }
 
-func (r *Redis) IncrementCounter(ctx context.Context, avatarsRequested, maxMintable int) error {
-	newMax, rdsCountIncrErr := r.client.IncrBy(ctx, r.countKey, int64(avatarsRequested)).Result()
+func (r *Redis) IncrementCounter(ctx context.Context, numRequested, maxMintable int, contractAddress string) error {
+	newMax, rdsCountIncrErr := r.client.IncrBy(ctx, r.getCountKey(contractAddress), int64(numRequested)).Result()
 	if rdsCountIncrErr != nil {
 		return rdsCountIncrErr
 	}
@@ -81,6 +93,18 @@ func (r *Redis) IncrementCounter(ctx context.Context, avatarsRequested, maxMinta
 		return errors.New("NFTs are sold out, for now")
 	}
 	return nil
+}
+
+func (r *Redis) Get(ctx context.Context, address, contractAddress string) (*Token, error) {
+	val, err := r.client.Get(ctx, r.getUserKey(contractAddress, address)).Result()
+	if err != nil {
+		return nil, err
+	}
+	token := Token{}
+	if unmarshalErr := json.Unmarshal([]byte(val), &token); unmarshalErr != nil {
+		return nil, unmarshalErr
+	}
+	return &token, nil
 }
 
 func (r *Redis) Ping() (string, error) {
@@ -112,4 +136,12 @@ func (r *Redis) Listen(handler func(string, string, error) error) error{
 		}
 
 	}
+}
+
+func (r *Redis) getCountKey(contractAddress string) string {
+	return r.countKey + "_" + contractAddress
+}
+
+func (r *Redis) getUserKey(contractAddress, address string) string {
+	return contractAddress + "_" + address
 }

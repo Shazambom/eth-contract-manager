@@ -241,5 +241,5 @@ var SigningService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "signingEvent.proto",
+	Metadata: "proto/signingManagement.proto",
 }

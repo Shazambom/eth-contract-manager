@@ -2,7 +2,7 @@ version: '3.8'
 services:
   redis:
     image: "redis:alpine"
-    command: redis-server
+    command: redis-server --requirepass pass
     ports:
       - "6379:6379"
     volumes:
@@ -13,7 +13,7 @@ services:
       timeout: 3s
       retries: 30
     networks:
-      - backend
+      - contract-service
 
   s3:
     image: localstack/localstack:latest-arm64
@@ -24,17 +24,48 @@ services:
       DATA_DIR: /tmp/localstack/data
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       CacheControl: no-cache
+      USE_SSL: false
     ports:
       - "4566:4566"
     networks:
-      - backend
+      - contract-service
     volumes:
       - ./aws:/docker-entrypoint-initaws.d
     healthcheck:
-      test: ["CMD", "bash", "-c", "awslocal s3 ls"]
+      test: [ "CMD", "awslocal", "s3api", "wait", "bucket-exists", "--bucket", "tokens" ]
       interval: 5s
       timeout: 10s
       start_period: 10s
+
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb
+    hostname: dynamodb
+    restart: always
+    ports:
+      - "8000:8000"
+    networks:
+      - contract-service
+    volumes:
+      - ./dynamodb:/home/dynamodb/data
+
+  aws-cli:
+    image: amazon/aws-cli
+    depends_on:
+      - dynamodb
+    environment:
+      AWS_ENDPOINT: --endpoint-url=http://dynamodb:8000
+    entrypoint: /bin/sh -c
+    volumes:
+      - ./dynamodb:/dynamodb
+    networks:
+      - contract-service
+    command: >
+      '
+      for script_name in /dynamodb/*.sh; do
+        sh $$script_name
+      done
+      '
 
   listener:
     build:
@@ -42,8 +73,8 @@ services:
       dockerfile: ./build/listener/Dockerfile
     restart: always
     environment:
-      RDS_ENDPOINT: "redis:6379"
-      RDS_PWD: ""
+      REDIS_ENDPOINT: "redis:6379"
+      REDIS_PASSWORD: "pass"
       AWS_ENDPOINT: "s3:4566"
       AWS_REGION: "us-east-1"
       BUCKET_NAME: "tokens"
@@ -51,13 +82,104 @@ services:
       AWS_SECRET_ACCESS_KEY: "yyy"
       SSL_ENABLED: "false"
     networks:
-      - backend
+      - contract-service
     depends_on:
       redis:
         condition: service_healthy
       s3:
         condition: service_healthy
 
+  signer:
+    build:
+      context: ..
+      dockerfile: ./build/signer/Dockerfile
+    restart: always
+    environment:
+      TABLE_NAME: "ContractPrivateKeyRepository"
+      AWS_ENDPOINT: "dynamodb:8000"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "xxx"
+      AWS_SECRET_ACCESS_KEY: "yyy"
+      SSL_ENABLED: "false"
+      PORT: 8081
+    ports:
+      - "8081:8081"
+    networks:
+      - contract-service
+    depends_on:
+      dynamodb:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=localhost:8081", "-v", "-service=SignerService"]
+      interval: 5s
+      timeout: 10s
+      start_period: 1s
+
+  contract-manager:
+    build:
+      context: ..
+      dockerfile: ./build/contract-manager/Dockerfile
+    restart: always
+    environment:
+      TABLE_NAME: "Contracts"
+      AWS_ENDPOINT: "dynamodb:8000"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "xxx"
+      AWS_SECRET_ACCESS_KEY: "yyy"
+      SSL_ENABLED: "false"
+      PORT: 8082
+    ports:
+      - "8082:8082"
+    networks:
+      - contract-service
+    depends_on:
+      dynamodb:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=localhost:8082", "-v", "-service=ContractManagementService"]
+      interval: 5s
+      timeout: 10s
+      start_period: 1s
+
+  transaction-manager:
+    build:
+      context: ..
+      dockerfile: ./build/transaction-manager/Dockerfile
+    restart: always
+    environment:
+      REDIS_ENDPOINT: "redis:6379"
+      REDIS_PASSWORD: "pass"
+      TABLE_NAME: "Contracts"
+      SIGNER_HOST: "signer:8081"
+      AWS_REGION: "us-east-1"
+      AWS_ENDPOINT: "dynamodb:8000"
+      AWS_ACCESS_KEY_ID: "xxx"
+      AWS_SECRET_ACCESS_KEY: "yyy"
+      SSL_ENABLED: "false"
+      PORT: 8083
+      COUNT_KEY: "Count"
+    ports:
+      - "8083:8083"
+    networks:
+      - contract-service
+    depends_on:
+      dynamodb:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      signer:
+        condition: service_healthy
+      listener:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=localhost:8083", "-v", "-service=TransactionService"]
+      interval: 5s
+      timeout: 10s
+      start_period: 1s
+
+#TODO Spin up API service for external APIs
+
+
 
 networks:
-  backend: {}
+  contract-service: {}

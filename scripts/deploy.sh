@@ -8,5 +8,5 @@ trap cleanup EXIT
 
 ./scripts/build.sh
 
-docker-compose -f ./deployments/docker-compose.yaml up  --force-recreate --build & sls offline --httpPort 8001
+docker-compose -f ./deployments/docker-compose.yaml up --force-recreate --build
 

@@ -1,52 +1,42 @@
 package main
 
 import (
+	"contract-service/listener"
 	"contract-service/storage"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"log"
-	"os"
 )
-
-var s3, s3Err = storage.NewS3(&aws.Config{
-	Endpoint: aws.String(os.Getenv("AWS_ENDPOINT")),
-	Region: aws.String(os.Getenv("AWS_REGION")),
-	Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"), ""),
-	S3ForcePathStyle: aws.Bool(true),
-	DisableSSL: aws.Bool(os.Getenv("SSL_ENABLED") != "true"),
-},
-os.Getenv("BUCKET_NAME"))
-
-func EventHandler(key, val string, err error) error {
-	if err != nil {
-		fmt.Printf("Error with redis stream: %s\n", err)
-	}
-	fmt.Printf("key: %s\nval:%s\n", key, val)
-	storeErr := s3.StorePair(key, val)
-	if storeErr != nil {
-		fmt.Printf("Error storing in s3: %s\n", storeErr.Error())
-	}
-	return nil
-}
-
-
+//TODO Add Ping route to container to check if service is alive
 func main() {
-	if s3Err != nil {
-		log.Fatal(s3Err)
+	log.Println("Getting environment variables")
+	cfg, envErr := NewConfig()
+	if envErr != nil {
+		log.Fatal(envErr)
 	}
-	if s3initErr := s3.InitBucket(); s3initErr != nil {
-		log.Fatal(s3initErr)
+	log.Printf("Loading Listener with Config: \n%+v\n", cfg)
+	handler, handlerInitErr := listener.InitializeListenerService(&aws.Config{
+		Endpoint: aws.String(cfg.AWSEndpoint),
+		Region: aws.String(cfg.AWSRegion),
+		Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		S3ForcePathStyle: aws.Bool(true),
+		DisableSSL: aws.Bool(!cfg.SSLEnabled),
+	}, cfg.TableName)
+	if handlerInitErr != nil {
+		log.Fatal(handlerInitErr)
 	}
-	fmt.Println("Connecting to Redis client")
-	rds := storage.NewRedisListener(os.Getenv("RDS_ENDPOINT"), os.Getenv("RDS_PWD"))
+	log.Println("Prepping handler dependencies")
+	if handlerDepErr := handler.InitService(); handlerDepErr != nil {
+		log.Fatal(handlerDepErr)
+	}
+	rds := storage.NewRedisListener(storage.RedisConfig{Endpoint: cfg.RedisEndpoint, Password: cfg.RedisPassword})
 	defer rds.Close()
-	fmt.Println("Initializing events")
+	log.Println("Initializing events")
 	if initErr := rds.InitEvents(); initErr != nil {
-		fmt.Println(initErr)
+		log.Fatal(initErr)
 	}
-	fmt.Println("Starting to listen to Redis event stream")
-	if err := rds.Listen(EventHandler); err != nil {
+	log.Println("Starting to listen to Redis event stream")
+	if err := rds.Listen(handler.Handle); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -39,6 +40,27 @@ func GetEnvVars() (rdsEndpoint, rdsPwd, secretKey, gURL, siteKey, projectID, con
 		abi, maxCount, maxIncr,
 		strings.Split(os.Getenv("VALID_ORIGINS"), "~"),
 		envErr
+}
+
+func GetEnvVar(key string) (string, error) {
+	val := os.Getenv(key)
+	if val == "" {
+		return "", errors.New("environment variable doesn't exist")
+	}
+	return val, nil
+}
+
+func GetEnvVarBatch(keys []string, vars... *string) error {
+	for i, key := range keys {
+		val, keyErr := GetEnvVar(key)
+		if keyErr != nil {
+			log.Println("Key: " + key)
+			return keyErr
+		}
+		*vars[i] = val
+
+	}
+	return nil
 }
 
 func StrInStrList(str string, strList []string) bool {

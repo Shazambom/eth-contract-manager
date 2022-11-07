@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"log"
-	"strconv"
 	"strings"
 )
 
@@ -23,8 +22,6 @@ type Contract struct {
 	Address string `json:"Address"`
 	ABI string `json:"ABI"`
 	Functions Functions `json:"HashableFunctions"`
-	MaxMintable int `json:"MaxMintable"`
-	MaxIncrement int `json:"MaxIncrement"`
 	ContractOwner string `json:"ContractOwner"`
 }
 
@@ -32,8 +29,6 @@ type dynamoContract struct {
 	Address string `json:"Address"`
 	ABI string `json:"ABI"`
 	Functions string `json:"HashableFunctions"`
-	MaxMintable int `json:"MaxMintable"`
-	MaxIncrement int `json:"MaxIncrement"`
 	ContractOwner string `json:"ContractOwner"`
 }
 
@@ -46,8 +41,6 @@ func (c *Contract) fromDynamo(dContract *dynamoContract) error {
 	c.Address = dContract.Address
 	c.ABI = dContract.ABI
 	c.Functions = functions
-	c.MaxMintable = dContract.MaxMintable
-	c.MaxIncrement = dContract.MaxIncrement
 	c.ContractOwner = dContract.ContractOwner
 	return nil
 }
@@ -68,8 +61,6 @@ func (c *Contract) ToRPC() (*pb.Contract) {
 		Address:      c.Address,
 		Abi:          c.ABI,
 		HashableFunctions: 	  functions,
-		MaxMintable:  int64(c.MaxMintable),
-		MaxIncrement: int64(c.MaxIncrement),
 		Owner:        c.ContractOwner,
 	}
 }
@@ -89,8 +80,6 @@ func (c *Contract) FromRPC(contract *pb.Contract) () {
 	c.Address = contract.Address
 	c.ABI = contract.Abi
 	c.Functions = functions
-	c.MaxMintable = int(contract.MaxMintable)
-	c.MaxIncrement = int(contract.MaxIncrement)
 	c.ContractOwner = contract.Owner
 }
 
@@ -219,8 +208,6 @@ func (cr *ContractRepo) GetContractsByOwner(ctx context.Context, owner string) (
 
 
 func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) error {
-	maxMint := strconv.FormatInt(int64(contract.MaxMintable), 10)
-	maxIncr := strconv.FormatInt(int64(contract.MaxIncrement), 10)
 	funcStr, marshalErr := json.Marshal(contract.Functions)
 	if marshalErr != nil {
 		return marshalErr
@@ -236,12 +223,6 @@ func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) 
 			},
 			"HashableFunctions": {
 				S: aws.String(string(funcStr)),
-			},
-			"MaxMintable": {
-				N: aws.String(maxMint),
-			},
-			"MaxIncrement": {
-				N: aws.String(maxIncr),
 			},
 			"ContractOwner": {
 				S: aws.String(contract.ContractOwner),

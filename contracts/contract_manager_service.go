@@ -54,7 +54,7 @@ func (cms *ContractManagerService) ListContracts(ctx context.Context, owner stri
 	return cms.repo.GetContractsByOwner(ctx, owner)
 }
 
-func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, numRequested int, arguments [][]byte, contract *storage.Contract) (*storage.Token, error) {
+func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, arguments [][]byte, contract *storage.Contract) (*storage.Token, error) {
 	log.Println("Unpacking ABI")
 	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
 	if abiErr != nil {
@@ -84,7 +84,7 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 	}
 
 	log.Println("Token created")
-	return storage.NewToken(contract.Address, msgSender, signature.Hash, contract.ABI, packed, numRequested), nil
+	return storage.NewToken(contract.Address, msgSender, signature.Hash, contract.ABI, packed), nil
 }
 
 
@@ -299,9 +299,6 @@ func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storag
 	err := cms.writer.MarkAddressAsUsed(ctx, token)
 	if err != nil {
 		return err
-	}
-	if token.NumRequested < 1 {
-		return nil
 	}
 	return cms.writer.IncrementCounter(ctx, token.NumRequested, contract.MaxMintable, contract.Address)
 }

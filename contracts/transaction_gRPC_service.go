@@ -50,25 +50,20 @@ func (ts *TransactionRPCService) GetContract(ctx context.Context, address *pb.Ad
 	return contract.ToRPC(), nil
 }
 
-func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *pb.TransactionRequest) (*pb.Error, error) {
+func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *pb.TransactionRequest) (*pb.Transaction, error) {
 	contract := &storage.Contract{}
 	contract.FromRPC(req.Contract)
 
-	isNotValidErr := ts.TransactionManager.CheckIfValidRequest(ctx, req.MessageSender, int(req.NumRequested), contract)
-	if isNotValidErr != nil {
-		return &pb.Error{Err: isNotValidErr.Error()}, isNotValidErr
-	}
-
-	token, tokenErr := ts.TransactionManager.BuildTransaction(ctx, req.MessageSender, req.FunctionName, int(req.NumRequested), req.Args, contract)
+	token, tokenErr := ts.TransactionManager.BuildTransaction(ctx, req.MessageSender, req.FunctionName, req.Args, contract)
 	if tokenErr != nil {
-		return &pb.Error{Err: tokenErr.Error()}, tokenErr
+		return nil, tokenErr
 	}
 
 	storeErr := ts.TransactionManager.StoreToken(ctx, token, contract)
 	if storeErr != nil {
-		return &pb.Error{Err: storeErr.Error()}, storeErr
+		return nil, storeErr
 	}
-	return &pb.Error{Err: ""}, nil
+	return token.ToRPC(), nil
 }
 
 func (ts *TransactionRPCService) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {

@@ -30,6 +30,15 @@ message KeyManagementResponse {
     string public_key = 2;
 }
 
+message SignatureVerificationRequest {
+    string message = 1;
+    string signature = 2;
+    string address = 3;
+}
+
+message SignatureVerificationResponse {
+    bool success = 1;
+}
 
 service SigningService {
     rpc SignTxn(SignatureRequest) returns (SignatureResponse) {}
@@ -37,4 +46,5 @@ service SigningService {
     rpc GenerateNewKey(KeyManagementRequest) returns (KeyManagementResponse) {}
     rpc DeleteKey(KeyManagementRequest) returns (KeyManagementResponse) {}
     rpc GetKey(KeyManagementRequest) returns (KeyManagementResponse) {}
+    rpc Verify(SignatureVerificationRequest) returns (SignatureVerificationResponse) {}
 }

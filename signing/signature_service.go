@@ -51,7 +51,10 @@ func (s *SignatureHandler) SignTxn(signingKey string, args [][]byte) (string, st
 	return "0x"+hex.EncodeToString(hash.Bytes()), "0x"+hex.EncodeToString(signature), nil
 }
 
-func (s *SignatureHandler) VerifyPublicKey(signature []byte, hash common.Hash, key *ecdsa.PrivateKey) error {
+func (s *SignatureHandler) VerifyFromHash(signature []byte, hash common.Hash, key *ecdsa.PrivateKey) error {
+	if signature[crypto.RecoveryIDOffset] == 27 || signature[crypto.RecoveryIDOffset] == 28 {
+		signature[crypto.RecoveryIDOffset] -= 27 // Transform yellow paper V from 27/28 to 0/1
+	}
 	sigPublicKeyECDSA, verErr := crypto.SigToPub(hash.Bytes(), signature)
 	if verErr != nil {
 		return verErr

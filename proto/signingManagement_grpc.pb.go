@@ -23,6 +23,7 @@ type SigningServiceClient interface {
 	GenerateNewKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error)
 	DeleteKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error)
 	GetKey(ctx context.Context, in *KeyManagementRequest, opts ...grpc.CallOption) (*KeyManagementResponse, error)
+	Verify(ctx context.Context, in *SignatureVerificationRequest, opts ...grpc.CallOption) (*SignatureVerificationResponse, error)
 }
 
 type signingServiceClient struct {
@@ -78,6 +79,15 @@ func (c *signingServiceClient) GetKey(ctx context.Context, in *KeyManagementRequ
 	return out, nil
 }
 
+func (c *signingServiceClient) Verify(ctx context.Context, in *SignatureVerificationRequest, opts ...grpc.CallOption) (*SignatureVerificationResponse, error) {
+	out := new(SignatureVerificationResponse)
+	err := c.cc.Invoke(ctx, "/SigningService/Verify", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SigningServiceServer is the server API for SigningService service.
 // All implementations must embed UnimplementedSigningServiceServer
 // for forward compatibility
@@ -87,6 +97,7 @@ type SigningServiceServer interface {
 	GenerateNewKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error)
 	DeleteKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error)
 	GetKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error)
+	Verify(context.Context, *SignatureVerificationRequest) (*SignatureVerificationResponse, error)
 	mustEmbedUnimplementedSigningServiceServer()
 }
 
@@ -108,6 +119,9 @@ func (UnimplementedSigningServiceServer) DeleteKey(context.Context, *KeyManageme
 }
 func (UnimplementedSigningServiceServer) GetKey(context.Context, *KeyManagementRequest) (*KeyManagementResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetKey not implemented")
+}
+func (UnimplementedSigningServiceServer) Verify(context.Context, *SignatureVerificationRequest) (*SignatureVerificationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Verify not implemented")
 }
 func (UnimplementedSigningServiceServer) mustEmbedUnimplementedSigningServiceServer() {}
 
@@ -212,6 +226,24 @@ func _SigningService_GetKey_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SigningService_Verify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignatureVerificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SigningServiceServer).Verify(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SigningService/Verify",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SigningServiceServer).Verify(ctx, req.(*SignatureVerificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SigningService_ServiceDesc is the grpc.ServiceDesc for SigningService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -238,6 +270,10 @@ var SigningService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetKey",
 			Handler:    _SigningService_GetKey_Handler,
+		},
+		{
+			MethodName: "Verify",
+			Handler:    _SigningService_Verify_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

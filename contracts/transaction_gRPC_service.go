@@ -66,6 +66,22 @@ func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *
 	return token.ToRPC(), nil
 }
 
+func (ts *TransactionRPCService) GetTransactions(ctx context.Context, address *pb.Address) (*pb.Transactions, error) {
+	tokens, err := ts.TransactionManager.GetTransactions(ctx, address.Address)
+	if err != nil {
+		return nil, err
+	}
+	txns := &pb.Transactions{Transactions: []*pb.Transaction{}}
+	for _, token := range tokens {
+		txns.Transactions = append(txns.Transactions, token.ToRPC())
+	}
+	return txns, nil
+}
+
+func (ts *TransactionRPCService) CompleteTransaction(ctx context.Context, req *pb.CompleteTransactionRequest) (*pb.Empty, error) {
+	return &pb.Empty{}, ts.TransactionManager.DeleteTransaction(ctx, req.Address, req.Hash)
+}
+
 func (ts *TransactionRPCService) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
 	log.Println("Health check ping to: " + req.Service)
 	return &grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_SERVING}, nil

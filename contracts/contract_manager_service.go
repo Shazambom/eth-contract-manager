@@ -16,9 +16,9 @@ import (
 )
 
 type ContractManagerService struct {
-	writer storage.RedisWriter
 	repo storage.ContractRepository
 	signer pb.SigningServiceClient
+	txnRepo storage.TransactionRepository
 }
 
 type ABIArg struct {
@@ -26,11 +26,11 @@ type ABIArg struct {
 	Name string `json:"name"`
 }
 
-func NewContractTransactionHandler(writer storage.RedisWriter, repo storage.ContractRepository, signer pb.SigningServiceClient) ContractTransactionHandler {
+func NewContractTransactionHandler(repo storage.ContractRepository, signer pb.SigningServiceClient, txnRepo storage.TransactionRepository) ContractTransactionHandler {
 	return &ContractManagerService{
-		writer: writer,
 		repo:   repo,
 		signer: signer,
+		txnRepo: txnRepo,
 	}
 }
 
@@ -296,27 +296,16 @@ func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]by
 }
 
 func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Token, contract *storage.Contract) error {
-	err := cms.writer.MarkAddressAsUsed(ctx, token)
-	if err != nil {
-		return err
-	}
-	return cms.writer.IncrementCounter(ctx, token.NumRequested, contract.MaxMintable, contract.Address)
+	return cms.txnRepo.StoreTransaction(ctx, *token)
 }
 
-func (cms *ContractManagerService) CheckIfValidRequest(ctx context.Context, msgSender string, numRequested int, contract *storage.Contract) error{
-	if numRequested > contract.MaxIncrement {
-		return errors.New("max increment exceeded with request")
-	}
-	invalid := cms.writer.VerifyValidAddress(ctx, msgSender, contract.Address)
-	if invalid != nil {
-		return invalid
-	}
-	if numRequested < 1 {
-		return nil
-	}
-	return cms.writer.GetReservedCount(ctx, numRequested, contract.MaxMintable, contract.Address)
+func (cms *ContractManagerService) GetTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+	return cms.txnRepo.GetTransactions(ctx, address)
+}
+
+func (cms *ContractManagerService) DeleteTransaction(ctx context.Context, address, hash string) error {
+	return cms.txnRepo.DeleteTransaction(ctx, address, hash)
 }
 
 func (cms *ContractManagerService) Close() {
-	cms.writer.Close()
 }

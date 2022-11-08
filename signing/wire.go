@@ -13,3 +13,8 @@ func InitializeSigningServer(host int, opts []grpc.ServerOption, tableName strin
 	wire.Build(NewSignerServer, NewSigningService, storage.NewPrivateKeyRepository)
 	return &SignerRPCService{}, nil
 }
+
+func InitializeVerifierServer(host int, opts []grpc.ServerOption) (*VerifierRPCService, error) {
+	wire.Build(NewVerifierServer, NewSigningService)
+	return &VerifierRPCService{}, nil
+}

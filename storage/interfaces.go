@@ -20,6 +20,12 @@ type RedisWriter interface {
 	Close()
 }
 
+type TransactionRepository interface {
+	StoreTransaction(ctx context.Context, token Token) error
+	GetTransactions(ctx context.Context, address string) ([]*Token, error)
+	DeleteTransaction(ctx context.Context, address, hash string) error
+}
+
 type PrivateKeyRepository interface {
 	GetPrivateKey(ctx context.Context, contractAddress string) (string, error)
 	UpsertPrivateKey(ctx context.Context, contractAddress, key string) error

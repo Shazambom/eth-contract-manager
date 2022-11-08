@@ -61,8 +61,8 @@ message CompleteTransactionRequest {
     string hash = 2;
 }
 
-message Error {
-    string err = 1;
+message Empty {
+
 }
 
 message Contracts {
@@ -74,12 +74,12 @@ service TransactionService {
     rpc GetContract(Address) returns(Contract) {}
     rpc ConstructTransaction(TransactionRequest) returns (Transaction) {}
     rpc GetTransactions(Address) returns(Transactions) {}
-    rpc CompleteTransaction(CompleteTransactionRequest) returns (Error) {}
+    rpc CompleteTransaction(CompleteTransactionRequest) returns (Empty) {}
 }
 
 service ContractManagement {
     rpc Get(Address) returns(Contract) {}
-    rpc Store(Contract) returns (Error) {}
-    rpc Delete(AddressOwner) returns (Error) {}
+    rpc Store(Contract) returns (Empty) {}
+    rpc Delete(AddressOwner) returns (Empty) {}
     rpc List(Owner) returns (Contracts) {}
 }

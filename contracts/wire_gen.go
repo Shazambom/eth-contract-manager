@@ -8,24 +8,26 @@ package contracts
 import (
 	"contract-service/proto"
 	"contract-service/storage"
-	"github.com/aws/aws-sdk-go/aws"
 	"google.golang.org/grpc"
 )
 
 // Injectors from wire.go:
 
-func InitializeContractTransactionHandler(rdsCfg storage.RedisConfig, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (ContractTransactionHandler, error) {
-	redisWriter := storage.NewRedisWriter(rdsCfg)
-	contractRepository, err := storage.NewContractRepository(tableName, cfg...)
+func InitializeContractTransactionHandler(client pb.SigningServiceClient, contractConfig storage.ContractConfig, transactionConfig storage.TransactionConfig) (ContractTransactionHandler, error) {
+	contractRepository, err := storage.NewContractRepository(contractConfig)
 	if err != nil {
 		return nil, err
 	}
-	contractTransactionHandler := NewContractTransactionHandler(redisWriter, contractRepository, client)
+	transactionRepository, err := storage.NewTransactionRepo(transactionConfig)
+	if err != nil {
+		return nil, err
+	}
+	contractTransactionHandler := NewContractTransactionHandler(contractRepository, client, transactionRepository)
 	return contractTransactionHandler, nil
 }
 
-func InitializeContractManagerHandler(tableName string, cfg ...*aws.Config) (ContractManagerHandler, error) {
-	contractRepository, err := storage.NewContractRepository(tableName, cfg...)
+func InitializeContractManagerHandler(contractConfig storage.ContractConfig) (ContractManagerHandler, error) {
+	contractRepository, err := storage.NewContractRepository(contractConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -33,8 +35,8 @@ func InitializeContractManagerHandler(tableName string, cfg ...*aws.Config) (Con
 	return contractManagerHandler, nil
 }
 
-func InitializeTransactionServer(port int, opts []grpc.ServerOption, rdsCfg storage.RedisConfig, client pb.SigningServiceClient, tableName string, cfg ...*aws.Config) (*TransactionRPCService, error) {
-	contractTransactionHandler, err := InitializeContractTransactionHandler(rdsCfg, client, tableName, cfg...)
+func InitializeTransactionServer(port int, opts []grpc.ServerOption, client pb.SigningServiceClient, contractConfig storage.ContractConfig, transactionConfig storage.TransactionConfig) (*TransactionRPCService, error) {
+	contractTransactionHandler, err := InitializeContractTransactionHandler(client, contractConfig, transactionConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +47,8 @@ func InitializeTransactionServer(port int, opts []grpc.ServerOption, rdsCfg stor
 	return transactionRPCService, nil
 }
 
-func InitializeContractServer(port int, opts []grpc.ServerOption, tableName string, cfg ...*aws.Config) (*ContractRPCService, error) {
-	contractManagerHandler, err := InitializeContractManagerHandler(tableName, cfg...)
+func InitializeContractServer(port int, opts []grpc.ServerOption, contractConfig storage.ContractConfig) (*ContractRPCService, error) {
+	contractManagerHandler, err := InitializeContractManagerHandler(contractConfig)
 	if err != nil {
 		return nil, err
 	}

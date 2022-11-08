@@ -112,15 +112,6 @@ func (sRPC *SignerRPCService) GetKey(ctx context.Context, req *pb.KeyManagementR
 	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: address}, nil
 }
 
-func (sRPC *SignerRPCService) Verify(ctx context.Context, req *pb.SignatureVerificationRequest) (*pb.SignatureVerificationResponse, error) {
-	log.Printf("Verifying\ncontext: %+v\nmessage:%s\nsignature%s\naddress:%s\n", ctx, req.Message, req.Signature, req.Address)
-	if err := sRPC.Handler.Verify(req.Message, req.Signature, req.Address); err != nil {
-		log.Println(err)
-		return &pb.SignatureVerificationResponse{Success: false}, err
-	}
-	return &pb.SignatureVerificationResponse{Success: true}, nil
-}
-
 func (sRPC *SignerRPCService) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
 	log.Println("Health check ping to: " + req.Service)
 	return &grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_SERVING}, nil

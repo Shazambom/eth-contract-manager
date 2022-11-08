@@ -18,6 +18,11 @@ type ContractRepo struct {
 	tableName string
 }
 
+type ContractConfig struct {
+	tableName string
+	cfg []*aws.Config
+}
+
 type Contract struct {
 	Address string `json:"Address"`
 	ABI string `json:"ABI"`
@@ -83,12 +88,12 @@ func (c *Contract) FromRPC(contract *pb.Contract) () {
 	c.ContractOwner = contract.Owner
 }
 
-func NewContractRepository(tableName string, cfg ...*aws.Config) (ContractRepository, error) {
-	sess, err := session.NewSession(cfg...)
+func NewContractRepository(config ContractConfig) (ContractRepository, error) {
+	sess, err := session.NewSession(config.cfg...)
 	if err != nil {
 		return nil, err
 	}
-	repo := &ContractRepo{dynamodb.New(sess, cfg...), tableName}
+	repo := &ContractRepo{dynamodb.New(sess, config.cfg...), config.tableName}
 	return repo, nil
 }
 

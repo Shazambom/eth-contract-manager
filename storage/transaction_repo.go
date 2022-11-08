@@ -14,12 +14,17 @@ type TransactionRepo struct {
 	tableName string
 }
 
-func NewTransactionRepo(tableName string, cfg ...*aws.Config) (*TransactionRepo, error) {
-	sess, err := session.NewSession(cfg...)
+type TransactionConfig struct {
+	tableName string
+	cfg []*aws.Config
+}
+
+func NewTransactionRepo(config TransactionConfig) (TransactionRepository, error) {
+	sess, err := session.NewSession(config.cfg...)
 	if err != nil {
 		return nil, err
 	}
-	repo := &TransactionRepo{dynamodb.New(sess, cfg...), tableName}
+	repo := &TransactionRepo{dynamodb.New(sess, config.cfg...), config.tableName}
 	return repo, nil
 }
 

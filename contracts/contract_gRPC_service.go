@@ -49,25 +49,16 @@ func (cs *ContractRPCService) Get(ctx context.Context, address *pb.Address) (*pb
 	return contract.ToRPC(), nil
 }
 
-func (cs *ContractRPCService) Store(ctx context.Context, contract *pb.Contract) (*pb.Error, error) {
+func (cs *ContractRPCService) Store(ctx context.Context, contract *pb.Contract) (*pb.Empty, error) {
 	con := &storage.Contract{}
 	con.FromRPC(contract)
 	log.Printf("Storing contract: %+v\n", con)
-	//TODO vvvvv_Can this just be moved to the return statement and get rid of all this error logic_vvvvv
-	err := cs.ContractManager.StoreContract(ctx, con)
-	if err != nil {
-		return &pb.Error{Err: err.Error()}, err
-	}
-	return &pb.Error{Err: ""}, nil
+	return &pb.Empty{}, cs.ContractManager.StoreContract(ctx, con)
 }
 
-func (cs *ContractRPCService) Delete(ctx context.Context, req *pb.AddressOwner) (*pb.Error, error) {
+func (cs *ContractRPCService) Delete(ctx context.Context, req *pb.AddressOwner) (*pb.Empty, error) {
 	log.Printf("Deleting %s's contract: %s\n", req.Owner, req.Address)
-	err := cs.ContractManager.DeleteContract(ctx, req.Address, req.Owner)
-	if err != nil {
-		return &pb.Error{Err: err.Error()}, err
-	}
-	return &pb.Error{Err: ""}, nil
+	return &pb.Empty{}, cs.ContractManager.DeleteContract(ctx, req.Address, req.Owner)
 }
 
 func (cs *ContractRPCService) List(ctx context.Context, owner *pb.Owner) (*pb.Contracts, error) {

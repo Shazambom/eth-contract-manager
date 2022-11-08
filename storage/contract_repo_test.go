@@ -32,8 +32,6 @@ func TestContractRepo_UpsertContract(t *testing.T) {
 				{Name: "numberOfTokens", Type: "uint256"},
 				{Name: "transactionNumber", Type: "uint256"},
 			}}}},
-		MaxMintable:  1000,
-		MaxIncrement: 3,
 		ContractOwner:        "Tester",
 	}
 	upsertErr := repo.UpsertContract(ctx, contract)
@@ -54,8 +52,6 @@ func TestContractRepo_GetContract(t *testing.T) {
 				{Name: "numberOfTokens", Type: "uint256"},
 				{Name: "transactionNumber", Type: "uint256"},
 			}}}},
-		MaxMintable:  1000,
-		MaxIncrement: 3,
 		ContractOwner:        "Tester",
 	}
 	upsertErr := repo.UpsertContract(ctx, contract)
@@ -80,8 +76,6 @@ func TestContractRepo_DeleteContract(t *testing.T) {
 				{Name: "numberOfTokens", Type: "uint256"},
 				{Name: "transactionNumber", Type: "uint256"},
 			}}}},
-		MaxMintable:  1000,
-		MaxIncrement: 3,
 		ContractOwner:        "DeleteTester",
 	}
 	upsertErr := repo.UpsertContract(ctx, contract)
@@ -110,8 +104,6 @@ func TestContractRepo_DeleteContract_WrongOwner(t *testing.T) {
 				{Name: "numberOfTokens", Type: "uint256"},
 				{Name: "transactionNumber", Type: "uint256"},
 			}}}},
-		MaxMintable:  1000,
-		MaxIncrement: 3,
 		ContractOwner:        "DeleteTester_WrongOwner",
 	}
 	upsertErr := repo.UpsertContract(ctx, contract)
@@ -145,8 +137,6 @@ func TestContractRepo_GetContractsByOwner(t *testing.T) {
 						{Name: "numberOfTokens", Type: "uint256"},
 						{Name: "transactionNumber", Type: "uint256"},
 					}}}},
-				MaxMintable:  1000,
-				MaxIncrement: 3,
 				ContractOwner:        owner,
 			})
 	}
@@ -176,8 +166,6 @@ func TestContract_FromRPC_ToRPC(t *testing.T) {
 				{Name: "numberOfTokens", Type: "uint256"},
 				{Name: "transactionNumber", Type: "uint256"},
 			}}}},
-		MaxMintable:  1000,
-		MaxIncrement: 3,
 		ContractOwner:        "Tester",
 	}
 
@@ -191,8 +179,6 @@ func TestContract_FromRPC_ToRPC(t *testing.T) {
 			{Name: "numberOfTokens", Type: "uint256"},
 			{Name: "transactionNumber", Type: "uint256"},
 		}}}},
-		MaxMintable:       1000,
-		MaxIncrement:      3,
 		Owner:             "Tester",
 	}, rpc)
 

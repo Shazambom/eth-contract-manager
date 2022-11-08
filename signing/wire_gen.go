@@ -25,3 +25,12 @@ func InitializeSigningServer(host int, opts []grpc.ServerOption, tableName strin
 	}
 	return signerRPCService, nil
 }
+
+func InitializeVerifierServer(host int, opts []grpc.ServerOption) (*VerifierRPCService, error) {
+	signingService := NewSigningService()
+	verifierRPCService, err := NewVerifierServer(host, opts, signingService)
+	if err != nil {
+		return nil, err
+	}
+	return verifierRPCService, nil
+}

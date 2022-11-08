@@ -21,7 +21,7 @@ type TransactionServiceClient interface {
 	GetContract(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Contract, error)
 	ConstructTransaction(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*Transaction, error)
 	GetTransactions(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Transactions, error)
-	CompleteTransaction(ctx context.Context, in *CompleteTransactionRequest, opts ...grpc.CallOption) (*Error, error)
+	CompleteTransaction(ctx context.Context, in *CompleteTransactionRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type transactionServiceClient struct {
@@ -59,8 +59,8 @@ func (c *transactionServiceClient) GetTransactions(ctx context.Context, in *Addr
 	return out, nil
 }
 
-func (c *transactionServiceClient) CompleteTransaction(ctx context.Context, in *CompleteTransactionRequest, opts ...grpc.CallOption) (*Error, error) {
-	out := new(Error)
+func (c *transactionServiceClient) CompleteTransaction(ctx context.Context, in *CompleteTransactionRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/TransactionService/CompleteTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ type TransactionServiceServer interface {
 	GetContract(context.Context, *Address) (*Contract, error)
 	ConstructTransaction(context.Context, *TransactionRequest) (*Transaction, error)
 	GetTransactions(context.Context, *Address) (*Transactions, error)
-	CompleteTransaction(context.Context, *CompleteTransactionRequest) (*Error, error)
+	CompleteTransaction(context.Context, *CompleteTransactionRequest) (*Empty, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
 
@@ -92,7 +92,7 @@ func (UnimplementedTransactionServiceServer) ConstructTransaction(context.Contex
 func (UnimplementedTransactionServiceServer) GetTransactions(context.Context, *Address) (*Transactions, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTransactions not implemented")
 }
-func (UnimplementedTransactionServiceServer) CompleteTransaction(context.Context, *CompleteTransactionRequest) (*Error, error) {
+func (UnimplementedTransactionServiceServer) CompleteTransaction(context.Context, *CompleteTransactionRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CompleteTransaction not implemented")
 }
 func (UnimplementedTransactionServiceServer) mustEmbedUnimplementedTransactionServiceServer() {}
@@ -213,8 +213,8 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ContractManagementClient interface {
 	Get(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Contract, error)
-	Store(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*Error, error)
-	Delete(ctx context.Context, in *AddressOwner, opts ...grpc.CallOption) (*Error, error)
+	Store(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*Empty, error)
+	Delete(ctx context.Context, in *AddressOwner, opts ...grpc.CallOption) (*Empty, error)
 	List(ctx context.Context, in *Owner, opts ...grpc.CallOption) (*Contracts, error)
 }
 
@@ -235,8 +235,8 @@ func (c *contractManagementClient) Get(ctx context.Context, in *Address, opts ..
 	return out, nil
 }
 
-func (c *contractManagementClient) Store(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*Error, error) {
-	out := new(Error)
+func (c *contractManagementClient) Store(ctx context.Context, in *Contract, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/ContractManagement/Store", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -244,8 +244,8 @@ func (c *contractManagementClient) Store(ctx context.Context, in *Contract, opts
 	return out, nil
 }
 
-func (c *contractManagementClient) Delete(ctx context.Context, in *AddressOwner, opts ...grpc.CallOption) (*Error, error) {
-	out := new(Error)
+func (c *contractManagementClient) Delete(ctx context.Context, in *AddressOwner, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/ContractManagement/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -267,8 +267,8 @@ func (c *contractManagementClient) List(ctx context.Context, in *Owner, opts ...
 // for forward compatibility
 type ContractManagementServer interface {
 	Get(context.Context, *Address) (*Contract, error)
-	Store(context.Context, *Contract) (*Error, error)
-	Delete(context.Context, *AddressOwner) (*Error, error)
+	Store(context.Context, *Contract) (*Empty, error)
+	Delete(context.Context, *AddressOwner) (*Empty, error)
 	List(context.Context, *Owner) (*Contracts, error)
 	mustEmbedUnimplementedContractManagementServer()
 }
@@ -280,10 +280,10 @@ type UnimplementedContractManagementServer struct {
 func (UnimplementedContractManagementServer) Get(context.Context, *Address) (*Contract, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedContractManagementServer) Store(context.Context, *Contract) (*Error, error) {
+func (UnimplementedContractManagementServer) Store(context.Context, *Contract) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Store not implemented")
 }
-func (UnimplementedContractManagementServer) Delete(context.Context, *AddressOwner) (*Error, error) {
+func (UnimplementedContractManagementServer) Delete(context.Context, *AddressOwner) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedContractManagementServer) List(context.Context, *Owner) (*Contracts, error) {

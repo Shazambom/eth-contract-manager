@@ -19,8 +19,8 @@ type ContractRepo struct {
 }
 
 type ContractConfig struct {
-	tableName string
-	cfg []*aws.Config
+	TableName string
+	CFG []*aws.Config
 }
 
 type Contract struct {
@@ -89,11 +89,11 @@ func (c *Contract) FromRPC(contract *pb.Contract) () {
 }
 
 func NewContractRepository(config ContractConfig) (ContractRepository, error) {
-	sess, err := session.NewSession(config.cfg...)
+	sess, err := session.NewSession(config.CFG...)
 	if err != nil {
 		return nil, err
 	}
-	repo := &ContractRepo{dynamodb.New(sess, config.cfg...), config.tableName}
+	repo := &ContractRepo{dynamodb.New(sess, config.CFG...), config.TableName}
 	return repo, nil
 }
 

@@ -23,22 +23,25 @@ func main() {
 		log.Fatal(clientErr)
 	}
 
+	awsConfig := &aws.Config{
+		Endpoint:         aws.String(cfg.AWSEndpoint),
+		Region:           aws.String(cfg.AWSRegion),
+		Credentials:      credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		DisableSSL:       aws.Bool(!cfg.SSLEnabled),
+	}
+
 	transactionRPC, gRPCErr := contracts.InitializeTransactionServer(
 		cfg.Port,
 		[]grpc.ServerOption{grpc.EmptyServerOption{}},
-		storage.RedisConfig{
-			Endpoint: cfg.RedisEndpoint,
-			Password: cfg.RedisPwd,
-			CountKey: cfg.CountKey,
-		},
 		signingClient.SigningClient,
-		cfg.TableName,
-		&aws.Config{
-			Endpoint:         aws.String(cfg.AWSEndpoint),
-			Region:           aws.String(cfg.AWSRegion),
-			Credentials:      credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
-			DisableSSL:       aws.Bool(!cfg.SSLEnabled),
-	})
+		storage.ContractConfig{
+			TableName: cfg.ContractTableName,
+			CFG:       []*aws.Config{awsConfig},
+		},
+		storage.TransactionConfig{
+			TableName: cfg.TransactionTableName,
+			CFG:       []*aws.Config{awsConfig},
+		})
 	if gRPCErr != nil {
 		log.Fatal(gRPCErr)
 	}

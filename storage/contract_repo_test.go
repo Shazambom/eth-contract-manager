@@ -3,6 +3,7 @@ package storage
 import (
 	pb "contract-service/proto"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 
 
 func TestNewContractRepository(t *testing.T) {
-	repo, err := NewContractRepository(TestPrivateKeyTableName, dynamoCfg)
+	repo, err := NewContractRepository(ContractConfig{TestPrivateKeyTableName, []*aws.Config{dynamoCfg}})
 	assert.Nil(t, err)
 	assert.IsType(t, &ContractRepo{}, repo)
 	inter := reflect.TypeOf((*ContractRepository)(nil)).Elem()
@@ -19,7 +20,7 @@ func TestNewContractRepository(t *testing.T) {
 }
 
 func TestContractRepo_UpsertContract(t *testing.T) {
-	repo, err := NewContractRepository(TestContractTableName, dynamoCfg)
+	repo, err := NewContractRepository(ContractConfig{TestPrivateKeyTableName, []*aws.Config{dynamoCfg}})
 	assert.Nil(t, err)
 	
 	contract := &Contract{
@@ -39,7 +40,7 @@ func TestContractRepo_UpsertContract(t *testing.T) {
 }
 
 func TestContractRepo_GetContract(t *testing.T) {
-	repo, err := NewContractRepository(TestContractTableName, dynamoCfg)
+	repo, err := NewContractRepository(ContractConfig{TestPrivateKeyTableName, []*aws.Config{dynamoCfg}})
 	assert.Nil(t, err)
 
 	contract := &Contract{
@@ -63,7 +64,7 @@ func TestContractRepo_GetContract(t *testing.T) {
 }
 
 func TestContractRepo_DeleteContract(t *testing.T) {
-	repo, err := NewContractRepository(TestContractTableName, dynamoCfg)
+	repo, err := NewContractRepository(ContractConfig{TestPrivateKeyTableName, []*aws.Config{dynamoCfg}})
 	assert.Nil(t, err)
 
 	contract := &Contract{
@@ -91,7 +92,7 @@ func TestContractRepo_DeleteContract(t *testing.T) {
 }
 
 func TestContractRepo_DeleteContract_WrongOwner(t *testing.T) {
-	repo, err := NewContractRepository(TestContractTableName, dynamoCfg)
+	repo, err := NewContractRepository(ContractConfig{TestPrivateKeyTableName, []*aws.Config{dynamoCfg}})
 	assert.Nil(t, err)
 
 	contract := &Contract{
@@ -119,7 +120,7 @@ func TestContractRepo_DeleteContract_WrongOwner(t *testing.T) {
 }
 
 func TestContractRepo_GetContractsByOwner(t *testing.T) {
-	repo, err := NewContractRepository(TestContractTableName, dynamoCfg)
+	repo, err := NewContractRepository(ContractConfig{TestPrivateKeyTableName, []*aws.Config{dynamoCfg}})
 	assert.Nil(t, err)
 
 

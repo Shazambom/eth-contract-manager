@@ -15,16 +15,16 @@ type TransactionRepo struct {
 }
 
 type TransactionConfig struct {
-	tableName string
-	cfg []*aws.Config
+	TableName string
+	CFG []*aws.Config
 }
 
 func NewTransactionRepo(config TransactionConfig) (TransactionRepository, error) {
-	sess, err := session.NewSession(config.cfg...)
+	sess, err := session.NewSession(config.CFG...)
 	if err != nil {
 		return nil, err
 	}
-	repo := &TransactionRepo{dynamodb.New(sess, config.cfg...), config.tableName}
+	repo := &TransactionRepo{dynamodb.New(sess, config.CFG...), config.TableName}
 	return repo, nil
 }
 

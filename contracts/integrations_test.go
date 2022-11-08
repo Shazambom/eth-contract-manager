@@ -68,18 +68,14 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 			{Name: "numberOfTokens", Type: "uint256"},
 			{Name: "transactionNumber", Type: "uint256"},
 		}}}},
-		MaxMintable:  1000,
-		MaxIncrement: 3,
 		Owner:        "Owner",
 	}
 	//Storing the contract and registering it with the contract service
-	storeErr, storeErrr := contractClient.Client.Store(ctx, contract)
+	_, storeErrr := contractClient.Client.Store(ctx, contract)
 	if storeErrr != nil {
 		fmt.Println(storeErrr)
 	}
 	assert.Nil(t, storeErrr)
-	assert.NotNil(t, storeErr)
-	assert.Equal(t, "", storeErr.Err)
 
 
 	//Generating a signing key for the above contract
@@ -95,10 +91,9 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	msgSender := "0x0fA37C622C7E57A06ba12afF48c846F42241F7F0"
 
 	//Building a transaction for the "mint" function by passing in the nonce, the num requested, and the transaction number
-	transactionResponse, transactionErr := transactionClient.Client.ConstructTransaction(ctx, &pb.TransactionRequest{
+	_, transactionErr := transactionClient.Client.ConstructTransaction(ctx, &pb.TransactionRequest{
 		MessageSender: msgSender,
 		FunctionName:  "mint",
-		NumRequested:  3,
 		Args:          [][]byte{nonceBytes, []byte("3"), []byte("1")},
 		Contract:      contract,
 	})
@@ -106,8 +101,6 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 		fmt.Println(transactionErr)
 	}
 	assert.Nil(t, transactionErr)
-	assert.NotNil(t, transactionResponse)
-	assert.Equal(t, "", transactionResponse.Err)
 
 
 	//Checking that the token was processed correctly, the transaction was signed, and the token was placed in redis

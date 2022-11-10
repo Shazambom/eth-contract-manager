@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"log"
-	"strings"
 )
 
 type ContractRepo struct {
@@ -95,62 +94,6 @@ func NewContractRepository(config ContractConfig) (ContractRepository, error) {
 	}
 	repo := &ContractRepo{dynamodb.New(sess, config.CFG...), config.TableName}
 	return repo, nil
-}
-
-func (cr *ContractRepo) Init() error {
-	log.Println("Attempting to Create Table: " + cr.tableName)
-	_, createErr := cr.db.CreateTable(&dynamodb.CreateTableInput{
-		AttributeDefinitions:   []*dynamodb.AttributeDefinition{
-			{
-				AttributeName: aws.String("Address"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("ContractOwner"),
-				AttributeType: aws.String("S"),
-			},
-		},
-		KeySchema:              []*dynamodb.KeySchemaElement{
-			{
-				AttributeName: aws.String("Address"),
-				KeyType: aws.String("HASH"),
-			},
-		},
-		GlobalSecondaryIndexes: []*dynamodb.GlobalSecondaryIndex{
-			{
-				IndexName: aws.String("ContractOwner"),
-				KeySchema: []*dynamodb.KeySchemaElement{
-					{
-						AttributeName: aws.String("ContractOwner"),
-						KeyType: aws.String("HASH"),
-					},
-				},
-				Projection: &dynamodb.Projection{
-					NonKeyAttributes: nil,
-					ProjectionType:   aws.String("ALL"),
-				},
-				ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
-					ReadCapacityUnits: aws.Int64(5),
-					WriteCapacityUnits:  aws.Int64(5),
-				},
-			},
-		},
-		TableName:              aws.String(cr.tableName),
-		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
-			ReadCapacityUnits: aws.Int64(5),
-			WriteCapacityUnits:  aws.Int64(5),
-		},
-	})
-
-	log.Println("Table Creation request complete")
-
-	if createErr == nil || strings.Contains(createErr.Error(), dynamodb.ErrCodeTableAlreadyExistsException) ||
-		strings.Contains(createErr.Error(), dynamodb.ErrCodeGlobalTableAlreadyExistsException) ||
-		strings.Contains(createErr.Error(), dynamodb.ErrCodeResourceInUseException) {
-		return nil
-	}
-
-	return createErr
 }
 
 func (cr *ContractRepo) GetContract(ctx context.Context, contractAddress string) (*Contract, error) {

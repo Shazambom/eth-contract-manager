@@ -30,7 +30,6 @@ type PrivateKeyRepository interface {
 	GetPrivateKey(ctx context.Context, contractAddress string) (string, error)
 	UpsertPrivateKey(ctx context.Context, contractAddress, key string) error
 	DeletePrivateKey(ctx context.Context, contractAddress string) error
-	Init() error
 }
 
 type ContractRepository interface {
@@ -38,5 +37,4 @@ type ContractRepository interface {
 	UpsertContract(ctx context.Context, contract *Contract) error
 	DeleteContract(ctx context.Context, contractAddress, owner string) error
 	GetContractsByOwner(ctx context.Context, owner string) ([]*Contract, error)
-	Init() error
 }

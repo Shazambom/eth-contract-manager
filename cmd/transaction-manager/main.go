@@ -4,7 +4,6 @@ import (
 	"contract-service/contracts"
 	"contract-service/signing"
 	"contract-service/storage"
-	"contract-service/utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"google.golang.org/grpc"
@@ -45,9 +44,5 @@ func main() {
 	if gRPCErr != nil {
 		log.Fatal(gRPCErr)
 	}
-	liveProbeErr := make(chan string)
-	probe := utils.NewProbe()
-
-	probe.Serve(liveProbeErr)
-	log.Fatal(utils.MergeChannels(liveProbeErr, transactionRPC.Channel))
+	log.Fatal(<-transactionRPC.Channel)
 }

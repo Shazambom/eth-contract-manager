@@ -7,15 +7,14 @@ package signing
 
 import (
 	"contract-service/storage"
-	"github.com/aws/aws-sdk-go/aws"
 	"google.golang.org/grpc"
 )
 
 // Injectors from wire.go:
 
-func InitializeSigningServer(host int, opts []grpc.ServerOption, tableName string, cfg ...*aws.Config) (*SignerRPCService, error) {
+func InitializeSigningServer(host int, opts []grpc.ServerOption, config storage.PrivateKeyConfig) (*SignerRPCService, error) {
 	signingService := NewSigningService()
-	privateKeyRepository, err := storage.NewPrivateKeyRepository(tableName, cfg...)
+	privateKeyRepository, err := storage.NewPrivateKeyRepository(config)
 	if err != nil {
 		return nil, err
 	}

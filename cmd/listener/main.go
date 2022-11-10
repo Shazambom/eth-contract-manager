@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"log"
 )
-
+//TODO this container may not be needed in the future but its nice to have for now. Potentially remove in the future
 func main() {
 	log.Println("Getting environment variables")
 	cfg, envErr := NewConfig()

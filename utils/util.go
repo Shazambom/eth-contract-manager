@@ -82,6 +82,7 @@ func GetNonce() (string, error) {
 }
 
 func MergeChannels(cs ...<-chan string) <-chan string {
+	//TODO debug this, I think it causes some hanging to occur
 	out := make(chan string)
 	for _, c := range cs {
 		go func(c <-chan string) {

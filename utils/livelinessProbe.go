@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+//DO NOT IMPLEMENT WITH gRPC SERVICES, USE grpc_health_probe FOR HEALTH CHECKING OF gRPC SERVICES
+
 type Response struct {
 	Body string `json:"body"`
 }

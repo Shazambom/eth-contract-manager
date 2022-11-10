@@ -16,7 +16,7 @@ func main() {
 	if cfgErr != nil {
 		log.Fatal(cfgErr)
 	}
-	log.Printf("Loading SignatureHandler with Config: \n%+v\n", cfg)
+	log.Printf("Loading SignatureHandler with Config: \n%s\n", cfg.String())
 	server, err := signing.InitializeSigningServer(cfg.Port, []grpc.ServerOption{grpc.EmptyServerOption{}}, storage.PrivateKeyConfig{
 		TableName: cfg.TableName,
 		CFG:       []*aws.Config{{

@@ -15,7 +15,6 @@ func main() {
 	if envErr != nil {
 		log.Fatal(envErr)
 	}
-	log.Printf("Loading Listener with Config: \n%+v\n", cfg)
 	handler, handlerInitErr := listener.InitializeListenerService(&aws.Config{
 		Endpoint: aws.String(cfg.AWSEndpoint),
 		Region: aws.String(cfg.AWSRegion),

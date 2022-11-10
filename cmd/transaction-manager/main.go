@@ -16,7 +16,7 @@ func main() {
 	if cfgErr != nil {
 		log.Fatal(cfgErr)
 	}
-	log.Printf("Loading TransactionManager with Config: \n%+v\n", cfg)
+	log.Printf("Loading TransactionManager with Config: \n%s\n", cfg.String())
 	signingClient, clientErr := signing.NewClient(cfg.SignerEndpoint, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	if clientErr != nil {
 		log.Fatal(clientErr)

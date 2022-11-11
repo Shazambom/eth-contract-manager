@@ -21,7 +21,9 @@ type TransactionServiceClient interface {
 	GetContract(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Contract, error)
 	ConstructTransaction(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*Transaction, error)
 	GetTransactions(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Transactions, error)
-	CompleteTransaction(ctx context.Context, in *CompleteTransactionRequest, opts ...grpc.CallOption) (*Empty, error)
+	CompleteTransaction(ctx context.Context, in *KeyTransactionRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeleteTransaction(ctx context.Context, in *KeyTransactionRequest, opts ...grpc.CallOption) (*Empty, error)
+	GetAllTransactions(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Transactions, error)
 }
 
 type transactionServiceClient struct {
@@ -59,9 +61,27 @@ func (c *transactionServiceClient) GetTransactions(ctx context.Context, in *Addr
 	return out, nil
 }
 
-func (c *transactionServiceClient) CompleteTransaction(ctx context.Context, in *CompleteTransactionRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *transactionServiceClient) CompleteTransaction(ctx context.Context, in *KeyTransactionRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/TransactionService/CompleteTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactionServiceClient) DeleteTransaction(ctx context.Context, in *KeyTransactionRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/TransactionService/DeleteTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactionServiceClient) GetAllTransactions(ctx context.Context, in *Address, opts ...grpc.CallOption) (*Transactions, error) {
+	out := new(Transactions)
+	err := c.cc.Invoke(ctx, "/TransactionService/GetAllTransactions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +95,9 @@ type TransactionServiceServer interface {
 	GetContract(context.Context, *Address) (*Contract, error)
 	ConstructTransaction(context.Context, *TransactionRequest) (*Transaction, error)
 	GetTransactions(context.Context, *Address) (*Transactions, error)
-	CompleteTransaction(context.Context, *CompleteTransactionRequest) (*Empty, error)
+	CompleteTransaction(context.Context, *KeyTransactionRequest) (*Empty, error)
+	DeleteTransaction(context.Context, *KeyTransactionRequest) (*Empty, error)
+	GetAllTransactions(context.Context, *Address) (*Transactions, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
 
@@ -92,8 +114,14 @@ func (UnimplementedTransactionServiceServer) ConstructTransaction(context.Contex
 func (UnimplementedTransactionServiceServer) GetTransactions(context.Context, *Address) (*Transactions, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTransactions not implemented")
 }
-func (UnimplementedTransactionServiceServer) CompleteTransaction(context.Context, *CompleteTransactionRequest) (*Empty, error) {
+func (UnimplementedTransactionServiceServer) CompleteTransaction(context.Context, *KeyTransactionRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CompleteTransaction not implemented")
+}
+func (UnimplementedTransactionServiceServer) DeleteTransaction(context.Context, *KeyTransactionRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTransaction not implemented")
+}
+func (UnimplementedTransactionServiceServer) GetAllTransactions(context.Context, *Address) (*Transactions, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllTransactions not implemented")
 }
 func (UnimplementedTransactionServiceServer) mustEmbedUnimplementedTransactionServiceServer() {}
 
@@ -163,7 +191,7 @@ func _TransactionService_GetTransactions_Handler(srv interface{}, ctx context.Co
 }
 
 func _TransactionService_CompleteTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CompleteTransactionRequest)
+	in := new(KeyTransactionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -175,7 +203,43 @@ func _TransactionService_CompleteTransaction_Handler(srv interface{}, ctx contex
 		FullMethod: "/TransactionService/CompleteTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionServiceServer).CompleteTransaction(ctx, req.(*CompleteTransactionRequest))
+		return srv.(TransactionServiceServer).CompleteTransaction(ctx, req.(*KeyTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TransactionService_DeleteTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KeyTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).DeleteTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TransactionService/DeleteTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).DeleteTransaction(ctx, req.(*KeyTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TransactionService_GetAllTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Address)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).GetAllTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/TransactionService/GetAllTransactions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).GetAllTransactions(ctx, req.(*Address))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -202,6 +266,14 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CompleteTransaction",
 			Handler:    _TransactionService_CompleteTransaction_Handler,
+		},
+		{
+			MethodName: "DeleteTransaction",
+			Handler:    _TransactionService_DeleteTransaction_Handler,
+		},
+		{
+			MethodName: "GetAllTransactions",
+			Handler:    _TransactionService_GetAllTransactions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

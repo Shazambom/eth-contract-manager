@@ -11,7 +11,8 @@ type ContractTransactionHandler interface {
 	StoreToken(ctx context.Context, token *storage.Token, contract *storage.Contract) error
 	GetTransactions(ctx context.Context, address string) ([]*storage.Token, error)
 	DeleteTransaction(ctx context.Context, address, hash string) error
-	Close()
+	GetAllTransactions(ctx context.Context, address string) ([]*storage.Token, error)
+	CompleteTransaction(ctx context.Context, address, hash string) error
 }
 
 type ContractManagerHandler interface {

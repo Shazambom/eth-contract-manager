@@ -34,7 +34,6 @@ func NewTransactionServer(port int, opts []grpc.ServerOption, handler ContractTr
 	go func() {
 		log.Println("TransactionService serving clients now")
 		defer server.Server.GracefulStop()
-		defer server.TransactionManager.Close()
 		serviceErr := server.Server.Serve(lis)
 		server.Channel <- serviceErr.Error()
 	}()
@@ -78,7 +77,23 @@ func (ts *TransactionRPCService) GetTransactions(ctx context.Context, address *p
 	return txns, nil
 }
 
-func (ts *TransactionRPCService) CompleteTransaction(ctx context.Context, req *pb.CompleteTransactionRequest) (*pb.Empty, error) {
+func (ts *TransactionRPCService) GetAllTransactions(ctx context.Context, address *pb.Address) (*pb.Transactions, error) {
+	tokens, err := ts.TransactionManager.GetAllTransactions(ctx, address.Address)
+	if err != nil {
+		return nil, err
+	}
+	txns := &pb.Transactions{Transactions: []*pb.Transaction{}}
+	for _, token := range tokens {
+		txns.Transactions = append(txns.Transactions, token.ToRPC())
+	}
+	return txns, nil
+}
+
+func (ts *TransactionRPCService) CompleteTransaction(ctx context.Context, req *pb.KeyTransactionRequest) (*pb.Empty, error) {
+	return &pb.Empty{}, ts.TransactionManager.CompleteTransaction(ctx, req.Address, req.Hash)
+}
+
+func (ts *TransactionRPCService) DeleteTransaction(ctx context.Context, req *pb.KeyTransactionRequest) (*pb.Empty, error) {
 	return &pb.Empty{}, ts.TransactionManager.DeleteTransaction(ctx, req.Address, req.Hash)
 }
 

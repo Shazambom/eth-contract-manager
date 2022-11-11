@@ -16,6 +16,7 @@ type Token struct {
 	ABI string `json:"abi"`
 	UserAddress string `json:"user_address"`
 	Hash string `json:"hash"`
+	IsComplete bool `json:"is_complete"`
 }
 
 func NewToken(contractAddress, userAddress, hash string, abi string, txn []byte) *Token {
@@ -25,6 +26,7 @@ func NewToken(contractAddress, userAddress, hash string, abi string, txn []byte)
 		ABI: abi,
 		UserAddress: userAddress,
 		Hash: hash,
+		IsComplete: false,
 	}
 }
 
@@ -35,6 +37,7 @@ func (token *Token) ToRPC() *pb.Transaction {
 		Hash:       token.Hash,
 		ContractAddress: token.ContractAddress,
 		UserAddress: token.UserAddress,
+		IsComplete: token.IsComplete,
 	}
 }
 

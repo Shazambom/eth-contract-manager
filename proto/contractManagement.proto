@@ -50,13 +50,14 @@ message Transaction {
     string hash = 3;
     string contract_address = 4;
     string user_address = 5;
+    bool is_complete = 6;
 }
 
 message Transactions {
     repeated Transaction transactions = 1;
 }
 
-message CompleteTransactionRequest {
+message KeyTransactionRequest {
     string address = 1;
     string hash = 2;
 }
@@ -74,7 +75,9 @@ service TransactionService {
     rpc GetContract(Address) returns(Contract) {}
     rpc ConstructTransaction(TransactionRequest) returns (Transaction) {}
     rpc GetTransactions(Address) returns(Transactions) {}
-    rpc CompleteTransaction(CompleteTransactionRequest) returns (Empty) {}
+    rpc CompleteTransaction(KeyTransactionRequest) returns (Empty) {}
+    rpc DeleteTransaction(KeyTransactionRequest) returns (Empty) {}
+    rpc GetAllTransactions(Address) returns(Transactions) {}
 }
 
 service ContractManagement {

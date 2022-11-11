@@ -303,9 +303,14 @@ func (cms *ContractManagerService) GetTransactions(ctx context.Context, address 
 	return cms.txnRepo.GetTransactions(ctx, address)
 }
 
+func (cms *ContractManagerService) GetAllTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+	return cms.txnRepo.GetAllTransactions(ctx, address)
+}
+
 func (cms *ContractManagerService) DeleteTransaction(ctx context.Context, address, hash string) error {
 	return cms.txnRepo.DeleteTransaction(ctx, address, hash)
 }
 
-func (cms *ContractManagerService) Close() {
+func (cms *ContractManagerService) CompleteTransaction(ctx context.Context, address, hash string) error {
+	return cms.txnRepo.CompleteTransaction(ctx, address, hash)
 }

@@ -24,6 +24,8 @@ type TransactionRepository interface {
 	StoreTransaction(ctx context.Context, token Token) error
 	GetTransactions(ctx context.Context, address string) ([]*Token, error)
 	DeleteTransaction(ctx context.Context, address, hash string) error
+	CompleteTransaction(ctx context.Context, address, hash string) error
+	GetAllTransactions(ctx context.Context, address string) ([]*Token, error)
 }
 
 type PrivateKeyRepository interface {

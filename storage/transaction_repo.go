@@ -43,17 +43,8 @@ func (tr *TransactionRepo) StoreTransaction(ctx context.Context, token Token) er
 	return err
 }
 
-func (tr *TransactionRepo) GetTransactions(ctx context.Context, address string) ([]*Token, error) {
-	result, err := tr.db.QueryWithContext(ctx, &dynamodb.QueryInput{
-		TableName: aws.String(tr.tableName),
-		IndexName: aws.String("user_address"),
-		KeyConditionExpression: aws.String("user_address = :v_addr"),
-		FilterExpression: aws.String("is_complete = :ic"),
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":v_addr": {S: aws.String(address)},
-			":ic": {BOOL: aws.Bool(false)},
-		},
-	})
+func (tr *TransactionRepo) queryTransactionsTable(ctx context.Context, input *dynamodb.QueryInput) ([]*Token, error) {
+	result, err := tr.db.QueryWithContext(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +61,22 @@ func (tr *TransactionRepo) GetTransactions(ctx context.Context, address string) 
 	return tokens, nil
 }
 
+func (tr *TransactionRepo) GetTransactions(ctx context.Context, address string) ([]*Token, error) {
+	return tr.queryTransactionsTable(ctx, &dynamodb.QueryInput{
+		TableName: aws.String(tr.tableName),
+		IndexName: aws.String("user_address"),
+		KeyConditionExpression: aws.String("user_address = :v_addr"),
+		FilterExpression: aws.String("is_complete = :ic"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":v_addr": {S: aws.String(address)},
+			":ic": {BOOL: aws.Bool(false)},
+		},
+	})
+}
+
 
 func (tr *TransactionRepo) GetAllTransactions(ctx context.Context, address string) ([]*Token, error) {
-	result, err := tr.db.QueryWithContext(ctx, &dynamodb.QueryInput{
+	return tr.queryTransactionsTable(ctx, &dynamodb.QueryInput{
 		TableName: aws.String(tr.tableName),
 		IndexName: aws.String("user_address"),
 		KeyConditionExpression: aws.String("user_address = :v_addr"),
@@ -80,20 +84,6 @@ func (tr *TransactionRepo) GetAllTransactions(ctx context.Context, address strin
 			":v_addr": {S: aws.String(address)},
 		},
 	})
-	if err != nil {
-		return nil, err
-	}
-	tokens := []*Token{}
-	for _, item := range result.Items {
-		token := Token{}
-		marshalErr := dynamodbattribute.UnmarshalMap(item, &token)
-		if marshalErr != nil {
-			log.Println(marshalErr.Error())
-			continue
-		}
-		tokens = append(tokens, &token)
-	}
-	return tokens, nil
 }
 
 

@@ -6,6 +6,7 @@ import (
 	"contract-service/storage"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
@@ -61,7 +62,7 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 		return nil, abiErr
 	}
 	log.Println("Packing arguments")
-	args, byteArgs, argParseErr := cms.UnpackArgs(msgSender, arguments, funcDef.Methods[functionName], contract.Functions.Functions[functionName])
+	args, byteArgs, argParseErr := cms.UnpackArgs(arguments, funcDef.Methods[functionName], contract.Functions.Functions[functionName])
 	if argParseErr != nil {
 		return nil, argParseErr
 	}
@@ -88,8 +89,7 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 }
 
 
-func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]byte, method abi.Method, hashibleFunc storage.Function) ([]interface{}, [][]byte, error) {
-
+func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Method, hashibleFunc storage.Function) ([]interface{}, [][]byte, error) {
 	//All of this splitting logic is to nicely organize the arguments, names and types
 	split := strings.Split(method.String(), "(")
 	otherSplit := strings.Split(split[1], ")")
@@ -100,8 +100,10 @@ func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]by
 		abiArgs = append(abiArgs, ABIArg{Type: abiArg[0], Name: abiArg[1]})
 	}
 
+	//We subtract 1 from abiArgs because there is an implicit signature value that is added by the service
+	//TODO Decide the structure or argument structure to allow the service to pack txns without a signature (if that is needed)
 	if len(abiArgs) - 1 != len(arguments) {
-		return nil, nil, errors.New("argument length mismatch")
+		return nil, nil, errors.New(fmt.Sprintf("argument length mismatch abi: %d argument length recieved: %d\n", len(abiArgs) - 1, len(arguments)))
 	}
 
 	argBytes := [][]byte{}
@@ -110,9 +112,6 @@ func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]by
 
 		argBytes = append(argBytes, []byte{})
 		hashArgMap[arg.Name] = i
-		if arg.Name == "msg.sender" {
-			argBytes[i] = common.HexToAddress(msgSender).Bytes()
-		}
 	}
 
 

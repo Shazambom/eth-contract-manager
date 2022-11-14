@@ -55,11 +55,13 @@ func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *
 
 	token, tokenErr := ts.TransactionManager.BuildTransaction(ctx, req.MessageSender, req.FunctionName, req.Args, contract)
 	if tokenErr != nil {
+		log.Println(tokenErr.Error())
 		return nil, tokenErr
 	}
 
 	storeErr := ts.TransactionManager.StoreToken(ctx, token, contract)
 	if storeErr != nil {
+		log.Println(storeErr.Error())
 		return nil, storeErr
 	}
 	return token.ToRPC(), nil

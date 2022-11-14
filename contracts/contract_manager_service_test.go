@@ -849,7 +849,7 @@ func TestContractManagerService_UnpackArgs(t *testing.T) {
 	assert.Nil(t, nonceErr)
 	nonceDecoded, decodeErr := hex.DecodeString(nonce[2:])
 	assert.Nil(t, decodeErr)
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", [][]byte{nonceDecoded, []byte("3"), []byte("1")}, abiDef.Methods["mint"], storage.Function{Arguments: []storage.Argument{
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs( [][]byte{nonceDecoded, []byte("3"), []byte("1")}, abiDef.Methods["mint"], storage.Function{Arguments: []storage.Argument{
 		{Name: "nonce", Type: "bytes16"},
 		{Name: "msg.sender", Type: "address"},
 		{Name: "numberOfTokens", Type: "uint256"},
@@ -903,7 +903,7 @@ func TestContractManagerService_UnpackArgsA(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsA"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsA"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -917,7 +917,7 @@ func TestContractManagerService_UnpackArgsB(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsB"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsB"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -931,7 +931,7 @@ func TestContractManagerService_UnpackArgsC(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsC"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsC"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -945,7 +945,7 @@ func TestContractManagerService_UnpackArgsD(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsD"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsD"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -959,7 +959,7 @@ func TestContractManagerService_UnpackArgsE(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsE"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsE"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -973,7 +973,7 @@ func TestContractManagerService_UnpackArgsF(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsF"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsF"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -987,7 +987,7 @@ func TestContractManagerService_UnpackArgsG(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsG"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsG"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1002,7 +1002,7 @@ func TestContractManagerService_UnpackArgsH(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsH"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsH"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1016,7 +1016,7 @@ func TestContractManagerService_UnpackArgsI(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsI"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsI"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1030,7 +1030,7 @@ func TestContractManagerService_UnpackArgsJ(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsJ"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsJ"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1044,7 +1044,7 @@ func TestContractManagerService_UnpackArgsK(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsK"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsK"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1058,7 +1058,7 @@ func TestContractManagerService_UnpackArgsL(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsL"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsL"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1072,7 +1072,7 @@ func TestContractManagerService_UnpackArgsM(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsM"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsM"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1086,7 +1086,7 @@ func TestContractManagerService_UnpackArgsN(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsN"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsN"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1100,7 +1100,7 @@ func TestContractManagerService_UnpackArgsO(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsO"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsO"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1114,7 +1114,7 @@ func TestContractManagerService_UnpackArgsP(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsP"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsP"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1128,7 +1128,7 @@ func TestContractManagerService_UnpackArgsQ(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsQ"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsQ"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1142,7 +1142,7 @@ func TestContractManagerService_UnpackArgsR(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsR"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsR"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))
@@ -1156,7 +1156,7 @@ func TestContractManagerService_UnpackArgsS(t *testing.T) {
 	abiDef, err := abi.JSON(strings.NewReader(fullTestAbi))
 	assert.Nil(t, err)
 
-	arguments, byteArgs, argumentsErr := cms.UnpackArgs("0x0fA37C622C7E57A06ba12afF48c846F42241F7F0", args, abiDef.Methods["TestInputsS"], storage.Function{})
+	arguments, byteArgs, argumentsErr := cms.UnpackArgs(args, abiDef.Methods["TestInputsS"], storage.Function{})
 	assert.Nil(t, argumentsErr)
 	fmt.Println(byteArgs)
 	arguments = append(arguments, []byte("signature :)"))

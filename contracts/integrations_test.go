@@ -19,32 +19,22 @@ import (
 	"math/big"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestStore_And_TransactionFlow(t *testing.T) {
-	return //TODO refactor this test to utilize the transaction repository instead of redis and s3
 	//Initializing all services needed for creating a contract, building a transaction, and signing it along with services to directly check that everything was stored properly
 	ctx := context.Background()
 
-	rds := storage.NewRedisWriter(storage.RedisConfig{
-		Endpoint: "localhost:6379",
-		Password: "pass",
-		CountKey: "Count",
+	txnDB, txnDBErr := storage.NewTransactionRepo(storage.TransactionConfig{
+		TableName: "Transactions",
+		CFG:       []*aws.Config{{
+			Endpoint:         aws.String("localhost:8000"),
+			Region:           aws.String("us-east-1"),
+			Credentials:      credentials.NewStaticCredentials("xxx","yyy", ""),
+			DisableSSL:       aws.Bool(true),
+		}},
 	})
-	defer rds.Close()
-
-	s3Bucket, bucketErr := storage.NewS3(&aws.Config{
-		Endpoint: aws.String("localhost:4566"),
-		Region: aws.String("us-east-1"),
-		Credentials: credentials.NewStaticCredentials("xxx", "yyy", ""),
-		S3ForcePathStyle: aws.Bool(true),
-		DisableSSL: aws.Bool(true),
-	}, "tokens")
-	assert.Nil(t, bucketErr)
-
-	_, pingErr := rds.Ping()
-	assert.Nil(t, pingErr)
+	assert.Nil(t, txnDBErr)
 
 	//GRPC Clients for the contract, transaction, and signer services
 	contractClient, contractConnErr := NewContractClient("localhost:8082", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
@@ -65,7 +55,6 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 		Abi: testAbi,
 		HashableFunctions:    &pb.Functions{Functions: map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
 			{Name: "nonce", Type: "bytes16"},
-			{Name: "msg.sender", Type: "address"},
 			{Name: "numberOfTokens", Type: "uint256"},
 			{Name: "transactionNumber", Type: "uint256"},
 		}}}},
@@ -105,10 +94,10 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 
 
 	//Checking that the token was processed correctly, the transaction was signed, and the token was placed in redis
-	token, tokenErr := rds.Get(ctx, msgSender, contract.Address)
+	tokens, tokenErr := txnDB.GetTransactions(ctx, msgSender)
 	assert.Nil(t, tokenErr)
-	fmt.Printf("Token: %+v\n", token)
-	args := [][]byte{nonceBytes, common.HexToAddress(msgSender).Bytes(), common.LeftPadBytes(big.NewInt(int64(3)).Bytes(),32), common.LeftPadBytes(big.NewInt(int64(1)).Bytes(),32)}
+	fmt.Printf("Token: %+v\n", tokens[0])
+	args := [][]byte{nonceBytes, common.LeftPadBytes(big.NewInt(int64(3)).Bytes(),32), common.LeftPadBytes(big.NewInt(int64(1)).Bytes(),32)}
 
 	fmt.Println(len(args))
 	for _, arg := range args {
@@ -119,9 +108,9 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 
 	//Checking the hashes to ensure the signer hashes the transaction properly
 	builtHash := signer.WrapHash(crypto.Keccak256Hash(args...)).String()
-	assert.Equal(t, builtHash, token.Hash)
+	assert.Equal(t, builtHash, tokens[0].Hash)
 	fmt.Println("Hashes:")
-	fmt.Println(token.Hash)
+	fmt.Println(tokens[0].Hash)
 	fmt.Println(builtHash)
 
 
@@ -135,7 +124,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	funcDef, abiErr := abi.JSON(strings.NewReader(testAbi))
 	assert.Nil(t, abiErr)
 
-	packedHex := hex.EncodeToString(token.ABIPackedTxn)
+	packedHex := hex.EncodeToString(tokens[0].ABIPackedTxn)
 	fmt.Println(packedHex)
 
 	decodedSig, sigDecodeErr := hex.DecodeString(packedHex[:8])
@@ -167,18 +156,5 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 
 	assert.Equal(t, big.NewInt(3), (unpacked[1]).(*big.Int))
 	assert.Equal(t, big.NewInt(1), (unpacked[2]).(*big.Int))
-
-	time.Sleep(1 * time.Second)
-
-	//Pulling the token from the s3 bucket to ensure it is correctly formatted and the same one that is stored in the redis instance
-	keys, s3KeyErr := s3Bucket.ListKeys()
-	assert.Nil(t, s3KeyErr)
-	fmt.Println(keys)
-	retrievedToken, getTokenErr := s3Bucket.GetToken(contract.Address, msgSender)
-	if getTokenErr != nil {
-		fmt.Println(getTokenErr.Error())
-	}
-	assert.Nil(t, getTokenErr)
-	assert.Equal(t, retrievedToken, token)
 }
 

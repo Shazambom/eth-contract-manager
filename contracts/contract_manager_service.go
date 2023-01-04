@@ -56,10 +56,6 @@ func (cms *ContractManagerService) ListContracts(ctx context.Context, owner stri
 }
 
 func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderInHash bool, msgSender, functionName string, arguments [][]byte, contract *storage.Contract) (*storage.Token, error) {
-	//TODO: Implement a way to have the msgSender hashed with the signature but not packed as an argument. The hash in the contract is created like this: hashRequest(msg.sender, nonce, numberOfTokens, transactionNumber).toEthSignedMessageHash()
-	//We can do this by just sending the signing service the msgSender and if the signing service detects whether or not the msgSender is an empty string it can add it to the hash...
-	//Or we can inject the msgSender into the byteArgs that we send to the signer. This removes the logic from the signer and makes the signer more generic...
-	//Either way we will need some sort of switch boolean that allows callers to choose if they want the msgSender to be apart of the packed txn.
 	log.Println("Unpacking ABI")
 	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
 	if abiErr != nil {

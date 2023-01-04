@@ -38,10 +38,11 @@ message Contract {
 }
 
 message TransactionRequest {
-    string message_sender = 1;
-    string function_name = 2;
-    repeated bytes args = 3;
-    Contract contract = 4;
+    bool sender_in_hash = 1;
+    string message_sender = 2;
+    string function_name = 3;
+    repeated bytes args = 4;
+    Contract contract = 5;
 }
 
 message Transaction {

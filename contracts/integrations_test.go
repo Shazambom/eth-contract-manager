@@ -78,10 +78,11 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	nonceBytes, decodeErr := hex.DecodeString(nonce[2:])
 	assert.Nil(t, decodeErr)
 
-	msgSender := "0x0fA37C622C7E57A06ba12afF48c846F42241F7F0"
+	msgSender := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
 	//Building a transaction for the "mint" function by passing in the nonce, the num requested, and the transaction number
 	_, transactionErr := transactionClient.Client.ConstructTransaction(ctx, &pb.TransactionRequest{
+		SenderInHash: true,
 		MessageSender: msgSender,
 		FunctionName:  "mint",
 		Args:          [][]byte{nonceBytes, []byte("3"), []byte("1")},
@@ -107,6 +108,9 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	signer := signing.SignatureHandler{}
 
 	//Checking the hashes to ensure the signer hashes the transaction properly
+	senderAddrBytes, senderErr := hex.DecodeString(msgSender[2:])
+	assert.Nil(t, senderErr)
+	args = append([][]byte{senderAddrBytes}, args...)
 	builtHash := signer.WrapHash(crypto.Keccak256Hash(args...)).String()
 	assert.Equal(t, builtHash, tokens[0].Hash)
 	fmt.Println("Hashes:")
@@ -125,7 +129,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	assert.Nil(t, abiErr)
 
 	packedHex := hex.EncodeToString(tokens[0].ABIPackedTxn)
-	fmt.Println(packedHex)
+	fmt.Println("Packed Hex of Txn: " + packedHex)
 
 	decodedSig, sigDecodeErr := hex.DecodeString(packedHex[:8])
 	assert.Nil(t, sigDecodeErr)

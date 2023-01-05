@@ -1,15 +1,15 @@
 package main
 
 import (
-	"contract-service/utils"
+	"contract-service/web"
 	"log"
 )
 
 func main() {
 	liveProbeErr := make(chan string)
-	probe := utils.NewProbe()
+	probe := web.NewProbe()
 
-	probe.Serve(liveProbeErr)
+	probe.Serve(8080, liveProbeErr)
 
 
 	log.Fatal(<-liveProbeErr)

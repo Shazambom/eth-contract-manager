@@ -4,6 +4,7 @@ import (
 	"contract-service/listener"
 	"contract-service/storage"
 	"contract-service/utils"
+	"contract-service/web"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"log"
@@ -44,9 +45,9 @@ func main() {
 	}(listenerErr)
 
 	liveProbeErr := make(chan string)
-	probe := utils.NewProbe()
+	probe := web.NewProbe()
 
-	probe.Serve(liveProbeErr)
+	probe.Serve(8080, liveProbeErr)
 
 	log.Fatal(utils.MergeChannels(liveProbeErr, listenerErr))
 }

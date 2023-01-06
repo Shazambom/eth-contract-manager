@@ -17,8 +17,8 @@ type Token struct {
 	UserAddress string `json:"user_address"`
 	Hash string `json:"hash"`
 	IsComplete bool `json:"is_complete"`
-	//TODO Maybe refactor this to just be a string in wei? This would remove the need for the DynamoTransaction struct and reduce complexity
-	// Use BigInt and string and just represent it in wei. Check contract_manager_service.go
+	//TODO Maybe refactor this to just be a string in wei? This would remove the need for the DynamoTransaction struct and reduce complexity... Definitely do this. Float32 is not precise enough.
+	// Use BigInt and string and just represent it in wei. Check contract_manager_service.go for examples
 	Value	float32 `json:"value"`
 }
 

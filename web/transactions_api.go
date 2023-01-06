@@ -3,6 +3,7 @@ package web
 import (
 	"contract-service/contracts"
 	pb "contract-service/proto"
+	"contract-service/storage"
 	"fmt"
 	"net/http"
 )
@@ -38,6 +39,11 @@ func (t *TransactionAPI) GetTransactionsFromAddress(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, "")
 	}
-	//TODO determine if this is the format we want to return things in? I think probably not given the web api will be using this. Cool that it works tho.
-	ctx.ProtoBuf(http.StatusOK, transactions)
+	tokens := []*storage.Token{}
+	for _, txn := range transactions.Transactions {
+		token := &storage.Token{}
+		token.FromRPC(txn)
+		tokens = append(tokens, token)
+	}
+	ctx.JSON(http.StatusOK, tokens)
 }

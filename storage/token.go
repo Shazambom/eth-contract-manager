@@ -30,6 +30,15 @@ func NewToken(contractAddress, userAddress, hash string, abi string, txn []byte)
 	}
 }
 
+func (token *Token) FromRPC(txn *pb.Transaction) {
+	token.ABI = txn.Abi
+	token.Hash = txn.Hash
+	token.ABIPackedTxn = txn.PackedArgs
+	token.ContractAddress = txn.ContractAddress
+	token.UserAddress = txn.UserAddress
+	token.IsComplete = txn.IsComplete
+}
+
 func (token *Token) ToRPC() *pb.Transaction {
 	return &pb.Transaction{
 		Abi:        token.ABI,

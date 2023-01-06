@@ -87,7 +87,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 		MessageSender: msgSender,
 		FunctionName:  "mint",
 		Args:          [][]byte{nonceBytes, []byte("3"), []byte("1")},
-		Contract:      contract,
+		ContractAddress:      contract.Address,
 		Value: 0.45,
 	})
 	if transactionErr != nil {

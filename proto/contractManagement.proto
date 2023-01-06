@@ -33,13 +33,13 @@ message Contract {
     string owner = 6;
 }
 
+//TODO Need some validation on who is calling to prove they have ownership of said contract
 message TransactionRequest {
     bool sender_in_hash = 1;
     string message_sender = 2;
     string function_name = 3;
     repeated bytes args = 4;
-    //TODO Maybe only need the contract address? Why need all of the contract info? May need some validation on who is calling to prove they have ownership of said contract
-    Contract contract = 5;
+    string contract_address = 5;
     float value = 6;
 }
 

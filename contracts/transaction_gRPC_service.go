@@ -3,7 +3,6 @@ package contracts
 import (
 	"context"
 	pb "contract-service/proto"
-	"contract-service/storage"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -50,8 +49,11 @@ func (ts *TransactionRPCService) GetContract(ctx context.Context, address *pb.Ad
 }
 
 func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *pb.TransactionRequest) (*pb.Transaction, error) {
-	contract := &storage.Contract{}
-	contract.FromRPC(req.Contract)
+	contract, contractErr := ts.TransactionManager.GetContract(ctx, req.ContractAddress)
+	if contractErr != nil {
+		log.Println(contractErr.Error())
+		return nil, contractErr
+	}
 
 	token, tokenErr := ts.TransactionManager.BuildTransaction(ctx, req.SenderInHash, req.MessageSender, req.FunctionName, req.Args, req.Value, contract)
 	if tokenErr != nil {

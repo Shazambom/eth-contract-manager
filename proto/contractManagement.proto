@@ -40,13 +40,11 @@ message TransactionRequest {
     repeated bytes args = 4;
     //TODO Maybe only need the contract address? Why need all of the contract info? May need some validation on who is calling to prove they have ownership of said contract
     Contract contract = 5;
+    float value = 6;
 }
 
 message Transaction {
-    //TODO likely don't need to return the abi
-    // just the packed arguments, contract address, user address, and value of ETH are needed to run a transaction
-    // Add value as an option to pack into and return in transactions
-    string abi = 1;
+    float value = 1;
     bytes packed_args = 2;
     string hash = 3;
     string contract_address = 4;

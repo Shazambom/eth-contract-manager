@@ -53,7 +53,7 @@ func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *
 	contract := &storage.Contract{}
 	contract.FromRPC(req.Contract)
 
-	token, tokenErr := ts.TransactionManager.BuildTransaction(ctx, req.SenderInHash, req.MessageSender, req.FunctionName, req.Args, contract)
+	token, tokenErr := ts.TransactionManager.BuildTransaction(ctx, req.SenderInHash, req.MessageSender, req.FunctionName, req.Args, req.Value, contract)
 	if tokenErr != nil {
 		log.Println(tokenErr.Error())
 		return nil, tokenErr

@@ -33,6 +33,8 @@ message Functions {
 message Contract {
     string address = 1;
     string abi = 2;
+    //TODO Change this since its just confusing to use. Instead just have this as:
+    // map<string, Function> functions = 3;
     Functions hashable_functions = 3;
     string owner = 6;
 }

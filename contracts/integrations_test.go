@@ -60,6 +60,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 		}}}},
 		Owner:        "Owner",
 	}
+	fmt.Printf("%+v\n", contract)
 	//Storing the contract and registering it with the contract service
 	_, storeErrr := contractClient.Client.Store(ctx, contract)
 	if storeErrr != nil {
@@ -92,6 +93,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 		fmt.Println(transactionErr)
 	}
 	assert.Nil(t, transactionErr)
+	fmt.Printf("%+v\n", [][]byte{nonceBytes, []byte("3"), []byte("1")})
 
 
 	//Checking that the token was processed correctly, the transaction was signed, and the token was placed in redis

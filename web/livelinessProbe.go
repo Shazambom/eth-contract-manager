@@ -29,8 +29,8 @@ func (p *Probe) Serve(port int, err chan string) {
 	}()
 }
 
-func (p *Probe) Handle(c *gin.Context) {
+func (p *Probe) Handle(ctx *gin.Context) {
 	resp := &LiveResponse{Body: "Service is alive"}
-	c.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, resp)
 	log.Println(resp.Body)
 }

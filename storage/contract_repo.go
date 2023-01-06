@@ -71,15 +71,17 @@ func (c *Contract) ToRPC() (*pb.Contract) {
 
 func (c *Contract) FromRPC(contract *pb.Contract) () {
 	functions := Functions{Functions: map[string]Function{}}
-	for key, val := range contract.HashableFunctions.Functions {
-		function := Function{}
-		for _, arg := range val.Arguments {
-			function.Arguments = append(function.Arguments, Argument{
-				Name: arg.Name,
-				Type: arg.Type,
-			})
+	if contract.HashableFunctions != nil {
+		for key, val := range contract.HashableFunctions.Functions {
+			function := Function{}
+			for _, arg := range val.Arguments {
+				function.Arguments = append(function.Arguments, Argument{
+					Name: arg.Name,
+					Type: arg.Type,
+				})
+			}
+			functions.Functions[key] = function
 		}
-		functions.Functions[key] = function
 	}
 	c.Address = contract.Address
 	c.ABI = contract.Abi

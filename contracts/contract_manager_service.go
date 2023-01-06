@@ -62,7 +62,7 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderI
 		return nil, abiErr
 	}
 	log.Println("Packing arguments")
-	args, byteArgs, argParseErr := cms.UnpackArgs(arguments, funcDef.Methods[functionName], contract.Functions.Functions[functionName])
+	args, byteArgs, argParseErr := cms.UnpackArgs(arguments, funcDef.Methods[functionName], contract.Functions[functionName])
 	if argParseErr != nil {
 		return nil, argParseErr
 	}

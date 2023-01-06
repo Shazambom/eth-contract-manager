@@ -53,11 +53,11 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	contract := &pb.Contract{
 		Address:      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		Abi: testAbi,
-		HashableFunctions:    &pb.Functions{Functions: map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
+		Functions:   map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "numberOfTokens", Type: "uint256"},
 			{Name: "transactionNumber", Type: "uint256"},
-		}}}},
+		}}},
 		Owner:        "Owner",
 	}
 	fmt.Printf("%+v\n", contract)

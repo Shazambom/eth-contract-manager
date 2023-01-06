@@ -9,7 +9,3 @@ type Argument struct {
 type Function struct {
 	Arguments []Argument `json:"arguments"`
 }
-
-type Functions struct {
-	Functions map[string]Function
-}

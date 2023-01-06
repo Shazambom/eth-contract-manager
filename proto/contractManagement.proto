@@ -26,16 +26,10 @@ message Function {
     repeated Argument arguments = 1;
 }
 
-message Functions {
-    map<string, Function> functions = 1;
-}
-
 message Contract {
     string address = 1;
     string abi = 2;
-    //TODO Change this since its just confusing to use. Instead just have this as:
-    // map<string, Function> functions = 3;
-    Functions hashable_functions = 3;
+    map<string, Function> functions = 3;
     string owner = 6;
 }
 
@@ -44,10 +38,14 @@ message TransactionRequest {
     string message_sender = 2;
     string function_name = 3;
     repeated bytes args = 4;
+    //TODO Maybe only need the contract address? Why need all of the contract info? May need some validation on who is calling to prove they have ownership of said contract
     Contract contract = 5;
 }
 
 message Transaction {
+    //TODO likely don't need to return the abi
+    // just the packed arguments, contract address, user address, and value of ETH are needed to run a transaction
+    // Add value as an option to pack into and return in transactions
     string abi = 1;
     bytes packed_args = 2;
     string hash = 3;

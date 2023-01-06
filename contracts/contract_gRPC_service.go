@@ -52,7 +52,8 @@ func (cs *ContractRPCService) Get(ctx context.Context, address *pb.Address) (*pb
 func (cs *ContractRPCService) Store(ctx context.Context, contract *pb.Contract) (*pb.Empty, error) {
 	con := &storage.Contract{}
 	con.FromRPC(contract)
-	log.Printf("Storing contract: %+v\n", con)
+	log.Printf("contract functions: %+v\n", contract.GetFunctions())
+	log.Printf("Storing contract: %+v\n", con.Functions)
 	return &pb.Empty{}, cs.ContractManager.StoreContract(ctx, con)
 }
 

@@ -25,19 +25,19 @@ type ContractConfig struct {
 type Contract struct {
 	Address string `json:"Address"`
 	ABI string `json:"ABI"`
-	Functions Functions `json:"HashableFunctions"`
+	Functions map[string]Function `json:"Functions"`
 	ContractOwner string `json:"ContractOwner"`
 }
 
 type dynamoContract struct {
 	Address string `json:"Address"`
 	ABI string `json:"ABI"`
-	Functions string `json:"HashableFunctions"`
+	Functions string `json:"Functions"`
 	ContractOwner string `json:"ContractOwner"`
 }
 
 func (c *Contract) fromDynamo(dContract *dynamoContract) error {
-	functions := Functions{}
+	functions := map[string]Function{}
 	err := json.Unmarshal([]byte(dContract.Functions), &functions)
 	if err != nil {
 		return err
@@ -50,37 +50,37 @@ func (c *Contract) fromDynamo(dContract *dynamoContract) error {
 }
 
 func (c *Contract) ToRPC() (*pb.Contract) {
-	functions := &pb.Functions{Functions: map[string]*pb.Function{}}
-	for key, val := range c.Functions.Functions {
-		function := &pb.Function{}
+	functions := map[string]*pb.Function{}
+	for key, val := range c.Functions {
+		function := &pb.Function{Arguments: []*pb.Argument{}}
 		for _, arg := range val.Arguments {
 			function.Arguments = append(function.Arguments, &pb.Argument{
 				Name: arg.Name,
 				Type: arg.Type,
 			})
 		}
-		functions.Functions[key] = function
+		functions[key] = function
 	}
 	return &pb.Contract{
 		Address:      c.Address,
 		Abi:          c.ABI,
-		HashableFunctions: 	  functions,
+		Functions: 	  functions,
 		Owner:        c.ContractOwner,
 	}
 }
 
 func (c *Contract) FromRPC(contract *pb.Contract) () {
-	functions := Functions{Functions: map[string]Function{}}
-	if contract.HashableFunctions != nil {
-		for key, val := range contract.HashableFunctions.Functions {
-			function := Function{}
+	functions := map[string]Function{}
+	if contract.Functions != nil {
+		for key, val := range contract.Functions{
+			function := Function{Arguments: []Argument{}}
 			for _, arg := range val.Arguments {
 				function.Arguments = append(function.Arguments, Argument{
 					Name: arg.Name,
 					Type: arg.Type,
 				})
 			}
-			functions.Functions[key] = function
+			functions[key] = function
 		}
 	}
 	c.Address = contract.Address
@@ -171,7 +171,7 @@ func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) 
 			"ABI": {
 				S: aws.String(contract.ABI),
 			},
-			"HashableFunctions": {
+			"Functions": {
 				S: aws.String(string(funcStr)),
 			},
 			"ContractOwner": {

@@ -9,7 +9,6 @@ import (
 )
 import "github.com/gin-gonic/gin"
 
-//TODO DECIDE: Implement interface pattern for the APIs? Or is it specific enough as an implementation that it doesn't require interfaces.
 
 type TransactionAPI struct {
 	client *contracts.TransactionClient

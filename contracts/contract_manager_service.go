@@ -35,6 +35,8 @@ func NewContractTransactionHandler(repo storage.ContractRepository, signer pb.Si
 	}
 }
 
+//TODO Add verifier service client to the ContractManagerHandler so it can verify ownership of contracts
+
 func NewContractManagerHandler(repo storage.ContractRepository) ContractManagerHandler {
 	return &ContractManagerService{repo: repo}
 }

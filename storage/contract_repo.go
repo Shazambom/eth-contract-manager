@@ -21,6 +21,10 @@ type ContractConfig struct {
 	TableName string
 	CFG []*aws.Config
 }
+//TODO Implement Ownership using signatures. The contract owner will be an address and a signature must be passed to modify stuff about a contract.
+
+//TODO Add descriptive fields to a contract, maybe an image url and a description field for the contract
+// also add an Enabled field that can disable and enable contracts from being used by any service other than the owner
 
 type Contract struct {
 	Address string `json:"Address"`
@@ -28,6 +32,9 @@ type Contract struct {
 	Functions map[string]Function `json:"Functions"`
 	ContractOwner string `json:"ContractOwner"`
 }
+
+//TODO Remove this mess and figure out how to easily marshal maps and objects into a dynamo table and then unmarshal it.
+// Having 2 structs to represent the same object is just messy.
 
 type dynamoContract struct {
 	Address string `json:"Address"`

@@ -72,6 +72,11 @@ func StrInStrList(str string, strList []string) bool {
 	return false
 }
 
+func GetNonceBytes() ([]byte, error) {
+	UUID := uuid.New()
+	return UUID.MarshalBinary()
+}
+
 func GetNonce() (string, error) {
 	UUID := uuid.New()
 	UUIDBytes, uuidErr  := UUID.MarshalBinary()

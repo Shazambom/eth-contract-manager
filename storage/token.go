@@ -6,9 +6,10 @@ import (
 	pb "contract-service/proto"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/math"
 	"io/ioutil"
-	"strconv"
 )
 
 type Token struct {
@@ -17,12 +18,13 @@ type Token struct {
 	UserAddress string `json:"user_address"`
 	Hash string `json:"hash"`
 	IsComplete bool `json:"is_complete"`
-	//TODO Maybe refactor this to just be a string in wei? This would remove the need for the DynamoTransaction struct and reduce complexity... Definitely do this. Float32 is not precise enough.
-	// Use BigInt and string and just represent it in wei. Check contract_manager_service.go for examples
-	Value	float32 `json:"value"`
+	Value	string `json:"value"`
 }
 
-func NewToken(contractAddress, userAddress, hash string, txn []byte, value float32) *Token {
+func NewToken(contractAddress, userAddress, hash string, txn []byte, value string) (*Token, error){
+	if _, ok := math.ParseBig256(value); !ok {
+		return nil, errors.New("Error parsing value from value string " + value + " is an invalid amount of wei")
+	}
 	return &Token{
 		ContractAddress: contractAddress,
 		ABIPackedTxn: txn,
@@ -30,51 +32,20 @@ func NewToken(contractAddress, userAddress, hash string, txn []byte, value float
 		Hash: hash,
 		IsComplete: false,
 		Value: value,
-	}
-}
-
-type DynamoTransaction struct {
-	ContractAddress string `json:"contract_address"`
-	ABIPackedTxn []byte `json:"abi_packed_txn"`
-	UserAddress string `json:"user_address"`
-	Hash string `json:"hash"`
-	IsComplete bool `json:"is_complete"`
-	Value	string `json:"value"`
-}
-
-func (dt *DynamoTransaction) ToToken() (*Token, error) {
-	value, err := strconv.ParseFloat(dt.Value, 32)
-	if err != nil {
-		return nil, err
-	}
-	return &Token{
-		ContractAddress: dt.ContractAddress,
-		ABIPackedTxn:    dt.ABIPackedTxn,
-		UserAddress:     dt.UserAddress,
-		Hash:            dt.Hash,
-		IsComplete:      dt.IsComplete,
-		Value:           float32(value),
 	}, nil
 }
 
-func (token *Token) ToDynamo() *DynamoTransaction {
-	return &DynamoTransaction{
-		ContractAddress: token.ContractAddress,
-		ABIPackedTxn:    token.ABIPackedTxn,
-		UserAddress:     token.UserAddress,
-		Hash:            token.Hash,
-		IsComplete:      token.IsComplete,
-		Value:           fmt.Sprintf("%f", token.Value),
+func (token *Token) FromRPC(txn *pb.Transaction) error {
+	if _, ok := math.ParseBig256(txn.Value); !ok {
+		return errors.New("Error parsing value from value string " + txn.Value + " is an invalid amount of wei")
 	}
-}
-
-func (token *Token) FromRPC(txn *pb.Transaction) {
 	token.Hash = txn.Hash
 	token.ABIPackedTxn = txn.PackedArgs
 	token.ContractAddress = txn.ContractAddress
 	token.UserAddress = txn.UserAddress
 	token.IsComplete = txn.IsComplete
 	token.Value = txn.Value
+	return nil
 }
 
 func (token *Token) ToRPC() *pb.Transaction {

@@ -40,11 +40,11 @@ message TransactionRequest {
     string function_name = 3;
     repeated bytes args = 4;
     string contract_address = 5;
-    float value = 6;
+    string value = 6;
 }
 
 message Transaction {
-    float value = 1;
+    string value = 1;
     bytes packed_args = 2;
     string hash = 3;
     string contract_address = 4;

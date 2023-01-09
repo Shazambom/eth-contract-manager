@@ -353,7 +353,7 @@ type TransactionRequest struct {
 	FunctionName    string   `protobuf:"bytes,3,opt,name=function_name,json=functionName,proto3" json:"function_name,omitempty"`
 	Args            [][]byte `protobuf:"bytes,4,rep,name=args,proto3" json:"args,omitempty"`
 	ContractAddress string   `protobuf:"bytes,5,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
-	Value           float32  `protobuf:"fixed32,6,opt,name=value,proto3" json:"value,omitempty"`
+	Value           string   `protobuf:"bytes,6,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (x *TransactionRequest) Reset() {
@@ -423,11 +423,11 @@ func (x *TransactionRequest) GetContractAddress() string {
 	return ""
 }
 
-func (x *TransactionRequest) GetValue() float32 {
+func (x *TransactionRequest) GetValue() string {
 	if x != nil {
 		return x.Value
 	}
-	return 0
+	return ""
 }
 
 type Transaction struct {
@@ -435,12 +435,12 @@ type Transaction struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Value           float32 `protobuf:"fixed32,1,opt,name=value,proto3" json:"value,omitempty"`
-	PackedArgs      []byte  `protobuf:"bytes,2,opt,name=packed_args,json=packedArgs,proto3" json:"packed_args,omitempty"`
-	Hash            string  `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash,omitempty"`
-	ContractAddress string  `protobuf:"bytes,4,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
-	UserAddress     string  `protobuf:"bytes,5,opt,name=user_address,json=userAddress,proto3" json:"user_address,omitempty"`
-	IsComplete      bool    `protobuf:"varint,6,opt,name=is_complete,json=isComplete,proto3" json:"is_complete,omitempty"`
+	Value           string `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
+	PackedArgs      []byte `protobuf:"bytes,2,opt,name=packed_args,json=packedArgs,proto3" json:"packed_args,omitempty"`
+	Hash            string `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash,omitempty"`
+	ContractAddress string `protobuf:"bytes,4,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
+	UserAddress     string `protobuf:"bytes,5,opt,name=user_address,json=userAddress,proto3" json:"user_address,omitempty"`
+	IsComplete      bool   `protobuf:"varint,6,opt,name=is_complete,json=isComplete,proto3" json:"is_complete,omitempty"`
 }
 
 func (x *Transaction) Reset() {
@@ -475,11 +475,11 @@ func (*Transaction) Descriptor() ([]byte, []int) {
 	return file_proto_contractManagement_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *Transaction) GetValue() float32 {
+func (x *Transaction) GetValue() string {
 	if x != nil {
 		return x.Value
 	}
-	return 0
+	return ""
 }
 
 func (x *Transaction) GetPackedArgs() []byte {
@@ -750,9 +750,9 @@ var file_proto_contractManagement_proto_rawDesc = []byte{
 	0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x5f, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x05,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x41, 0x64,
 	0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x06,
-	0x20, 0x01, 0x28, 0x02, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0xc7, 0x01, 0x0a, 0x0b,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0xc7, 0x01, 0x0a, 0x0b,
 	0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x76,
-	0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x02, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75,
 	0x65, 0x12, 0x1f, 0x0a, 0x0b, 0x70, 0x61, 0x63, 0x6b, 0x65, 0x64, 0x5f, 0x61, 0x72, 0x67, 0x73,
 	0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0a, 0x70, 0x61, 0x63, 0x6b, 0x65, 0x64, 0x41, 0x72,
 	0x67, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,

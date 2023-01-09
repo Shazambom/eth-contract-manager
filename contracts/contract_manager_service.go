@@ -55,7 +55,7 @@ func (cms *ContractManagerService) ListContracts(ctx context.Context, owner stri
 	return cms.repo.GetContractsByOwner(ctx, owner)
 }
 
-func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderInHash bool, msgSender, functionName string, arguments [][]byte, value float32, contract *storage.Contract) (*storage.Token, error) {
+func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderInHash bool, msgSender, functionName string, arguments [][]byte, value string, contract *storage.Contract) (*storage.Token, error) {
 	log.Println("Unpacking ABI")
 	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
 	if abiErr != nil {
@@ -93,7 +93,7 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderI
 	}
 
 	log.Println("Token created")
-	return storage.NewToken(contract.Address, msgSender, signature.Hash, packed, value), nil
+	return storage.NewToken(contract.Address, msgSender, signature.Hash, packed, value)
 }
 
 

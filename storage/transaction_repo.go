@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -32,7 +31,7 @@ func NewTransactionRepo(config TransactionConfig) (TransactionRepository, error)
 func (tr *TransactionRepo) StoreTransaction(ctx context.Context, token Token) error {
 	_, err := tr.db.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
-			"value": {S: aws.String(fmt.Sprintf("%f", token.Value))},
+			"value": {S: aws.String(token.Value)},
 			"abi_packed_txn": {B: token.ABIPackedTxn},
 			"contract_address": {S: aws.String(token.ContractAddress)},
 			"user_address": {S: aws.String(token.UserAddress)},
@@ -51,18 +50,13 @@ func (tr *TransactionRepo) queryTransactionsTable(ctx context.Context, input *dy
 	}
 	tokens := []*Token{}
 	for _, item := range result.Items {
-		dt := DynamoTransaction{}
-		marshalErr := dynamodbattribute.UnmarshalMap(item, &dt)
+		token := Token{}
+		marshalErr := dynamodbattribute.UnmarshalMap(item, &token)
 		if marshalErr != nil {
 			log.Println(marshalErr.Error())
 			continue
 		}
-		token, tokenParseErr := dt.ToToken()
-		if tokenParseErr != nil {
-			log.Println(tokenParseErr.Error())
-			continue
-		}
-		tokens = append(tokens, token)
+		tokens = append(tokens, &token)
 	}
 	return tokens, nil
 }

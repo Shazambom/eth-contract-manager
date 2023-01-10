@@ -103,3 +103,89 @@ var MintService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "proto/minting.proto",
 }
+
+// ClaimServiceClient is the client API for ClaimService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ClaimServiceClient interface {
+	BuildClaimTransaction(ctx context.Context, in *ClaimRequest, opts ...grpc.CallOption) (*MintResponse, error)
+}
+
+type claimServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewClaimServiceClient(cc grpc.ClientConnInterface) ClaimServiceClient {
+	return &claimServiceClient{cc}
+}
+
+func (c *claimServiceClient) BuildClaimTransaction(ctx context.Context, in *ClaimRequest, opts ...grpc.CallOption) (*MintResponse, error) {
+	out := new(MintResponse)
+	err := c.cc.Invoke(ctx, "/ClaimService/BuildClaimTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ClaimServiceServer is the server API for ClaimService service.
+// All implementations must embed UnimplementedClaimServiceServer
+// for forward compatibility
+type ClaimServiceServer interface {
+	BuildClaimTransaction(context.Context, *ClaimRequest) (*MintResponse, error)
+	mustEmbedUnimplementedClaimServiceServer()
+}
+
+// UnimplementedClaimServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedClaimServiceServer struct {
+}
+
+func (UnimplementedClaimServiceServer) BuildClaimTransaction(context.Context, *ClaimRequest) (*MintResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BuildClaimTransaction not implemented")
+}
+func (UnimplementedClaimServiceServer) mustEmbedUnimplementedClaimServiceServer() {}
+
+// UnsafeClaimServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ClaimServiceServer will
+// result in compilation errors.
+type UnsafeClaimServiceServer interface {
+	mustEmbedUnimplementedClaimServiceServer()
+}
+
+func RegisterClaimServiceServer(s grpc.ServiceRegistrar, srv ClaimServiceServer) {
+	s.RegisterService(&ClaimService_ServiceDesc, srv)
+}
+
+func _ClaimService_BuildClaimTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClaimRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClaimServiceServer).BuildClaimTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ClaimService/BuildClaimTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClaimServiceServer).BuildClaimTransaction(ctx, req.(*ClaimRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ClaimService_ServiceDesc is the grpc.ServiceDesc for ClaimService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ClaimService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ClaimService",
+	HandlerType: (*ClaimServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "BuildClaimTransaction",
+			Handler:    _ClaimService_BuildClaimTransaction_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "proto/minting.proto",
+}

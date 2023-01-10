@@ -31,8 +31,10 @@ message ClaimRequest {
 
 service MintService {
     rpc BuildMintTransaction(MintRequest) returns(MintResponse) {}
+    //TODO Build function for Claiming ERC1155 tokens as well
 }
 
 service ClaimService {
     rpc BuildClaimTransaction(ClaimRequest) returns(MintResponse) {}
+    //TODO Build function for Claiming ERC1155 tokens as well
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -111,6 +112,9 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	signer := signing.SignatureHandler{}
 
 	//Checking the hashes to ensure the signer hashes the transaction properly
+	value, ok := math.ParseBig256("450000000000000000")
+	assert.True(t, ok)
+	args = append([][]byte{value.Bytes()}, args...)
 	senderAddrBytes, senderErr := hex.DecodeString(msgSender[2:])
 	assert.Nil(t, senderErr)
 	args = append([][]byte{senderAddrBytes}, args...)

@@ -69,6 +69,13 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderI
 		return nil, argParseErr
 	}
 
+	//Injecting value into arguments to validate the txn actually pays the contract what it's owed at runtime
+	valueInt, ok := math.ParseBig256(value)
+	if !ok {
+		return nil, errors.New("invalid value, value is of type int256 and represents the amount of eth in wei")
+	}
+	byteArgs = append([][]byte{valueInt.Bytes()}, byteArgs...)
+	//Injecting sender into arguments to validate the sender of the txn is who should be sending it
 	if senderInHash {
 		senderAddrBytes, senderErr := hex.DecodeString(msgSender[2:])
 		if senderErr != nil {

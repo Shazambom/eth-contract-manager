@@ -18,172 +18,122 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// MintServiceClient is the client API for MintService service.
+// ContractIntegrationClient is the client API for ContractIntegration service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type MintServiceClient interface {
+type ContractIntegrationClient interface {
 	BuildMintTransaction(ctx context.Context, in *MintRequest, opts ...grpc.CallOption) (*MintResponse, error)
+	BuildClaimTransaction(ctx context.Context, in *ClaimRequest, opts ...grpc.CallOption) (*MintResponse, error)
 }
 
-type mintServiceClient struct {
+type contractIntegrationClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewMintServiceClient(cc grpc.ClientConnInterface) MintServiceClient {
-	return &mintServiceClient{cc}
+func NewContractIntegrationClient(cc grpc.ClientConnInterface) ContractIntegrationClient {
+	return &contractIntegrationClient{cc}
 }
 
-func (c *mintServiceClient) BuildMintTransaction(ctx context.Context, in *MintRequest, opts ...grpc.CallOption) (*MintResponse, error) {
+func (c *contractIntegrationClient) BuildMintTransaction(ctx context.Context, in *MintRequest, opts ...grpc.CallOption) (*MintResponse, error) {
 	out := new(MintResponse)
-	err := c.cc.Invoke(ctx, "/MintService/BuildMintTransaction", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ContractIntegration/BuildMintTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MintServiceServer is the server API for MintService service.
-// All implementations must embed UnimplementedMintServiceServer
+func (c *contractIntegrationClient) BuildClaimTransaction(ctx context.Context, in *ClaimRequest, opts ...grpc.CallOption) (*MintResponse, error) {
+	out := new(MintResponse)
+	err := c.cc.Invoke(ctx, "/ContractIntegration/BuildClaimTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ContractIntegrationServer is the server API for ContractIntegration service.
+// All implementations must embed UnimplementedContractIntegrationServer
 // for forward compatibility
-type MintServiceServer interface {
+type ContractIntegrationServer interface {
 	BuildMintTransaction(context.Context, *MintRequest) (*MintResponse, error)
-	mustEmbedUnimplementedMintServiceServer()
+	BuildClaimTransaction(context.Context, *ClaimRequest) (*MintResponse, error)
+	mustEmbedUnimplementedContractIntegrationServer()
 }
 
-// UnimplementedMintServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedMintServiceServer struct {
+// UnimplementedContractIntegrationServer must be embedded to have forward compatible implementations.
+type UnimplementedContractIntegrationServer struct {
 }
 
-func (UnimplementedMintServiceServer) BuildMintTransaction(context.Context, *MintRequest) (*MintResponse, error) {
+func (UnimplementedContractIntegrationServer) BuildMintTransaction(context.Context, *MintRequest) (*MintResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BuildMintTransaction not implemented")
 }
-func (UnimplementedMintServiceServer) mustEmbedUnimplementedMintServiceServer() {}
+func (UnimplementedContractIntegrationServer) BuildClaimTransaction(context.Context, *ClaimRequest) (*MintResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BuildClaimTransaction not implemented")
+}
+func (UnimplementedContractIntegrationServer) mustEmbedUnimplementedContractIntegrationServer() {}
 
-// UnsafeMintServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to MintServiceServer will
+// UnsafeContractIntegrationServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ContractIntegrationServer will
 // result in compilation errors.
-type UnsafeMintServiceServer interface {
-	mustEmbedUnimplementedMintServiceServer()
+type UnsafeContractIntegrationServer interface {
+	mustEmbedUnimplementedContractIntegrationServer()
 }
 
-func RegisterMintServiceServer(s grpc.ServiceRegistrar, srv MintServiceServer) {
-	s.RegisterService(&MintService_ServiceDesc, srv)
+func RegisterContractIntegrationServer(s grpc.ServiceRegistrar, srv ContractIntegrationServer) {
+	s.RegisterService(&ContractIntegration_ServiceDesc, srv)
 }
 
-func _MintService_BuildMintTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ContractIntegration_BuildMintTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MintRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MintServiceServer).BuildMintTransaction(ctx, in)
+		return srv.(ContractIntegrationServer).BuildMintTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/MintService/BuildMintTransaction",
+		FullMethod: "/ContractIntegration/BuildMintTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MintServiceServer).BuildMintTransaction(ctx, req.(*MintRequest))
+		return srv.(ContractIntegrationServer).BuildMintTransaction(ctx, req.(*MintRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// MintService_ServiceDesc is the grpc.ServiceDesc for MintService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var MintService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "MintService",
-	HandlerType: (*MintServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "BuildMintTransaction",
-			Handler:    _MintService_BuildMintTransaction_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/minting.proto",
-}
-
-// ClaimServiceClient is the client API for ClaimService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ClaimServiceClient interface {
-	BuildClaimTransaction(ctx context.Context, in *ClaimRequest, opts ...grpc.CallOption) (*MintResponse, error)
-}
-
-type claimServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewClaimServiceClient(cc grpc.ClientConnInterface) ClaimServiceClient {
-	return &claimServiceClient{cc}
-}
-
-func (c *claimServiceClient) BuildClaimTransaction(ctx context.Context, in *ClaimRequest, opts ...grpc.CallOption) (*MintResponse, error) {
-	out := new(MintResponse)
-	err := c.cc.Invoke(ctx, "/ClaimService/BuildClaimTransaction", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// ClaimServiceServer is the server API for ClaimService service.
-// All implementations must embed UnimplementedClaimServiceServer
-// for forward compatibility
-type ClaimServiceServer interface {
-	BuildClaimTransaction(context.Context, *ClaimRequest) (*MintResponse, error)
-	mustEmbedUnimplementedClaimServiceServer()
-}
-
-// UnimplementedClaimServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedClaimServiceServer struct {
-}
-
-func (UnimplementedClaimServiceServer) BuildClaimTransaction(context.Context, *ClaimRequest) (*MintResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BuildClaimTransaction not implemented")
-}
-func (UnimplementedClaimServiceServer) mustEmbedUnimplementedClaimServiceServer() {}
-
-// UnsafeClaimServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ClaimServiceServer will
-// result in compilation errors.
-type UnsafeClaimServiceServer interface {
-	mustEmbedUnimplementedClaimServiceServer()
-}
-
-func RegisterClaimServiceServer(s grpc.ServiceRegistrar, srv ClaimServiceServer) {
-	s.RegisterService(&ClaimService_ServiceDesc, srv)
-}
-
-func _ClaimService_BuildClaimTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ContractIntegration_BuildClaimTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ClaimRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ClaimServiceServer).BuildClaimTransaction(ctx, in)
+		return srv.(ContractIntegrationServer).BuildClaimTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ClaimService/BuildClaimTransaction",
+		FullMethod: "/ContractIntegration/BuildClaimTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClaimServiceServer).BuildClaimTransaction(ctx, req.(*ClaimRequest))
+		return srv.(ContractIntegrationServer).BuildClaimTransaction(ctx, req.(*ClaimRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// ClaimService_ServiceDesc is the grpc.ServiceDesc for ClaimService service.
+// ContractIntegration_ServiceDesc is the grpc.ServiceDesc for ContractIntegration service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ClaimService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ClaimService",
-	HandlerType: (*ClaimServiceServer)(nil),
+var ContractIntegration_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ContractIntegration",
+	HandlerType: (*ContractIntegrationServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "BuildMintTransaction",
+			Handler:    _ContractIntegration_BuildMintTransaction_Handler,
+		},
+		{
 			MethodName: "BuildClaimTransaction",
-			Handler:    _ClaimService_BuildClaimTransaction_Handler,
+			Handler:    _ContractIntegration_BuildClaimTransaction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

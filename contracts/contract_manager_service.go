@@ -304,7 +304,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 	return args, argBytes, nil
 }
 
-func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Token, contract *storage.Contract) error {
+func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Token) error {
 	return cms.txnRepo.StoreTransaction(ctx, *token)
 }
 

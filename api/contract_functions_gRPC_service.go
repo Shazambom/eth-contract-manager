@@ -9,7 +9,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"log"
-	"math/big"
 	"net"
 )
 
@@ -51,15 +50,17 @@ func (cRPC *ContractIntegrationRPC) BuildClaimTransaction(ctx context.Context, r
 		return &pb.MintResponse{Status: pb.Code_CODE_INTERNAL_SERVER_ERROR, Message: nonceErr.Error()}, nil
 	}
 
-	tokenId := new(big.Int).SetInt64(req.TokenId)
+	tokenId := fmt.Sprintf("%d", req.TokenId)
 
 	args = append(args, nonce)
-	args = append(args, tokenId.Bytes())
+	args = append(args, []byte(tokenId))
+
+	log.Printf("%+v\n", args)
 
 	_, err := cRPC.TransactionService.Client.ConstructTransaction(ctx, &pb.TransactionRequest{
 		SenderInHash:    true,
 		MessageSender:   req.MessageSender,
-		FunctionName:    "mint",
+		FunctionName:    "mintArtie",
 		Args:            args,
 		ContractAddress: req.ContractAddress,
 		Value:           "0",
@@ -80,12 +81,12 @@ func (cRPC *ContractIntegrationRPC) BuildMintTransaction(ctx context.Context, re
 		return &pb.MintResponse{Status: pb.Code_CODE_INTERNAL_SERVER_ERROR, Message: nonceErr.Error()}, nil
 	}
 
-	tokensRequested := new(big.Int).SetInt64(req.NumberOfTokens)
-	transactionNumber := new(big.Int).SetInt64(req.TransactionNumber)
+	tokensRequested := fmt.Sprintf("%d", req.NumberOfTokens)
+	transactionNumber := fmt.Sprintf("%d", req.TransactionNumber)
 
 	args = append(args, nonce)
-	args = append(args, tokensRequested.Bytes())
-	args = append(args, transactionNumber.Bytes())
+	args = append(args, []byte(tokensRequested))
+	args = append(args, []byte(transactionNumber))
 
 	_, err := cRPC.TransactionService.Client.ConstructTransaction(ctx, &pb.TransactionRequest{
 		SenderInHash:    true,

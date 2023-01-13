@@ -64,25 +64,28 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderI
 		return nil, abiErr
 	}
 	log.Println("Packing arguments")
-	args, byteArgs, argParseErr := cms.UnpackArgs(arguments, funcDef.Methods[functionName], contract.Functions[functionName])
+	function, funcOk := contract.Functions[functionName]
+	if !funcOk {
+		log.Println("Function not a hashible function")
+		return nil, errors.New("function selected is not hashible")
+	}
+	args, byteArgs, argParseErr := cms.UnpackArgs(arguments, funcDef.Methods[functionName], function)
 	if argParseErr != nil {
 		return nil, argParseErr
 	}
 
-	//Injecting value into arguments to validate the txn actually pays the contract what it's owed at runtime
-	valueInt, ok := math.ParseBig256(value)
-	if !ok {
+	//Pre-pending value into arguments to validate the txn actually pays the contract what it's owed at runtime
+	valueInt, valueOk := math.ParseBig256(value)
+	if !valueOk {
 		return nil, errors.New("invalid value, value is of type int256 and represents the amount of eth in wei")
 	}
-	byteArgs = append([][]byte{valueInt.Bytes()}, byteArgs...)
-	//Injecting sender into arguments to validate the sender of the txn is who should be sending it
+	byteArgs = append([][]byte{common.LeftPadBytes(valueInt.Bytes(), 32)}, byteArgs...)
+	//Pre-pending sender into arguments to validate the sender of the txn is who should be sending it
 	if senderInHash {
-		senderAddrBytes, senderErr := hex.DecodeString(msgSender[2:])
-		if senderErr != nil {
-			return nil, senderErr
-		}
-		byteArgs = append([][]byte{senderAddrBytes}, byteArgs...)
+		byteArgs = append([][]byte{common.HexToAddress(msgSender).Bytes()}, byteArgs...)
 	}
+	//Argument priority order: msg.sender, msg.value, args...
+	//So we prepend the value first, then prepend the sender so the sender goes before the value
 
 	log.Println("Sending Signature Request")
 	signature, signingErr := cms.signer.SignTxn(ctx, &pb.SignatureRequest{ContractAddress: contract.Address, Args: byteArgs})
@@ -108,6 +111,9 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderI
 
 func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Method, hashibleFunc storage.Function) ([]interface{}, [][]byte, error) {
 	//All of this splitting logic is to nicely organize the arguments, names and types
+	if method.String() == "" {
+		return nil, nil, errors.New("method could not be found")
+	}
 	split := strings.Split(method.String(), "(")
 	otherSplit := strings.Split(split[1], ")")
 	argStrs := strings.Split(otherSplit[0], ",")

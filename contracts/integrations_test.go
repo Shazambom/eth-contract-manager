@@ -114,7 +114,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	//Checking the hashes to ensure the signer hashes the transaction properly
 	value, ok := math.ParseBig256("450000000000000000")
 	assert.True(t, ok)
-	args = append([][]byte{value.Bytes()}, args...)
+	args = append([][]byte{common.LeftPadBytes(value.Bytes(), 32)}, args...)
 	senderAddrBytes, senderErr := hex.DecodeString(msgSender[2:])
 	assert.Nil(t, senderErr)
 	args = append([][]byte{senderAddrBytes}, args...)

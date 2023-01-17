@@ -16,11 +16,6 @@ var dynamoCfg = &aws.Config{
 	DisableSSL:       aws.Bool(true),
 }
 
-var rdsCfg = RedisConfig{
-	Endpoint: "localhost:6379",
-	Password: "pass",
-	CountKey: "counterTest",
-}
 var ctx = context.Background()
 
 var s3cfg = &aws.Config{
@@ -52,14 +47,6 @@ var pkr PrivateKeyRepository
 var tr TransactionRepository
 
 func TestMain(m *testing.M) {
-	s3, s3Err := NewS3(s3cfg, testBucketName)
-	if s3Err != nil {
-		log.Fatal(s3Err)
-	}
-	if s3InitErr := s3.InitBucket(); s3InitErr != nil {
-		log.Fatal(s3InitErr)
-	}
-
 	var pkrErr error
 	pkr, pkrErr = NewPrivateKeyRepository(PrivateKeyRepoConfig)
 	if pkrErr != nil {

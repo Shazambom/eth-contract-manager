@@ -1,42 +1,5 @@
 version: '3.8'
 services:
-  redis:
-    image: "redis:alpine"
-    command: redis-server --requirepass pass
-    ports:
-      - "6379:6379"
-    volumes:
-      - $PWD/redis-data:/var/lib/redis
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
-    networks:
-      - contract-service
-
-  s3:
-    image: localstack/localstack:latest-arm64
-    environment:
-      SERVICES: s3
-      AWS_ACCESS_KEY_ID: xxx
-      AWS_SECRET_ACCESS_KEY: yyy
-      DATA_DIR: /tmp/localstack/data
-      NODE_TLS_REJECT_UNAUTHORIZED: 0
-      CacheControl: no-cache
-      USE_SSL: false
-    ports:
-      - "4566:4566"
-    networks:
-      - contract-service
-    volumes:
-      - ./aws:/docker-entrypoint-initaws.d
-    healthcheck:
-      test: [ "CMD", "awslocal", "s3api", "wait", "bucket-exists", "--bucket", "tokens" ]
-      interval: 5s
-      timeout: 10s
-      start_period: 10s
-
   dynamodb:
     image: amazon/dynamodb-local:latest
     container_name: dynamodb
@@ -67,29 +30,6 @@ services:
       done
       '
 
-
-#TODO decide what to do with the listener service, should we remove it entirely?
-#  listener:
-#    build:
-#      context: ..
-#      dockerfile: ./build/listener/Dockerfile
-#    restart: always
-#    environment:
-#      REDIS_ENDPOINT: "redis:6379"
-#      REDIS_PASSWORD: "pass"
-#      AWS_ENDPOINT: "s3:4566"
-#      AWS_REGION: "us-east-1"
-#      BUCKET_NAME: "tokens"
-#      AWS_ACCESS_KEY_ID: "xxx"
-#      AWS_SECRET_ACCESS_KEY: "yyy"
-#      SSL_ENABLED: "false"
-#    networks:
-#      - contract-service
-#    depends_on:
-#      redis:
-#        condition: service_healthy
-#      s3:
-#        condition: service_healthy
 
   signer:
     build:

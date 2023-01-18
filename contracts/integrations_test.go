@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -53,13 +54,14 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	contract := &pb.Contract{
 		Address:      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		Abi: testAbi,
-		HashableFunctions:    &pb.Functions{Functions: map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
+		Functions:   map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "numberOfTokens", Type: "uint256"},
 			{Name: "transactionNumber", Type: "uint256"},
-		}}}},
+		}}},
 		Owner:        "Owner",
 	}
+	fmt.Printf("%+v\n", contract)
 	//Storing the contract and registering it with the contract service
 	_, storeErrr := contractClient.Client.Store(ctx, contract)
 	if storeErrr != nil {
@@ -78,19 +80,22 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	nonceBytes, decodeErr := hex.DecodeString(nonce[2:])
 	assert.Nil(t, decodeErr)
 
-	msgSender := "0x0fA37C622C7E57A06ba12afF48c846F42241F7F0"
+	msgSender := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
 	//Building a transaction for the "mint" function by passing in the nonce, the num requested, and the transaction number
 	_, transactionErr := transactionClient.Client.ConstructTransaction(ctx, &pb.TransactionRequest{
+		SenderInHash: true,
 		MessageSender: msgSender,
 		FunctionName:  "mint",
 		Args:          [][]byte{nonceBytes, []byte("3"), []byte("1")},
-		Contract:      contract,
+		ContractAddress:      contract.Address,
+		Value: "450000000000000000",
 	})
 	if transactionErr != nil {
 		fmt.Println(transactionErr)
 	}
 	assert.Nil(t, transactionErr)
+	fmt.Printf("%+v\n", [][]byte{nonceBytes, []byte("3"), []byte("1")})
 
 
 	//Checking that the token was processed correctly, the transaction was signed, and the token was placed in redis
@@ -107,6 +112,12 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	signer := signing.SignatureHandler{}
 
 	//Checking the hashes to ensure the signer hashes the transaction properly
+	value, ok := math.ParseBig256("450000000000000000")
+	assert.True(t, ok)
+	args = append([][]byte{common.LeftPadBytes(value.Bytes(), 32)}, args...)
+	senderAddrBytes, senderErr := hex.DecodeString(msgSender[2:])
+	assert.Nil(t, senderErr)
+	args = append([][]byte{senderAddrBytes}, args...)
 	builtHash := signer.WrapHash(crypto.Keccak256Hash(args...)).String()
 	assert.Equal(t, builtHash, tokens[0].Hash)
 	fmt.Println("Hashes:")
@@ -125,7 +136,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	assert.Nil(t, abiErr)
 
 	packedHex := hex.EncodeToString(tokens[0].ABIPackedTxn)
-	fmt.Println(packedHex)
+	fmt.Println("Packed Hex of Txn: " + packedHex)
 
 	decodedSig, sigDecodeErr := hex.DecodeString(packedHex[:8])
 	assert.Nil(t, sigDecodeErr)

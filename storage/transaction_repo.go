@@ -31,7 +31,7 @@ func NewTransactionRepo(config TransactionConfig) (TransactionRepository, error)
 func (tr *TransactionRepo) StoreTransaction(ctx context.Context, token Token) error {
 	_, err := tr.db.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
-			"abi": {S: aws.String(token.ABI)},
+			"value": {S: aws.String(token.Value)},
 			"abi_packed_txn": {B: token.ABIPackedTxn},
 			"contract_address": {S: aws.String(token.ContractAddress)},
 			"user_address": {S: aws.String(token.UserAddress)},

@@ -26,26 +26,25 @@ message Function {
     repeated Argument arguments = 1;
 }
 
-message Functions {
-    map<string, Function> functions = 1;
-}
-
 message Contract {
     string address = 1;
     string abi = 2;
-    Functions hashable_functions = 3;
+    map<string, Function> functions = 3;
     string owner = 6;
 }
 
+//TODO Need some validation on who is calling to prove they have ownership of said contract
 message TransactionRequest {
-    string message_sender = 1;
-    string function_name = 2;
-    repeated bytes args = 3;
-    Contract contract = 4;
+    bool sender_in_hash = 1;
+    string message_sender = 2;
+    string function_name = 3;
+    repeated bytes args = 4;
+    string contract_address = 5;
+    string value = 6;
 }
 
 message Transaction {
-    string abi = 1;
+    string value = 1;
     bytes packed_args = 2;
     string hash = 3;
     string contract_address = 4;

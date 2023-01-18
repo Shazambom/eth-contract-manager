@@ -182,7 +182,59 @@ services:
       timeout: 2s
       start_period: 1s
 
-#TODO Spin up API service for external APIs
+
+  web:
+    build:
+      context: ..
+      dockerfile: ./build/web/Dockerfile
+    restart: always
+    environment:
+      SIGNER_HOST: "signer:8081"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "xxx"
+      AWS_SECRET_ACCESS_KEY: "yyy"
+      SSL_ENABLED: "false"
+      PORT: 8084
+    ports:
+      - "8084:8084"
+    networks:
+      - contract-service
+    depends_on:
+      contract-manager:
+        condition: service_healthy
+      signer:
+        condition: service_healthy
+      transaction-manager:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ..
+      dockerfile: ./build/api/Dockerfile
+    restart: always
+    environment:
+      SIGNER_HOST: "signer:8081"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "xxx"
+      AWS_SECRET_ACCESS_KEY: "yyy"
+      SSL_ENABLED: "false"
+      PORT: 8085
+    ports:
+      - "8085:8085"
+    networks:
+      - contract-service
+    depends_on:
+      contract-manager:
+        condition: service_healthy
+      signer:
+        condition: service_healthy
+      transaction-manager:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=localhost:8085", "-v", "-service=ContractIntegrationService"]
+      interval: 2s
+      timeout: 2s
+      start_period: 1s
 
 
 

@@ -33,6 +33,8 @@ func TestSignatureHandler_GenerateKey(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, len(priv), 64)
 	assert.Equal(t, len(addr), 42)
+	fmt.Printf("private key: %s\n", priv)
+	fmt.Printf("address: %s\n", addr)
 }
 
 func TestSignatureHandler_SignTxn_and_VerifyFromHash(t *testing.T) {

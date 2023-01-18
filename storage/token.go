@@ -6,38 +6,56 @@ import (
 	pb "contract-service/proto"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/math"
 	"io/ioutil"
 )
 
 type Token struct {
 	ContractAddress string `json:"contract_address"`
 	ABIPackedTxn []byte `json:"abi_packed_txn"`
-	ABI string `json:"abi"`
 	UserAddress string `json:"user_address"`
 	Hash string `json:"hash"`
 	IsComplete bool `json:"is_complete"`
+	Value	string `json:"value"`
 }
 
-func NewToken(contractAddress, userAddress, hash string, abi string, txn []byte) *Token {
+func NewToken(contractAddress, userAddress, hash string, txn []byte, value string) (*Token, error){
+	if _, ok := math.ParseBig256(value); !ok {
+		return nil, errors.New("Error parsing value from value string " + value + " is an invalid amount of wei")
+	}
 	return &Token{
 		ContractAddress: contractAddress,
 		ABIPackedTxn: txn,
-		ABI: abi,
 		UserAddress: userAddress,
 		Hash: hash,
 		IsComplete: false,
+		Value: value,
+	}, nil
+}
+
+func (token *Token) FromRPC(txn *pb.Transaction) error {
+	if _, ok := math.ParseBig256(txn.Value); !ok {
+		return errors.New("Error parsing value from value string " + txn.Value + " is an invalid amount of wei")
 	}
+	token.Hash = txn.Hash
+	token.ABIPackedTxn = txn.PackedArgs
+	token.ContractAddress = txn.ContractAddress
+	token.UserAddress = txn.UserAddress
+	token.IsComplete = txn.IsComplete
+	token.Value = txn.Value
+	return nil
 }
 
 func (token *Token) ToRPC() *pb.Transaction {
 	return &pb.Transaction{
-		Abi:        token.ABI,
 		PackedArgs: token.ABIPackedTxn,
 		Hash:       token.Hash,
 		ContractAddress: token.ContractAddress,
 		UserAddress: token.UserAddress,
 		IsComplete: token.IsComplete,
+		Value: token.Value,
 	}
 }
 
@@ -89,7 +107,7 @@ func (token *Token) UnZip(payload []byte) error {
 	}
 	token.ContractAddress = tok.ContractAddress
 	token.UserAddress = tok.UserAddress
-	token.ABI = tok.ABI
+	token.Value = tok.Value
 	token.Hash = tok.Hash
 	token.ABIPackedTxn = tok.ABIPackedTxn
 	return nil

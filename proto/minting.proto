@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+
+option go_package = "./;pb";
+
+enum Code {
+    CODE_SUCCESS= 0;
+    CODE_BAD_REQUEST = 1;
+    CODE_INTERNAL_SERVER_ERROR = 2;
+}
+
+message MintRequest {
+    string message_sender = 1;
+    int64 number_of_tokens = 2;
+    int64 transaction_number = 3;
+    string value = 4;
+    string contract_address = 5;
+}
+
+message MintResponse {
+    Code status = 1;
+    string message = 2;
+}
+
+message ClaimRequest {
+    string message_sender = 1;
+    int64 token_id = 2;
+    string contract_address = 3;
+}
+
+
+service ContractIntegration {
+    rpc BuildMintTransaction(MintRequest) returns(MintResponse) {}
+    rpc BuildClaimTransaction(ClaimRequest) returns(MintResponse) {}
+    //TODO Build function for Claiming ERC1155 tokens as well
+}

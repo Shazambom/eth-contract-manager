@@ -35,6 +35,8 @@ func NewContractTransactionHandler(repo storage.ContractRepository, signer pb.Si
 	}
 }
 
+//TODO Add verifier service client to the ContractManagerHandler so it can verify ownership of contracts
+
 func NewContractManagerHandler(repo storage.ContractRepository) ContractManagerHandler {
 	return &ContractManagerService{repo: repo}
 }
@@ -55,17 +57,35 @@ func (cms *ContractManagerService) ListContracts(ctx context.Context, owner stri
 	return cms.repo.GetContractsByOwner(ctx, owner)
 }
 
-func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, arguments [][]byte, contract *storage.Contract) (*storage.Token, error) {
+func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderInHash bool, msgSender, functionName string, arguments [][]byte, value string, contract *storage.Contract) (*storage.Token, error) {
 	log.Println("Unpacking ABI")
 	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
 	if abiErr != nil {
 		return nil, abiErr
 	}
 	log.Println("Packing arguments")
-	args, byteArgs, argParseErr := cms.UnpackArgs(arguments, funcDef.Methods[functionName], contract.Functions.Functions[functionName])
+	function, funcOk := contract.Functions[functionName]
+	if !funcOk {
+		log.Println("Function not a hashible function")
+		return nil, errors.New("function selected is not hashible")
+	}
+	args, byteArgs, argParseErr := cms.UnpackArgs(arguments, funcDef.Methods[functionName], function)
 	if argParseErr != nil {
 		return nil, argParseErr
 	}
+
+	//Pre-pending value into arguments to validate the txn actually pays the contract what it's owed at runtime
+	valueInt, valueOk := math.ParseBig256(value)
+	if !valueOk {
+		return nil, errors.New("invalid value, value is of type int256 and represents the amount of eth in wei")
+	}
+	byteArgs = append([][]byte{common.LeftPadBytes(valueInt.Bytes(), 32)}, byteArgs...)
+	//Pre-pending sender into arguments to validate the sender of the txn is who should be sending it
+	if senderInHash {
+		byteArgs = append([][]byte{common.HexToAddress(msgSender).Bytes()}, byteArgs...)
+	}
+	//Argument priority order: msg.sender, msg.value, args...
+	//So we prepend the value first, then prepend the sender so the sender goes before the value
 
 	log.Println("Sending Signature Request")
 	signature, signingErr := cms.signer.SignTxn(ctx, &pb.SignatureRequest{ContractAddress: contract.Address, Args: byteArgs})
@@ -85,12 +105,15 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 	}
 
 	log.Println("Token created")
-	return storage.NewToken(contract.Address, msgSender, signature.Hash, contract.ABI, packed), nil
+	return storage.NewToken(contract.Address, msgSender, signature.Hash, packed, value)
 }
 
 
 func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Method, hashibleFunc storage.Function) ([]interface{}, [][]byte, error) {
 	//All of this splitting logic is to nicely organize the arguments, names and types
+	if method.String() == "" {
+		return nil, nil, errors.New("method could not be found")
+	}
 	split := strings.Split(method.String(), "(")
 	otherSplit := strings.Split(split[1], ")")
 	argStrs := strings.Split(otherSplit[0], ",")
@@ -294,7 +317,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 	return args, argBytes, nil
 }
 
-func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Token, contract *storage.Contract) error {
+func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Token) error {
 	return cms.txnRepo.StoreTransaction(ctx, *token)
 }
 

@@ -2,24 +2,6 @@ package storage
 
 import "context"
 
-type RedisListener interface {
-	InitEvents() error
-	Close()
-	Listen(handler func(string, string, error) error) error
-	Ping() (string, error)
-}
-
-type RedisWriter interface {
-	VerifyValidAddress(ctx context.Context, address, contractAddress string) error
-	GetReservedCount(ctx context.Context, numRequested, maxMintable int, contractAddress string) error
-	MarkAddressAsUsed(ctx context.Context, token *Token) error
-	GetQueueNum(ctx context.Context) (int64, error)
-	IncrementCounter(ctx context.Context, numRequested, maxMintable int, contractAddress string) error
-	Get(ctx context.Context, address, contractAddres string) (*Token, error)
-	Ping() (string, error)
-	Close()
-}
-
 type TransactionRepository interface {
 	StoreTransaction(ctx context.Context, token Token) error
 	GetTransactions(ctx context.Context, address string) ([]*Token, error)

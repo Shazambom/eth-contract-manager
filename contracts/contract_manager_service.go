@@ -6,6 +6,7 @@ import (
 	"contract-service/storage"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
@@ -16,9 +17,9 @@ import (
 )
 
 type ContractManagerService struct {
-	writer storage.RedisWriter
 	repo storage.ContractRepository
 	signer pb.SigningServiceClient
+	txnRepo storage.TransactionRepository
 }
 
 type ABIArg struct {
@@ -26,11 +27,11 @@ type ABIArg struct {
 	Name string `json:"name"`
 }
 
-func NewContractTransactionHandler(writer storage.RedisWriter, repo storage.ContractRepository, signer pb.SigningServiceClient) ContractTransactionHandler {
+func NewContractTransactionHandler(repo storage.ContractRepository, signer pb.SigningServiceClient, txnRepo storage.TransactionRepository) ContractTransactionHandler {
 	return &ContractManagerService{
-		writer: writer,
 		repo:   repo,
 		signer: signer,
+		txnRepo: txnRepo,
 	}
 }
 
@@ -54,14 +55,14 @@ func (cms *ContractManagerService) ListContracts(ctx context.Context, owner stri
 	return cms.repo.GetContractsByOwner(ctx, owner)
 }
 
-func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, numRequested int, arguments [][]byte, contract *storage.Contract) (*storage.Token, error) {
+func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSender, functionName string, arguments [][]byte, contract *storage.Contract) (*storage.Token, error) {
 	log.Println("Unpacking ABI")
 	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
 	if abiErr != nil {
 		return nil, abiErr
 	}
 	log.Println("Packing arguments")
-	args, byteArgs, argParseErr := cms.UnpackArgs(msgSender, arguments, funcDef.Methods[functionName], contract.Functions.Functions[functionName])
+	args, byteArgs, argParseErr := cms.UnpackArgs(arguments, funcDef.Methods[functionName], contract.Functions.Functions[functionName])
 	if argParseErr != nil {
 		return nil, argParseErr
 	}
@@ -84,12 +85,11 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, msgSend
 	}
 
 	log.Println("Token created")
-	return storage.NewToken(contract.Address, msgSender, signature.Hash, contract.ABI, packed, numRequested), nil
+	return storage.NewToken(contract.Address, msgSender, signature.Hash, contract.ABI, packed), nil
 }
 
 
-func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]byte, method abi.Method, hashibleFunc storage.Function) ([]interface{}, [][]byte, error) {
-
+func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Method, hashibleFunc storage.Function) ([]interface{}, [][]byte, error) {
 	//All of this splitting logic is to nicely organize the arguments, names and types
 	split := strings.Split(method.String(), "(")
 	otherSplit := strings.Split(split[1], ")")
@@ -100,8 +100,10 @@ func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]by
 		abiArgs = append(abiArgs, ABIArg{Type: abiArg[0], Name: abiArg[1]})
 	}
 
+	//We subtract 1 from abiArgs because there is an implicit signature value that is added by the service
+	//TODO Decide the structure or argument structure to allow the service to pack txns without a signature (if that is needed)
 	if len(abiArgs) - 1 != len(arguments) {
-		return nil, nil, errors.New("argument length mismatch")
+		return nil, nil, errors.New(fmt.Sprintf("argument length mismatch abi: %d argument length recieved: %d\n", len(abiArgs) - 1, len(arguments)))
 	}
 
 	argBytes := [][]byte{}
@@ -110,9 +112,6 @@ func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]by
 
 		argBytes = append(argBytes, []byte{})
 		hashArgMap[arg.Name] = i
-		if arg.Name == "msg.sender" {
-			argBytes[i] = common.HexToAddress(msgSender).Bytes()
-		}
 	}
 
 
@@ -296,30 +295,21 @@ func (cms *ContractManagerService) UnpackArgs(msgSender string, arguments [][]by
 }
 
 func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Token, contract *storage.Contract) error {
-	err := cms.writer.MarkAddressAsUsed(ctx, token)
-	if err != nil {
-		return err
-	}
-	if token.NumRequested < 1 {
-		return nil
-	}
-	return cms.writer.IncrementCounter(ctx, token.NumRequested, contract.MaxMintable, contract.Address)
+	return cms.txnRepo.StoreTransaction(ctx, *token)
 }
 
-func (cms *ContractManagerService) CheckIfValidRequest(ctx context.Context, msgSender string, numRequested int, contract *storage.Contract) error{
-	if numRequested > contract.MaxIncrement {
-		return errors.New("max increment exceeded with request")
-	}
-	invalid := cms.writer.VerifyValidAddress(ctx, msgSender, contract.Address)
-	if invalid != nil {
-		return invalid
-	}
-	if numRequested < 1 {
-		return nil
-	}
-	return cms.writer.GetReservedCount(ctx, numRequested, contract.MaxMintable, contract.Address)
+func (cms *ContractManagerService) GetTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+	return cms.txnRepo.GetTransactions(ctx, address)
 }
 
-func (cms *ContractManagerService) Close() {
-	cms.writer.Close()
+func (cms *ContractManagerService) GetAllTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+	return cms.txnRepo.GetAllTransactions(ctx, address)
+}
+
+func (cms *ContractManagerService) DeleteTransaction(ctx context.Context, address, hash string) error {
+	return cms.txnRepo.DeleteTransaction(ctx, address, hash)
+}
+
+func (cms *ContractManagerService) CompleteTransaction(ctx context.Context, address, hash string) error {
+	return cms.txnRepo.CompleteTransaction(ctx, address, hash)
 }

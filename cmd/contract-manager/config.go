@@ -2,6 +2,7 @@ package main
 
 import (
 	"contract-service/utils"
+	"fmt"
 	"strconv"
 )
 
@@ -34,4 +35,9 @@ func NewConfig() (Config, error) {
 		SecretAccessKey: awsSecret,
 		SSLEnabled: sslEnabled == "true",
 	}, envErr
+}
+
+func (c *Config) String() string {
+	return fmt.Sprintf("{\n\tPort: %d\n\tTableName: %s\n\tAWSEndpoint: %s\n\tAWSRegion: %s\n\tAccessKeyID: ********%s\n\tSecretAccessKey: ********%s\n\tSSLEnabled: %t\n}\n",
+		c.Port, c.TableName, c.AWSEndpoint, c.AWSRegion, c.AccessKeyID[len(c.AccessKeyID)-3:], c.SecretAccessKey[len(c.SecretAccessKey)-3:], c.SSLEnabled)
 }

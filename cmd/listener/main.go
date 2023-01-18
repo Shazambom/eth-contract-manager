@@ -3,18 +3,18 @@ package main
 import (
 	"contract-service/listener"
 	"contract-service/storage"
+	"contract-service/utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"log"
 )
-//TODO Add Ping route to container to check if service is alive
+//TODO this container may not be needed in the future but its nice to have for now. Potentially remove in the future
 func main() {
 	log.Println("Getting environment variables")
 	cfg, envErr := NewConfig()
 	if envErr != nil {
 		log.Fatal(envErr)
 	}
-	log.Printf("Loading Listener with Config: \n%+v\n", cfg)
 	handler, handlerInitErr := listener.InitializeListenerService(&aws.Config{
 		Endpoint: aws.String(cfg.AWSEndpoint),
 		Region: aws.String(cfg.AWSRegion),
@@ -36,7 +36,17 @@ func main() {
 		log.Fatal(initErr)
 	}
 	log.Println("Starting to listen to Redis event stream")
-	if err := rds.Listen(handler.Handle); err != nil {
-		log.Fatal(err)
-	}
+	listenerErr := make(chan string)
+	go func(errOut chan string) {
+		if err := rds.Listen(handler.Handle); err != nil {
+			errOut <- err.Error()
+		}
+	}(listenerErr)
+
+	liveProbeErr := make(chan string)
+	probe := utils.NewProbe()
+
+	probe.Serve(liveProbeErr)
+
+	log.Fatal(utils.MergeChannels(liveProbeErr, listenerErr))
 }

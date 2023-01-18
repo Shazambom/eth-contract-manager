@@ -34,21 +34,36 @@ message Contract {
     string address = 1;
     string abi = 2;
     Functions hashable_functions = 3;
-    int64 max_mintable = 4;
-    int64 max_increment = 5;
     string owner = 6;
 }
 
 message TransactionRequest {
     string message_sender = 1;
     string function_name = 2;
-    int64 num_requested = 3;
-    repeated bytes args = 4;
-    Contract contract = 5;
+    repeated bytes args = 3;
+    Contract contract = 4;
 }
 
-message Error {
-    string err = 1;
+message Transaction {
+    string abi = 1;
+    bytes packed_args = 2;
+    string hash = 3;
+    string contract_address = 4;
+    string user_address = 5;
+    bool is_complete = 6;
+}
+
+message Transactions {
+    repeated Transaction transactions = 1;
+}
+
+message KeyTransactionRequest {
+    string address = 1;
+    string hash = 2;
+}
+
+message Empty {
+
 }
 
 message Contracts {
@@ -58,12 +73,16 @@ message Contracts {
 
 service TransactionService {
     rpc GetContract(Address) returns(Contract) {}
-    rpc ConstructTransaction(TransactionRequest) returns (Error) {}
+    rpc ConstructTransaction(TransactionRequest) returns (Transaction) {}
+    rpc GetTransactions(Address) returns(Transactions) {}
+    rpc CompleteTransaction(KeyTransactionRequest) returns (Empty) {}
+    rpc DeleteTransaction(KeyTransactionRequest) returns (Empty) {}
+    rpc GetAllTransactions(Address) returns(Transactions) {}
 }
 
 service ContractManagement {
     rpc Get(Address) returns(Contract) {}
-    rpc Store(Contract) returns (Error) {}
-    rpc Delete(AddressOwner) returns (Error) {}
+    rpc Store(Contract) returns (Empty) {}
+    rpc Delete(AddressOwner) returns (Empty) {}
     rpc List(Owner) returns (Contracts) {}
 }

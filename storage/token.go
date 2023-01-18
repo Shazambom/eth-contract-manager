@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"compress/gzip"
+	pb "contract-service/proto"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -15,17 +16,28 @@ type Token struct {
 	ABI string `json:"abi"`
 	UserAddress string `json:"user_address"`
 	Hash string `json:"hash"`
-	NumRequested int `json:"num_requested"`
+	IsComplete bool `json:"is_complete"`
 }
 
-func NewToken(contractAddress, userAddress, hash string, abi string, txn []byte, numRequested int) *Token {
+func NewToken(contractAddress, userAddress, hash string, abi string, txn []byte) *Token {
 	return &Token{
 		ContractAddress: contractAddress,
 		ABIPackedTxn: txn,
 		ABI: abi,
 		UserAddress: userAddress,
 		Hash: hash,
-		NumRequested: numRequested,
+		IsComplete: false,
+	}
+}
+
+func (token *Token) ToRPC() *pb.Transaction {
+	return &pb.Transaction{
+		Abi:        token.ABI,
+		PackedArgs: token.ABIPackedTxn,
+		Hash:       token.Hash,
+		ContractAddress: token.ContractAddress,
+		UserAddress: token.UserAddress,
+		IsComplete: token.IsComplete,
 	}
 }
 
@@ -80,6 +92,5 @@ func (token *Token) UnZip(payload []byte) error {
 	token.ABI = tok.ABI
 	token.Hash = tok.Hash
 	token.ABIPackedTxn = tok.ABIPackedTxn
-	token.NumRequested = tok.NumRequested
 	return nil
 }

@@ -80,3 +80,14 @@ func GetNonce() (string, error) {
 	}
 	return "0x"+hex.EncodeToString(UUIDBytes), nil
 }
+
+func MergeChannels(cs ...<-chan string) <-chan string {
+	//TODO debug this, I think it causes some hanging to occur
+	out := make(chan string)
+	for _, c := range cs {
+		go func(c <-chan string) {
+			out <- <- c
+		}(c)
+	}
+	return out
+}

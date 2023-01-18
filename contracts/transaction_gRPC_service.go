@@ -34,7 +34,6 @@ func NewTransactionServer(port int, opts []grpc.ServerOption, handler ContractTr
 	go func() {
 		log.Println("TransactionService serving clients now")
 		defer server.Server.GracefulStop()
-		defer server.TransactionManager.Close()
 		serviceErr := server.Server.Serve(lis)
 		server.Channel <- serviceErr.Error()
 	}()
@@ -50,25 +49,54 @@ func (ts *TransactionRPCService) GetContract(ctx context.Context, address *pb.Ad
 	return contract.ToRPC(), nil
 }
 
-func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *pb.TransactionRequest) (*pb.Error, error) {
+func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *pb.TransactionRequest) (*pb.Transaction, error) {
 	contract := &storage.Contract{}
 	contract.FromRPC(req.Contract)
 
-	isNotValidErr := ts.TransactionManager.CheckIfValidRequest(ctx, req.MessageSender, int(req.NumRequested), contract)
-	if isNotValidErr != nil {
-		return &pb.Error{Err: isNotValidErr.Error()}, isNotValidErr
-	}
-
-	token, tokenErr := ts.TransactionManager.BuildTransaction(ctx, req.MessageSender, req.FunctionName, int(req.NumRequested), req.Args, contract)
+	token, tokenErr := ts.TransactionManager.BuildTransaction(ctx, req.MessageSender, req.FunctionName, req.Args, contract)
 	if tokenErr != nil {
-		return &pb.Error{Err: tokenErr.Error()}, tokenErr
+		log.Println(tokenErr.Error())
+		return nil, tokenErr
 	}
 
 	storeErr := ts.TransactionManager.StoreToken(ctx, token, contract)
 	if storeErr != nil {
-		return &pb.Error{Err: storeErr.Error()}, storeErr
+		log.Println(storeErr.Error())
+		return nil, storeErr
 	}
-	return &pb.Error{Err: ""}, nil
+	return token.ToRPC(), nil
+}
+
+func (ts *TransactionRPCService) GetTransactions(ctx context.Context, address *pb.Address) (*pb.Transactions, error) {
+	tokens, err := ts.TransactionManager.GetTransactions(ctx, address.Address)
+	if err != nil {
+		return nil, err
+	}
+	txns := &pb.Transactions{Transactions: []*pb.Transaction{}}
+	for _, token := range tokens {
+		txns.Transactions = append(txns.Transactions, token.ToRPC())
+	}
+	return txns, nil
+}
+
+func (ts *TransactionRPCService) GetAllTransactions(ctx context.Context, address *pb.Address) (*pb.Transactions, error) {
+	tokens, err := ts.TransactionManager.GetAllTransactions(ctx, address.Address)
+	if err != nil {
+		return nil, err
+	}
+	txns := &pb.Transactions{Transactions: []*pb.Transaction{}}
+	for _, token := range tokens {
+		txns.Transactions = append(txns.Transactions, token.ToRPC())
+	}
+	return txns, nil
+}
+
+func (ts *TransactionRPCService) CompleteTransaction(ctx context.Context, req *pb.KeyTransactionRequest) (*pb.Empty, error) {
+	return &pb.Empty{}, ts.TransactionManager.CompleteTransaction(ctx, req.Address, req.Hash)
+}
+
+func (ts *TransactionRPCService) DeleteTransaction(ctx context.Context, req *pb.KeyTransactionRequest) (*pb.Empty, error) {
+	return &pb.Empty{}, ts.TransactionManager.DeleteTransaction(ctx, req.Address, req.Hash)
 }
 
 func (ts *TransactionRPCService) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {

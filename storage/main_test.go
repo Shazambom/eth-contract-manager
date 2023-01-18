@@ -32,8 +32,24 @@ var s3cfg = &aws.Config{
 }
 var testBucketName = "buckety"
 
-var TestContractTableName = "ContractsTest"
-var TestPrivateKeyTableName = "PrivateKeyTest"
+var PrivateKeyRepoConfig = PrivateKeyConfig{
+	TableName: "ContractPrivateKeyRepository",
+	CFG:       []*aws.Config{dynamoCfg},
+}
+
+var ContractRepoConfig = ContractConfig{
+	TableName: "Contracts",
+	CFG:       []*aws.Config{dynamoCfg},
+}
+
+var TransactionRepoConfig = TransactionConfig{
+	TableName: "Transactions",
+	CFG:       []*aws.Config{dynamoCfg},
+}
+
+var cr ContractRepository
+var pkr PrivateKeyRepository
+var tr TransactionRepository
 
 func TestMain(m *testing.M) {
 	s3, s3Err := NewS3(s3cfg, testBucketName)
@@ -44,20 +60,20 @@ func TestMain(m *testing.M) {
 		log.Fatal(s3InitErr)
 	}
 
-	pkr, pkrErr := NewPrivateKeyRepository(TestPrivateKeyTableName, dynamoCfg)
+	var pkrErr error
+	pkr, pkrErr = NewPrivateKeyRepository(PrivateKeyRepoConfig)
 	if pkrErr != nil {
 		log.Fatal(pkrErr)
 	}
-	if pkrInitErr := pkr.Init(); pkrInitErr != nil {
-		log.Fatal(pkrInitErr)
-	}
-
-	cr, crErr := NewContractRepository(TestContractTableName, dynamoCfg)
+	var crErr error
+	cr, crErr = NewContractRepository(ContractRepoConfig)
 	if crErr != nil {
 		log.Fatal(crErr)
 	}
-	if crInitErr := cr.Init(); crInitErr != nil {
-		log.Fatal(crInitErr)
+	var trErr error
+	tr, trErr = NewTransactionRepo(TransactionRepoConfig)
+	if trErr != nil {
+		log.Fatal(trErr)
 	}
 
 	code := m.Run()

@@ -7,10 +7,12 @@ import (
 
 type ContractTransactionHandler interface {
 	GetContract(ctx context.Context, address string) (*storage.Contract, error)
-	BuildTransaction(ctx context.Context, msgSender, functionName string, numRequested int, arguments [][]byte, contract *storage.Contract) (*storage.Token, error)
+	BuildTransaction(ctx context.Context, msgSender, functionName string, arguments [][]byte, contract *storage.Contract) (*storage.Token, error)
 	StoreToken(ctx context.Context, token *storage.Token, contract *storage.Contract) error
-	CheckIfValidRequest(ctx context.Context, msgSender string, numRequested int, contract *storage.Contract) error
-	Close()
+	GetTransactions(ctx context.Context, address string) ([]*storage.Token, error)
+	DeleteTransaction(ctx context.Context, address, hash string) error
+	GetAllTransactions(ctx context.Context, address string) ([]*storage.Token, error)
+	CompleteTransaction(ctx context.Context, address, hash string) error
 }
 
 type ContractManagerHandler interface {

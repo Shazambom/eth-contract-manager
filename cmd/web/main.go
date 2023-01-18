@@ -12,18 +12,20 @@ func main() {
 	errChan := make(chan string)
 	probe := web.NewProbe()
 
-	//TODO Move config stuff to the config struct and implement dependency injection with wire
 
-	//TODO Should I build and run the gRPC services for claiming and minting in this container or build a new one? I'm leaning towards new container.
-	txnClient, clientErr := contracts.NewTransactionClient("transaction-manager:8083", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	cfg, cfgErr := NewConfig()
+	if cfgErr != nil {
+		log.Fatal(cfgErr)
+	}
+	txnClient, clientErr := contracts.NewTransactionClient(cfg.TxnHost, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	if clientErr != nil {
 		log.Fatal(clientErr)
 	}
 
 	transactionAPI := web.NewTransactionAPI(txnClient)
 
-	transactionAPI.Serve(8084, errChan)
-	probe.Serve(8080, errChan)
+	transactionAPI.Serve(cfg.Port, errChan)
+	probe.Serve(cfg.AlivePort, errChan)
 	log.Fatal(<-errChan)
 }
 

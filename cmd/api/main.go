@@ -9,12 +9,15 @@ import (
 )
 
 func main() {
-	//TODO Move config stuff to the config struct and implement dependency injection with wire
-	txnClient, clientErr := contracts.NewTransactionClient("transaction-manager:8083", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	cfg, cfgErr := NewConfig()
+	if cfgErr != nil{
+		log.Fatal(cfgErr)
+	}
+	txnClient, clientErr := contracts.NewTransactionClient(cfg.TxnHost, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	if clientErr != nil {
 		log.Fatal(clientErr)
 	}
-	claimService, claimErr := api.NewContractIntegrationRPCService(8085, []grpc.ServerOption{grpc.EmptyServerOption{}}, txnClient)
+	claimService, claimErr := api.NewContractIntegrationRPCService(cfg.Port, []grpc.ServerOption{grpc.EmptyServerOption{}}, txnClient)
 	if claimErr != nil {
 		log.Fatal(claimErr)
 	}

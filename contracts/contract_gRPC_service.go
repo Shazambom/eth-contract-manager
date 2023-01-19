@@ -35,7 +35,11 @@ func NewContractServer(port int, opts []grpc.ServerOption, handler ContractManag
 		log.Println("ContractManager serving clients now")
 		defer server.Server.GracefulStop()
 		serviceErr := server.Server.Serve(lis)
-		server.Channel <- serviceErr.Error()
+		if serviceErr != nil {
+			server.Channel <- serviceErr.Error()
+		} else {
+			server.Channel <- "gRPC Service has stopped"
+		}
 	}()
 	return server, nil
 }

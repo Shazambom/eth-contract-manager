@@ -57,7 +57,7 @@ func (cms *ContractManagerService) ListContracts(ctx context.Context, owner stri
 	return cms.repo.GetContractsByOwner(ctx, owner)
 }
 
-func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderInHash bool, msgSender, functionName string, arguments [][]byte, value string, contract *storage.Contract) (*storage.Token, error) {
+func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderInHash bool, msgSender, functionName string, arguments [][]byte, value string, contract *storage.Contract) (*storage.Transaction, error) {
 	log.Println("Unpacking ABI")
 	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
 	if abiErr != nil {
@@ -104,8 +104,8 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderI
 		return nil, packingErr
 	}
 
-	log.Println("Token created")
-	return storage.NewToken(contract.Address, msgSender, signature.Hash, packed, value)
+	log.Println("Transaction created")
+	return storage.NewTransaction(contract.Address, msgSender, signature.Hash, packed, value)
 }
 
 
@@ -317,15 +317,15 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 	return args, argBytes, nil
 }
 
-func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Token) error {
+func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Transaction) error {
 	return cms.txnRepo.StoreTransaction(ctx, *token)
 }
 
-func (cms *ContractManagerService) GetTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+func (cms *ContractManagerService) GetTransactions(ctx context.Context, address string) ([]*storage.Transaction, error) {
 	return cms.txnRepo.GetTransactions(ctx, address)
 }
 
-func (cms *ContractManagerService) GetAllTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+func (cms *ContractManagerService) GetAllTransactions(ctx context.Context, address string) ([]*storage.Transaction, error) {
 	return cms.txnRepo.GetAllTransactions(ctx, address)
 }
 

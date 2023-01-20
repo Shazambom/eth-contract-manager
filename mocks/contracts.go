@@ -36,10 +36,10 @@ func (m *MockContractTransactionHandler) EXPECT() *MockContractTransactionHandle
 }
 
 // BuildTransaction mocks base method.
-func (m *MockContractTransactionHandler) BuildTransaction(ctx context.Context, senderInHash bool, msgSender, functionName string, arguments [][]byte, value string, contract *storage.Contract) (*storage.Token, error) {
+func (m *MockContractTransactionHandler) BuildTransaction(ctx context.Context, senderInHash bool, msgSender, functionName string, arguments [][]byte, value string, contract *storage.Contract) (*storage.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BuildTransaction", ctx, senderInHash, msgSender, functionName, arguments, value, contract)
-	ret0, _ := ret[0].(*storage.Token)
+	ret0, _ := ret[0].(*storage.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,10 +79,10 @@ func (mr *MockContractTransactionHandlerMockRecorder) DeleteTransaction(ctx, add
 }
 
 // GetAllTransactions mocks base method.
-func (m *MockContractTransactionHandler) GetAllTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+func (m *MockContractTransactionHandler) GetAllTransactions(ctx context.Context, address string) ([]*storage.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllTransactions", ctx, address)
-	ret0, _ := ret[0].([]*storage.Token)
+	ret0, _ := ret[0].([]*storage.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -109,10 +109,10 @@ func (mr *MockContractTransactionHandlerMockRecorder) GetContract(ctx, address i
 }
 
 // GetTransactions mocks base method.
-func (m *MockContractTransactionHandler) GetTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+func (m *MockContractTransactionHandler) GetTransactions(ctx context.Context, address string) ([]*storage.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTransactions", ctx, address)
-	ret0, _ := ret[0].([]*storage.Token)
+	ret0, _ := ret[0].([]*storage.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -124,7 +124,7 @@ func (mr *MockContractTransactionHandlerMockRecorder) GetTransactions(ctx, addre
 }
 
 // StoreToken mocks base method.
-func (m *MockContractTransactionHandler) StoreToken(ctx context.Context, token *storage.Token) error {
+func (m *MockContractTransactionHandler) StoreToken(ctx context.Context, token *storage.Transaction) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StoreToken", ctx, token)
 	ret0, _ := ret[0].(error)

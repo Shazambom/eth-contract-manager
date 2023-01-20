@@ -64,10 +64,10 @@ func (mr *MockTransactionRepositoryMockRecorder) DeleteTransaction(ctx, address,
 }
 
 // GetAllTransactions mocks base method.
-func (m *MockTransactionRepository) GetAllTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+func (m *MockTransactionRepository) GetAllTransactions(ctx context.Context, address string) ([]*storage.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllTransactions", ctx, address)
-	ret0, _ := ret[0].([]*storage.Token)
+	ret0, _ := ret[0].([]*storage.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,10 +79,10 @@ func (mr *MockTransactionRepositoryMockRecorder) GetAllTransactions(ctx, address
 }
 
 // GetTransactions mocks base method.
-func (m *MockTransactionRepository) GetTransactions(ctx context.Context, address string) ([]*storage.Token, error) {
+func (m *MockTransactionRepository) GetTransactions(ctx context.Context, address string) ([]*storage.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTransactions", ctx, address)
-	ret0, _ := ret[0].([]*storage.Token)
+	ret0, _ := ret[0].([]*storage.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -94,7 +94,7 @@ func (mr *MockTransactionRepositoryMockRecorder) GetTransactions(ctx, address in
 }
 
 // StoreTransaction mocks base method.
-func (m *MockTransactionRepository) StoreTransaction(ctx context.Context, token storage.Token) error {
+func (m *MockTransactionRepository) StoreTransaction(ctx context.Context, token storage.Transaction) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StoreTransaction", ctx, token)
 	ret0, _ := ret[0].(error)

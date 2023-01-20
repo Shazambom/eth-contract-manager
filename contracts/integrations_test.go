@@ -101,7 +101,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	//Checking that the token was processed correctly, the transaction was signed, and the token was placed in redis
 	tokens, tokenErr := txnDB.GetTransactions(ctx, msgSender)
 	assert.Nil(t, tokenErr)
-	fmt.Printf("Token: %+v\n", tokens[0])
+	fmt.Printf("Transaction: %+v\n", tokens[0])
 	args := [][]byte{nonceBytes, common.LeftPadBytes(big.NewInt(int64(3)).Bytes(),32), common.LeftPadBytes(big.NewInt(int64(1)).Bytes(),32)}
 
 	fmt.Println(len(args))

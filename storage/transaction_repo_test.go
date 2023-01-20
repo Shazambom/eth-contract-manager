@@ -14,7 +14,7 @@ func TestNewTransactionRepo(t *testing.T) {
 }
 
 func TestTransactionRepo_StoreTransaction(t *testing.T) {
-	token, tokenErr := NewToken(
+	token, tokenErr := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"0x0fA37C622C7E57A06ba12afF48c846F42241F7F0",
 		"0xce11e286abab09c3ad05f1f9fff4daaf4f5139214a1f4746661018f0b855f075",
@@ -25,7 +25,7 @@ func TestTransactionRepo_StoreTransaction(t *testing.T) {
 }
 
 func TestTransactionRepo_DeleteTransaction(t *testing.T) {
-	token, tokenErr := NewToken(
+	token, tokenErr := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"0x0fA37C622C7E57A06ba12afF48c846F42241F7F0",
 		"0xce11e286abab09c3ad05f1f9fff4daaf4f5139214a1f4746661018f0b855f075",
@@ -37,7 +37,7 @@ func TestTransactionRepo_DeleteTransaction(t *testing.T) {
 }
 
 func TestTransactionRepo_GetTransactions(t *testing.T) {
-	template, templateErr := NewToken(
+	template, templateErr := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetTransactions",
 		"",
@@ -45,7 +45,7 @@ func TestTransactionRepo_GetTransactions(t *testing.T) {
 		"450000000000000000")
 	assert.Nil(t, templateErr)
 
-	tokenHash1, hash1Err := NewToken(
+	tokenHash1, hash1Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetTransactions",
 		"1",
@@ -54,7 +54,7 @@ func TestTransactionRepo_GetTransactions(t *testing.T) {
 	assert.Nil(t, hash1Err)
 	assert.Nil(t, tr.StoreTransaction(ctx, *tokenHash1))
 
-	tokenHash2, hash2Err := NewToken(
+	tokenHash2, hash2Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetTransactions",
 		"2",
@@ -62,7 +62,7 @@ func TestTransactionRepo_GetTransactions(t *testing.T) {
 		"450000000000000000")
 	assert.Nil(t, hash2Err)
 	assert.Nil(t, tr.StoreTransaction(ctx, *tokenHash2))
-	tokenHash3, hash3Err := NewToken(
+	tokenHash3, hash3Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetTransactions",
 		"3",
@@ -70,7 +70,7 @@ func TestTransactionRepo_GetTransactions(t *testing.T) {
 		"450000000000000000")
 	assert.Nil(t, hash3Err)
 	assert.Nil(t, tr.StoreTransaction(ctx, *tokenHash3))
-	tokenHash4, hash4Err := NewToken(
+	tokenHash4, hash4Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetTransactions",
 		"4",
@@ -120,7 +120,7 @@ func TestTransactionRepo_GetTransactions(t *testing.T) {
 }
 
 func TestTransactionRepo_CompleteTransaction(t *testing.T) {
-	template, templateErr := NewToken(
+	template, templateErr := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_CompleteTransaction",
 		"",
@@ -128,7 +128,7 @@ func TestTransactionRepo_CompleteTransaction(t *testing.T) {
 		"450000000000000000")
 	assert.Nil(t, templateErr)
 
-	tokenHash1, hash1Err := NewToken(
+	tokenHash1, hash1Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_CompleteTransaction",
 		"1",
@@ -137,7 +137,7 @@ func TestTransactionRepo_CompleteTransaction(t *testing.T) {
 	assert.Nil(t, hash1Err)
 	assert.Nil(t, tr.StoreTransaction(ctx, *tokenHash1))
 
-	tokenHash2, hash2Err := NewToken(
+	tokenHash2, hash2Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_CompleteTransaction",
 		"2",
@@ -145,7 +145,7 @@ func TestTransactionRepo_CompleteTransaction(t *testing.T) {
 		"450000000000000000")
 	assert.Nil(t, hash2Err)
 	assert.Nil(t, tr.StoreTransaction(ctx, *tokenHash2))
-	tokenHash3, hash3Err := NewToken(
+	tokenHash3, hash3Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_CompleteTransaction",
 		"3",
@@ -153,7 +153,7 @@ func TestTransactionRepo_CompleteTransaction(t *testing.T) {
 		"450000000000000000")
 	assert.Nil(t, hash3Err)
 	assert.Nil(t, tr.StoreTransaction(ctx, *tokenHash3))
-	tokenHash4, hash4Err := NewToken(
+	tokenHash4, hash4Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_CompleteTransaction",
 		"4",
@@ -204,7 +204,7 @@ func TestTransactionRepo_CompleteTransaction(t *testing.T) {
 }
 
 func TestTransactionRepo_GetAllTransactions(t *testing.T) {
-	template, templateErr := NewToken(
+	template, templateErr := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetAllTransactions",
 		"",
@@ -212,7 +212,7 @@ func TestTransactionRepo_GetAllTransactions(t *testing.T) {
 		"450000000000000000")
 	assert.Nil(t, templateErr)
 
-	tokenHash1, hash1Err := NewToken(
+	tokenHash1, hash1Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetAllTransactions",
 		"1",
@@ -221,7 +221,7 @@ func TestTransactionRepo_GetAllTransactions(t *testing.T) {
 	assert.Nil(t, hash1Err)
 	assert.Nil(t, tr.StoreTransaction(ctx, *tokenHash1))
 
-	tokenHash2, hash2Err := NewToken(
+	tokenHash2, hash2Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetAllTransactions",
 		"2",
@@ -229,7 +229,7 @@ func TestTransactionRepo_GetAllTransactions(t *testing.T) {
 		"450000000000000000")
 	assert.Nil(t, hash2Err)
 	assert.Nil(t, tr.StoreTransaction(ctx, *tokenHash2))
-	tokenHash3, hash3Err := NewToken(
+	tokenHash3, hash3Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetAllTransactions",
 		"3",
@@ -237,7 +237,7 @@ func TestTransactionRepo_GetAllTransactions(t *testing.T) {
 		"450000000000000000")
 	assert.Nil(t, hash3Err)
 	assert.Nil(t, tr.StoreTransaction(ctx, *tokenHash3))
-	tokenHash4, hash4Err := NewToken(
+	tokenHash4, hash4Err := NewTransaction(
 		"0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 		"TestTransactionRepo_GetAllTransactions",
 		"4",

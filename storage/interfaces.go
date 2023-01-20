@@ -3,11 +3,11 @@ package storage
 import "context"
 
 type TransactionRepository interface {
-	StoreTransaction(ctx context.Context, token Token) error
-	GetTransactions(ctx context.Context, address string) ([]*Token, error)
+	StoreTransaction(ctx context.Context, token Transaction) error
+	GetTransactions(ctx context.Context, address string) ([]*Transaction, error)
 	DeleteTransaction(ctx context.Context, address, hash string) error
 	CompleteTransaction(ctx context.Context, address, hash string) error
-	GetAllTransactions(ctx context.Context, address string) ([]*Token, error)
+	GetAllTransactions(ctx context.Context, address string) ([]*Transaction, error)
 }
 
 type PrivateKeyRepository interface {

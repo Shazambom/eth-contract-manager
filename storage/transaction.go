@@ -12,7 +12,7 @@ import (
 	"io/ioutil"
 )
 
-type Token struct {
+type Transaction struct {
 	ContractAddress string `json:"contract_address"`
 	ABIPackedTxn []byte `json:"abi_packed_txn"`
 	UserAddress string `json:"user_address"`
@@ -21,11 +21,11 @@ type Token struct {
 	Value	string `json:"value"`
 }
 
-func NewToken(contractAddress, userAddress, hash string, txn []byte, value string) (*Token, error){
+func NewTransaction(contractAddress, userAddress, hash string, txn []byte, value string) (*Transaction, error){
 	if _, ok := math.ParseBig256(value); !ok {
 		return nil, errors.New("Error parsing value from string " + value + " is an invalid amount of wei")
 	}
-	return &Token{
+	return &Transaction{
 		ContractAddress: contractAddress,
 		ABIPackedTxn: txn,
 		UserAddress: userAddress,
@@ -35,7 +35,7 @@ func NewToken(contractAddress, userAddress, hash string, txn []byte, value strin
 	}, nil
 }
 
-func (token *Token) FromRPC(txn *pb.Transaction) error {
+func (token *Transaction) FromRPC(txn *pb.Transaction) error {
 	if _, ok := math.ParseBig256(txn.Value); !ok {
 		return errors.New("Error parsing value from string " + txn.Value + " is an invalid amount of wei")
 	}
@@ -48,7 +48,7 @@ func (token *Token) FromRPC(txn *pb.Transaction) error {
 	return nil
 }
 
-func (token *Token) ToRPC() *pb.Transaction {
+func (token *Transaction) ToRPC() *pb.Transaction {
 	return &pb.Transaction{
 		PackedArgs: token.ABIPackedTxn,
 		Hash:       token.Hash,
@@ -60,12 +60,12 @@ func (token *Token) ToRPC() *pb.Transaction {
 }
 
 
-func (token *Token) ToString() (string, error) {
+func (token *Transaction) ToString() (string, error) {
 	byteArr, err := json.Marshal(token)
 	return string(byteArr), err
 }
 
-func (token *Token) Gzip() (string, error) {
+func (token *Transaction) Gzip() (string, error) {
 	raw, respMarshalErr := json.Marshal(token)
 	if respMarshalErr != nil {
 		return "", respMarshalErr
@@ -87,7 +87,7 @@ func (token *Token) Gzip() (string, error) {
 	return base64.StdEncoding.EncodeToString(buff.Bytes()), nil
 }
 
-func (token *Token) UnZip(payload []byte) error {
+func (token *Transaction) UnZip(payload []byte) error {
 	data, decodeErr := base64.StdEncoding.DecodeString(string(payload))
 	if decodeErr != nil {
 		return decodeErr
@@ -100,7 +100,7 @@ func (token *Token) UnZip(payload []byte) error {
 	if unzipErr != nil {
 		return unzipErr
 	}
-	var tok Token
+	var tok Transaction
 	marshalErr := json.Unmarshal(unzipped, &tok)
 	if marshalErr != nil {
 		return marshalErr

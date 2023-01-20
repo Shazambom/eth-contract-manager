@@ -317,6 +317,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 	return args, argBytes, nil
 }
 
+//TODO Refactor this function to StoreTransaction
 func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Transaction) error {
 	return cms.txnRepo.StoreTransaction(ctx, *token)
 }

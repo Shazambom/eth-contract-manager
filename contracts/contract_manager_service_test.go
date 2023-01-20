@@ -1712,3 +1712,5 @@ func TestContractMangerService_CompleteTransaction_Err(t *testing.T) {
 	err := contractManager.CompleteTransaction(ctx, transaction.UserAddress, transaction.Hash)
 	assert.Equal(t, transactionRepoErr, err)
 }
+
+//TODO Write tests for BuildTransaction

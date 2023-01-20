@@ -6,6 +6,7 @@ import (
 	"contract-service/signing"
 	"contract-service/storage"
 	"contract-service/utils"
+	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -1587,4 +1588,127 @@ func TestContractManagerService_ListContracts_Err(t *testing.T) {
 	contractReturned, err := contractManager.ListContracts(ctx, owner)
 	assert.Equal(t, storageErr, err)
 	assert.Nil(t, contractReturned)
+}
+func getTestTxn(t *testing.T) (*storage.Transaction){
+	txnStr := "iGzyWevkUjBL2U+oga+uTpOyl0kAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBdjqSg89m+fXSO353Z57au81uMkncUB6qm5IY9acLMsQNIAcu6sH5fOpHhGHdlN4d8Xa8/ND2SIaKEtqm6KiD6hsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+	decoded, decodeErr := base64.StdEncoding.DecodeString(txnStr)
+	assert.Nil(t, decodeErr)
+	transaction, transactionInitErr := storage.NewTransaction(
+		"0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+		"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+		"0xe3958a47c7c9ffd6c23f8ecf07e30e920e24e9edee9af892083a7fe1a59b6c74",
+		decoded,
+		"0",
+	)
+	assert.Nil(t, transactionInitErr)
+	return transaction
+}
+
+func TestContractMangerService_StoreToken(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	mockTransactionRepo.EXPECT().StoreTransaction(ctx, *transaction).Return(nil)
+
+	err := contractManager.StoreToken(ctx, transaction)
+	assert.Nil(t, err)
+}
+
+func TestContractMangerService_StoreToken_Err(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	transactionRepoErr := errors.New("some transaction repository error")
+	mockTransactionRepo.EXPECT().StoreTransaction(ctx, *transaction).Return(transactionRepoErr)
+
+	err := contractManager.StoreToken(ctx, transaction)
+	assert.Equal(t, transactionRepoErr, err)
+}
+
+func TestContractManagerService_GetTransactions(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	mockTransactionRepo.EXPECT().GetTransactions(ctx, transaction.UserAddress).Return([]*storage.Transaction{transaction}, nil)
+
+	txns, err := contractManager.GetTransactions(ctx, transaction.UserAddress)
+	assert.Nil(t, err)
+	assert.Equal(t, transaction, txns[0])
+}
+
+func TestContractManagerService_GetTransactions_Err(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	transactionRepoErr := errors.New("some transaction repository error")
+	mockTransactionRepo.EXPECT().GetTransactions(ctx, transaction.UserAddress).Return(nil, transactionRepoErr)
+
+	txns, err := contractManager.GetTransactions(ctx, transaction.UserAddress)
+	assert.Nil(t, txns)
+	assert.Equal(t, transactionRepoErr, err)
+}
+
+func TestContractManagerService_GetAllTransactions(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	mockTransactionRepo.EXPECT().GetAllTransactions(ctx, transaction.UserAddress).Return([]*storage.Transaction{transaction}, nil)
+
+	txns, err := contractManager.GetAllTransactions(ctx, transaction.UserAddress)
+	assert.Nil(t, err)
+	assert.Equal(t, transaction, txns[0])
+}
+
+func TestContractManagerService_GetAllTransactions_Err(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	transactionRepoErr := errors.New("some transaction repository error")
+	mockTransactionRepo.EXPECT().GetAllTransactions(ctx, transaction.UserAddress).Return(nil, transactionRepoErr)
+
+	txns, err := contractManager.GetAllTransactions(ctx, transaction.UserAddress)
+	assert.Nil(t, txns)
+	assert.Equal(t, transactionRepoErr, err)
+}
+
+func TestContractMangerService_DeleteTransaction(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	mockTransactionRepo.EXPECT().DeleteTransaction(ctx, transaction.UserAddress, transaction.Hash).Return(nil)
+
+	err := contractManager.DeleteTransaction(ctx, transaction.UserAddress, transaction.Hash)
+	assert.Nil(t, err)
+}
+
+func TestContractMangerService_DeleteTransaction_Err(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	transactionRepoErr := errors.New("some transaction repository error")
+	mockTransactionRepo.EXPECT().DeleteTransaction(ctx, transaction.UserAddress, transaction.Hash).Return(transactionRepoErr)
+
+	err := contractManager.DeleteTransaction(ctx, transaction.UserAddress, transaction.Hash)
+	assert.Equal(t, transactionRepoErr, err)
+}
+
+func TestContractMangerService_CompleteTransaction(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	mockTransactionRepo.EXPECT().CompleteTransaction(ctx, transaction.UserAddress, transaction.Hash).Return(nil)
+
+	err := contractManager.CompleteTransaction(ctx, transaction.UserAddress, transaction.Hash)
+	assert.Nil(t, err)
+}
+
+func TestContractMangerService_CompleteTransaction_Err(t *testing.T) {
+	_, _, mockTransactionRepo, contractManager, ctx := newContractManagementService(t)
+	transaction := getTestTxn(t)
+
+	transactionRepoErr := errors.New("some transaction repository error")
+	mockTransactionRepo.EXPECT().CompleteTransaction(ctx, transaction.UserAddress, transaction.Hash).Return(transactionRepoErr)
+
+	err := contractManager.CompleteTransaction(ctx, transaction.UserAddress, transaction.Hash)
+	assert.Equal(t, transactionRepoErr, err)
 }

@@ -1,13 +1,17 @@
 package contracts
 
 import (
+	"context"
+	"contract-service/mocks"
 	"contract-service/signing"
 	"contract-service/storage"
 	"contract-service/utils"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -1428,4 +1432,159 @@ func TestContractManagerService_UnpackArgsS(t *testing.T) {
 	packed, packingErr := abiDef.Pack("TestInputsS", arguments...)
 	assert.Nil(t, packingErr)
 	fmt.Println(packed)
+}
+
+
+func newContractManagementService(t *testing.T) (*mocks.MockContractRepository, *mocks.MockSigningServiceClient, *mocks.MockTransactionRepository, *ContractManagerService, context.Context){
+	ctrl := gomock.NewController(t)
+	mockContractRepo := mocks.NewMockContractRepository(ctrl)
+	mockSigningServiceClient := mocks.NewMockSigningServiceClient(ctrl)
+	mockTransactionRepository := mocks.NewMockTransactionRepository(ctrl)
+	return mockContractRepo, mockSigningServiceClient, mockTransactionRepository, &ContractManagerService{
+		repo:    mockContractRepo,
+		signer:  mockSigningServiceClient,
+		txnRepo: mockTransactionRepository,
+	}, context.Background()
+}
+
+func TestNewContractTransactionHandler(t *testing.T) {
+	mockContractRepo, mockSigningServiceClient, mockTransactionRepository, _, _ := newContractManagementService(t)
+	txnHandler := NewContractTransactionHandler(mockContractRepo, mockSigningServiceClient, mockTransactionRepository)
+	assert.IsType(t, &ContractManagerService{}, txnHandler)
+	assert.Implements(t, new(ContractTransactionHandler), txnHandler)
+}
+
+func TestNewContractManagerHandler(t *testing.T) {
+	mockContractRepo, _, _, _, _ := newContractManagementService(t)
+	contractManager := NewContractManagerHandler(mockContractRepo)
+	assert.IsType(t, &ContractManagerService{}, contractManager)
+	assert.Implements(t, new(ContractManagerHandler), contractManager)
+}
+
+func TestContractManagerService_GetContract(t *testing.T) {
+	mockContractRepo, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        "Tester",
+	}
+	mockContractRepo.EXPECT().GetContract(ctx, address).Return(contract, nil)
+
+	contractReturned, err := contractManager.GetContract(ctx, address)
+	assert.Nil(t, err)
+	assert.Equal(t, contract, contractReturned)
+}
+
+func TestContractManagerService_GetContract_Err(t *testing.T) {
+	mockContractRepo, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+
+	storageErr := errors.New("error getting contract")
+	mockContractRepo.EXPECT().GetContract(ctx, address).Return(nil, storageErr)
+
+	contractReturned, err := contractManager.GetContract(ctx, address)
+	assert.Equal(t, storageErr, err)
+	assert.Nil(t, contractReturned)
+}
+
+func TestContractManagerService_StoreContract(t *testing.T) {
+	mockContractRepo, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        "Tester",
+	}
+	mockContractRepo.EXPECT().UpsertContract(ctx, contract).Return(nil)
+
+	err := contractManager.StoreContract(ctx, contract)
+	assert.Nil(t, err)
+}
+
+func TestContractManagerService_StoreContract_Err(t *testing.T) {
+	mockContractRepo, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        "Tester",
+	}
+	storageErr := errors.New("error getting contract")
+	mockContractRepo.EXPECT().UpsertContract(ctx, contract).Return(storageErr)
+
+	err := contractManager.StoreContract(ctx, contract)
+	assert.Equal(t, storageErr, err)
+}
+
+func TestContractManagerService_DeleteContract(t *testing.T) {
+	mockContractRepo, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+
+	mockContractRepo.EXPECT().DeleteContract(ctx, address, owner).Return(nil)
+
+	err := contractManager.DeleteContract(ctx, address, owner)
+	assert.Nil(t, err)
+}
+
+func TestContractManagerService_DeleteContract_Err(t *testing.T) {
+	mockContractRepo, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+
+	storageErr := errors.New("error getting contract")
+	mockContractRepo.EXPECT().DeleteContract(ctx, address, owner).Return(storageErr)
+
+	err := contractManager.DeleteContract(ctx, address, owner)
+	assert.Equal(t, storageErr, err)
+}
+
+
+func TestContractManagerService_ListContracts(t *testing.T) {
+	mockContractRepo, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+	mockContractRepo.EXPECT().GetContractsByOwner(ctx, owner).Return([]*storage.Contract{contract}, nil)
+
+	contractsReturned, err := contractManager.ListContracts(ctx, owner)
+	assert.Nil(t, err)
+	assert.Equal(t, contract, contractsReturned[0])
+}
+
+func TestContractManagerService_ListContracts_Err(t *testing.T) {
+	mockContractRepo, _, _, contractManager, ctx := newContractManagementService(t)
+	owner := "Tester"
+
+	storageErr := errors.New("error getting contract")
+	mockContractRepo.EXPECT().GetContractsByOwner(ctx, owner).Return(nil, storageErr)
+
+	contractReturned, err := contractManager.ListContracts(ctx, owner)
+	assert.Equal(t, storageErr, err)
+	assert.Nil(t, contractReturned)
 }

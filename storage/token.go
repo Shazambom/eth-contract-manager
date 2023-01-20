@@ -23,7 +23,7 @@ type Token struct {
 
 func NewToken(contractAddress, userAddress, hash string, txn []byte, value string) (*Token, error){
 	if _, ok := math.ParseBig256(value); !ok {
-		return nil, errors.New("Error parsing value from value string " + value + " is an invalid amount of wei")
+		return nil, errors.New("Error parsing value from string " + value + " is an invalid amount of wei")
 	}
 	return &Token{
 		ContractAddress: contractAddress,
@@ -37,7 +37,7 @@ func NewToken(contractAddress, userAddress, hash string, txn []byte, value strin
 
 func (token *Token) FromRPC(txn *pb.Transaction) error {
 	if _, ok := math.ParseBig256(txn.Value); !ok {
-		return errors.New("Error parsing value from value string " + txn.Value + " is an invalid amount of wei")
+		return errors.New("Error parsing value from string " + txn.Value + " is an invalid amount of wei")
 	}
 	token.Hash = txn.Hash
 	token.ABIPackedTxn = txn.PackedArgs

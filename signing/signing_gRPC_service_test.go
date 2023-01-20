@@ -19,8 +19,7 @@ func newTestingSignerServer(t *testing.T) (*mocks.MockSigningService, *mocks.Moc
 	mockPrivateKeyRepo := mocks.NewMockPrivateKeyRepository(ctrl)
 	signerServer, newServerErr := NewSignerServer(getTestPort(), []grpc.ServerOption{grpc.EmptyServerOption{}}, mockSigningService, mockPrivateKeyRepo)
 	assert.Nil(t, newServerErr)
-	ctx := context.Background()
-	return mockSigningService, mockPrivateKeyRepo, signerServer, ctx
+	return mockSigningService, mockPrivateKeyRepo, signerServer, context.Background()
 }
 
 func TestNewSignerServer(t *testing.T) {

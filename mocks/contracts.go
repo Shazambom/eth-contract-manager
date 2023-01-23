@@ -123,18 +123,18 @@ func (mr *MockContractTransactionHandlerMockRecorder) GetTransactions(ctx, addre
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactions", reflect.TypeOf((*MockContractTransactionHandler)(nil).GetTransactions), ctx, address)
 }
 
-// StoreToken mocks base method.
-func (m *MockContractTransactionHandler) StoreToken(ctx context.Context, token *storage.Transaction) error {
+// StoreTransaction mocks base method.
+func (m *MockContractTransactionHandler) StoreTransaction(ctx context.Context, token *storage.Transaction) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "StoreToken", ctx, token)
+	ret := m.ctrl.Call(m, "StoreTransaction", ctx, token)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// StoreToken indicates an expected call of StoreToken.
-func (mr *MockContractTransactionHandlerMockRecorder) StoreToken(ctx, token interface{}) *gomock.Call {
+// StoreTransaction indicates an expected call of StoreTransaction.
+func (mr *MockContractTransactionHandlerMockRecorder) StoreTransaction(ctx, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreToken", reflect.TypeOf((*MockContractTransactionHandler)(nil).StoreToken), ctx, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreTransaction", reflect.TypeOf((*MockContractTransactionHandler)(nil).StoreTransaction), ctx, token)
 }
 
 // MockContractManagerHandler is a mock of ContractManagerHandler interface.

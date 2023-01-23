@@ -126,7 +126,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 	//We subtract 1 from abiArgs because there is an implicit signature value that is added by the service
 	//TODO Decide the structure or argument structure to allow the service to pack txns without a signature (if that is needed)
 	if len(abiArgs) - 1 != len(arguments) {
-		return nil, nil, errors.New(fmt.Sprintf("argument length mismatch abi: %d argument length recieved: %d\n", len(abiArgs) - 1, len(arguments)))
+		return nil, nil, errors.New(fmt.Sprintf("argument length mismatch abi: %d argument length recieved: %d", len(abiArgs) - 1, len(arguments)))
 	}
 
 	argBytes := [][]byte{}
@@ -317,8 +317,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 	return args, argBytes, nil
 }
 
-//TODO Refactor this function to StoreTransaction
-func (cms *ContractManagerService) StoreToken(ctx context.Context, token *storage.Transaction) error {
+func (cms *ContractManagerService) StoreTransaction(ctx context.Context, token *storage.Transaction) error {
 	return cms.txnRepo.StoreTransaction(ctx, *token)
 }
 

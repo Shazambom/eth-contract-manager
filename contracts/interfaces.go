@@ -8,7 +8,7 @@ import (
 type ContractTransactionHandler interface {
 	GetContract(ctx context.Context, address string) (*storage.Contract, error)
 	BuildTransaction(ctx context.Context, senderInHash bool, msgSender, functionName string, arguments [][]byte, value string, contract *storage.Contract) (*storage.Transaction, error)
-	StoreToken(ctx context.Context, token *storage.Transaction) error
+	StoreTransaction(ctx context.Context, token *storage.Transaction) error
 	GetTransactions(ctx context.Context, address string) ([]*storage.Transaction, error)
 	DeleteTransaction(ctx context.Context, address, hash string) error
 	GetAllTransactions(ctx context.Context, address string) ([]*storage.Transaction, error)

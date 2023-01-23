@@ -41,6 +41,7 @@ func TestSignatureHandler_SignTxn_and_VerifyFromHash(t *testing.T) {
 	someHexArg, _ := hex.DecodeString("abdcefffffff")
 	args := [][]byte{[]byte("I'm packed arguments ready to be signed"), someHexArg}
 	hash, signature, err := s.SignTxn(privateKey, args)
+	fmt.Printf("hash: %s\nsignature: %s\n", hash, signature)
 	assert.Nil(t, err)
 	assert.Equal(t, len(signature), 132)
 	assert.Equal(t, len(hash), 66)

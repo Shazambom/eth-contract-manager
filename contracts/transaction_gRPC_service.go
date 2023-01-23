@@ -65,7 +65,7 @@ func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *
 		return nil, tokenErr
 	}
 
-	storeErr := ts.TransactionManager.StoreToken(ctx, token)
+	storeErr := ts.TransactionManager.StoreTransaction(ctx, token)
 	if storeErr != nil {
 		log.Println(storeErr.Error())
 		return nil, storeErr

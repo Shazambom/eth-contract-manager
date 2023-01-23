@@ -3,6 +3,7 @@ package contracts
 import (
 	"context"
 	"contract-service/mocks"
+	pb "contract-service/proto"
 	"contract-service/signing"
 	"contract-service/storage"
 	"contract-service/utils"
@@ -12,8 +13,10 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"math/big"
 	"strings"
 	"testing"
 )
@@ -1610,7 +1613,7 @@ func TestContractMangerService_StoreToken(t *testing.T) {
 
 	mockTransactionRepo.EXPECT().StoreTransaction(ctx, *transaction).Return(nil)
 
-	err := contractManager.StoreToken(ctx, transaction)
+	err := contractManager.StoreTransaction(ctx, transaction)
 	assert.Nil(t, err)
 }
 
@@ -1621,7 +1624,7 @@ func TestContractMangerService_StoreToken_Err(t *testing.T) {
 	transactionRepoErr := errors.New("some transaction repository error")
 	mockTransactionRepo.EXPECT().StoreTransaction(ctx, *transaction).Return(transactionRepoErr)
 
-	err := contractManager.StoreToken(ctx, transaction)
+	err := contractManager.StoreTransaction(ctx, transaction)
 	assert.Equal(t, transactionRepoErr, err)
 }
 
@@ -1713,4 +1716,403 @@ func TestContractMangerService_CompleteTransaction_Err(t *testing.T) {
 	assert.Equal(t, transactionRepoErr, err)
 }
 
-//TODO Write tests for BuildTransaction
+func TestContractManagerService_BuildTransaction_InvalidABI(t *testing.T) {
+	_, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          "some invalid abi",
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, functionName, [][]byte{}, "0", contract)
+	assert.Nil(t, txn)
+	assert.Error(t, err)
+}
+
+
+func TestContractManagerService_BuildTransaction_FunctionNotFound(t *testing.T) {
+	_, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, "invalid function name", [][]byte{}, "0", contract)
+	assert.Nil(t, txn)
+	assert.Error(t, err)
+	assert.Equal(t, errors.New("function selected is not hashible"), err)
+}
+
+
+func TestContractManagerService_BuildTransaction_ArgumentLengthMismatch(t *testing.T) {
+	_, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, functionName, [][]byte{}, "0", contract)
+	assert.Nil(t, txn)
+	assert.Error(t, err)
+	assert.Equal(t, errors.New("argument length mismatch abi: 2 argument length recieved: 0"), err)
+}
+
+
+func TestContractManagerService_BuildTransaction_ArgumentTypeError(t *testing.T) {
+	_, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+
+	nonce, nonceErr := utils.GetNonceBytes()
+	assert.Nil(t, nonceErr)
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, functionName, [][]byte{nonce, []byte("aaaa")}, "0", contract)
+	assert.Nil(t, txn)
+	assert.Error(t, err)
+	assert.Equal(t, errors.New("Unable to parse uint256"), err)
+}
+
+
+
+func TestContractManagerService_BuildTransaction_ArgumentOrderError(t *testing.T) {
+	_, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+
+	nonce, nonceErr := utils.GetNonceBytes()
+	assert.Nil(t, nonceErr)
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, functionName, [][]byte{[]byte("123"), nonce}, "0", contract)
+	assert.Nil(t, txn)
+	assert.Error(t, err)
+	assert.Equal(t, errors.New("Unable to parse uint256"), err)
+}
+
+
+func TestContractManagerService_BuildTransaction_ValueIsInvalid(t *testing.T) {
+	_, _, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+
+	nonce, nonceErr := utils.GetNonceBytes()
+	assert.Nil(t, nonceErr)
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, functionName, [][]byte{nonce, []byte("123")}, "abc not a number", contract)
+	assert.Nil(t, txn)
+	assert.Error(t, err)
+	assert.Equal(t, errors.New("invalid value, value is of type int256 and represents the amount of eth in wei"), err)
+}
+
+func TestContractManagerService_BuildTransaction(t *testing.T) {
+	_, mockSigningServiceClient, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
+	assert.Nil(t, abiErr)
+	nonce, nonceErr := utils.GetNonceBytes()
+	assert.Nil(t, nonceErr)
+	tokenId := 15874
+	value := "4500000000"
+
+	valueBigInt, _ := math.ParseBig256(value)
+	tokenIdBigInt := big.NewInt(int64(tokenId))
+	tokenIdBytesPadded := common.LeftPadBytes(tokenIdBigInt.Bytes(), 32)
+	moddedArgs := [][]byte{common.HexToAddress(user_address).Bytes(), common.LeftPadBytes(valueBigInt.Bytes(), 32), nonce, tokenIdBytesPadded}
+	hash := "0xb138be16a6c461be1faa1e12c9a1d9300954b2c0cba433711415a34695b12392"
+	signature := "0x4984749a4018a10a08170cf4559320409eff3dd45ae771e42c64cd91a249f3673075026298209608e1b51e711c8b77d21317dc6227e04044246ea3403f1ff74d1b"
+	signatureBytes, decodeErr := hex.DecodeString(signature[2:])
+	assert.Nil(t, decodeErr)
+
+	mockSigningServiceClient.EXPECT().SignTxn(ctx, &pb.SignatureRequest{ContractAddress: address, Args: moddedArgs}).Return(&pb.SignatureResponse{
+		Signature: signature,
+		Hash:      hash,
+	}, nil)
+
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, functionName, [][]byte{nonce, []byte(fmt.Sprintf("%d", tokenId))}, value, contract)
+	assert.Nil(t, err)
+
+	var nonceData [16]byte
+	copy(nonceData[:], common.LeftPadBytes(nonce, 16))
+	packingArgs := []interface{}{nonceData, tokenIdBigInt, signatureBytes}
+	packedBytes, bytePackingErr := funcDef.Pack(functionName, packingArgs...)
+	assert.Nil(t, bytePackingErr)
+	expected, transactionInitErr := storage.NewTransaction(
+		address,
+		user_address,
+		hash,
+		packedBytes,
+		value,
+	)
+	assert.Nil(t, transactionInitErr)
+	assert.Equal(t, expected, txn)
+}
+
+
+func TestContractManagerService_BuildTransaction_SenderNotInHash(t *testing.T) {
+	_, mockSigningServiceClient, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+	funcDef, abiErr := abi.JSON(strings.NewReader(contract.ABI))
+	assert.Nil(t, abiErr)
+	nonce, nonceErr := utils.GetNonceBytes()
+	assert.Nil(t, nonceErr)
+	tokenId := 15874
+	value := "4500000000"
+
+	valueBigInt, _ := math.ParseBig256(value)
+	tokenIdBigInt := big.NewInt(int64(tokenId))
+	tokenIdBytesPadded := common.LeftPadBytes(tokenIdBigInt.Bytes(), 32)
+	moddedArgs := [][]byte{common.LeftPadBytes(valueBigInt.Bytes(), 32), nonce, tokenIdBytesPadded}
+	hash := "0xb138be16a6c461be1faa1e12c9a1d9300954b2c0cba433711415a34695b12392"
+	signature := "0x4984749a4018a10a08170cf4559320409eff3dd45ae771e42c64cd91a249f3673075026298209608e1b51e711c8b77d21317dc6227e04044246ea3403f1ff74d1b"
+	signatureBytes, decodeErr := hex.DecodeString(signature[2:])
+	assert.Nil(t, decodeErr)
+
+	mockSigningServiceClient.EXPECT().SignTxn(ctx, &pb.SignatureRequest{ContractAddress: address, Args: moddedArgs}).Return(&pb.SignatureResponse{
+		Signature: signature,
+		Hash:      hash,
+	}, nil)
+
+
+	txn, err := contractManager.BuildTransaction(ctx, false, user_address, functionName, [][]byte{nonce, []byte(fmt.Sprintf("%d", tokenId))}, value, contract)
+	assert.Nil(t, err)
+
+	var nonceData [16]byte
+	copy(nonceData[:], common.LeftPadBytes(nonce, 16))
+	packingArgs := []interface{}{nonceData, tokenIdBigInt, signatureBytes}
+	packedBytes, bytePackingErr := funcDef.Pack(functionName, packingArgs...)
+	assert.Nil(t, bytePackingErr)
+	expected, transactionInitErr := storage.NewTransaction(
+		address,
+		user_address,
+		hash,
+		packedBytes,
+		value,
+	)
+	assert.Nil(t, transactionInitErr)
+	assert.Equal(t, expected, txn)
+}
+
+
+func TestContractManagerService_BuildTransaction_SigningServiceError(t *testing.T) {
+	_, mockSigningServiceClient, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+	nonce, nonceErr := utils.GetNonceBytes()
+	assert.Nil(t, nonceErr)
+	tokenId := 15874
+	value := "4500000000"
+
+	valueBigInt, _ := math.ParseBig256(value)
+	tokenIdBigInt := big.NewInt(int64(tokenId))
+	tokenIdBytesPadded := common.LeftPadBytes(tokenIdBigInt.Bytes(), 32)
+	moddedArgs := [][]byte{common.HexToAddress(user_address).Bytes(), common.LeftPadBytes(valueBigInt.Bytes(), 32), nonce, tokenIdBytesPadded}
+
+	signatureServiceError := errors.New("this is a random error within the signing service")
+	mockSigningServiceClient.EXPECT().SignTxn(ctx, &pb.SignatureRequest{ContractAddress: address, Args: moddedArgs}).Return(nil, signatureServiceError)
+
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, functionName, [][]byte{nonce, []byte(fmt.Sprintf("%d", tokenId))}, value, contract)
+	assert.Nil(t, txn)
+	assert.Equal(t, signatureServiceError, err)
+}
+
+
+func TestContractManagerService_BuildTransaction_InvalidSignatureReturned(t *testing.T) {
+	_, mockSigningServiceClient, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie"
+
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+	nonce, nonceErr := utils.GetNonceBytes()
+	assert.Nil(t, nonceErr)
+	tokenId := 15874
+	value := "4500000000"
+
+	valueBigInt, _ := math.ParseBig256(value)
+	tokenIdBigInt := big.NewInt(int64(tokenId))
+	tokenIdBytesPadded := common.LeftPadBytes(tokenIdBigInt.Bytes(), 32)
+	moddedArgs := [][]byte{common.HexToAddress(user_address).Bytes(), common.LeftPadBytes(valueBigInt.Bytes(), 32), nonce, tokenIdBytesPadded}
+	hash := "0xb138be16a6c461be1faa1e12c9a1d9300954b2c0cba433711415a34695b12392"
+	signature := "some random message that isn't a valid signature"
+
+	mockSigningServiceClient.EXPECT().SignTxn(ctx, &pb.SignatureRequest{ContractAddress: address, Args: moddedArgs}).Return(&pb.SignatureResponse{
+		Signature: signature,
+		Hash:      hash,
+	}, nil)
+
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, functionName, [][]byte{nonce, []byte(fmt.Sprintf("%d", tokenId))}, value, contract)
+	assert.Nil(t, txn)
+	assert.Error(t, err)
+	assert.Equal(t, hex.InvalidByteError(0x6d), err)
+}
+
+
+func TestContractManagerService_BuildTransaction_ContractFunctionMisconfigurationWithABI(t *testing.T) {
+	_, mockSigningServiceClient, _, contractManager, ctx := newContractManagementService(t)
+	address := "some address"
+	owner := "Tester"
+	user_address := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	functionName := "mintArtie_IncorrectFunctionName :P"
+
+	contract := &storage.Contract{
+		Address:      address,
+		ABI:          claimAbi_Flattened,
+		Functions:    map[string]storage.Function{functionName: {Arguments: []storage.Argument{
+			{Name: "nonce", Type: "bytes16"},
+			{Name: "tokenId", Type: "uint256"},
+		}}},
+		ContractOwner:        owner,
+	}
+	nonce, nonceErr := utils.GetNonceBytes()
+	assert.Nil(t, nonceErr)
+	tokenId := 15874
+	value := "4500000000"
+
+	valueBigInt, _ := math.ParseBig256(value)
+	tokenIdBigInt := big.NewInt(int64(tokenId))
+	tokenIdBytesPadded := common.LeftPadBytes(tokenIdBigInt.Bytes(), 32)
+	moddedArgs := [][]byte{common.HexToAddress(user_address).Bytes(), common.LeftPadBytes(valueBigInt.Bytes(), 32), nonce, tokenIdBytesPadded}
+	hash := "0xb138be16a6c461be1faa1e12c9a1d9300954b2c0cba433711415a34695b12392"
+	signature := "0x4984749a4018a10a08170cf4559320409eff3dd45ae771e42c64cd91a249f3673075026298209608e1b51e711c8b77d21317dc6227e04044246ea3403f1ff74d1b"
+
+	mockSigningServiceClient.EXPECT().SignTxn(ctx, &pb.SignatureRequest{ContractAddress: address, Args: moddedArgs}).Return(&pb.SignatureResponse{
+		Signature: signature,
+		Hash:      hash,
+	}, nil)
+
+
+	txn, err := contractManager.BuildTransaction(ctx, true, user_address, functionName, [][]byte{nonce, []byte(fmt.Sprintf("%d", tokenId))}, value, contract)
+	assert.Nil(t, txn)
+	assert.Error(t, err)
+	assert.Equal(t, errors.New("method could not be found"), err)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

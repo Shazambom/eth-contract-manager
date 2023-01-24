@@ -1,7 +1,7 @@
 package web
 
 import (
-	"contract-service/utils"
+	"bitbucket.org/artie_inc/contract-service/utils"
 	"encoding/json"
 	"errors"
 	"github.com/aws/aws-lambda-go/events"

@@ -3,7 +3,7 @@ package storage
 import (
 	"bytes"
 	"compress/gzip"
-	pb "contract-service/proto"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"encoding/base64"
 	"encoding/json"
 	"errors"

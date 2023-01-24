@@ -3,7 +3,7 @@
 package signing
 
 import (
-	"contract-service/storage"
+	"bitbucket.org/artie_inc/contract-service/storage"
 	"github.com/google/wire"
 	"google.golang.org/grpc"
 )

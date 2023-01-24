@@ -1,8 +1,8 @@
 package main
 
 import (
-	"contract-service/contracts"
-	"contract-service/web"
+	"bitbucket.org/artie_inc/contract-service/contracts"
+	"bitbucket.org/artie_inc/contract-service/web"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"

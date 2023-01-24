@@ -2,8 +2,8 @@ package contracts
 
 import (
 	"context"
-	pb "contract-service/proto"
-	"contract-service/storage"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
+	"bitbucket.org/artie_inc/contract-service/storage"
 	"encoding/hex"
 	"errors"
 	"fmt"

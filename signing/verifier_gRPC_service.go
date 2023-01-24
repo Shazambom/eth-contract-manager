@@ -2,7 +2,7 @@ package signing
 
 import (
 	"context"
-	pb "contract-service/proto"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"

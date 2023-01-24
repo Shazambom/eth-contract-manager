@@ -2,7 +2,7 @@ package storage
 
 import (
 	"context"
-	pb "contract-service/proto"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"encoding/json"
 	"errors"
 	"github.com/aws/aws-sdk-go/aws"

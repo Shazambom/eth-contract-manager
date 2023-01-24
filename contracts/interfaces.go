@@ -2,7 +2,7 @@ package contracts
 
 import (
 	"context"
-	"contract-service/storage"
+	"bitbucket.org/artie_inc/contract-service/storage"
 )
 
 type ContractTransactionHandler interface {

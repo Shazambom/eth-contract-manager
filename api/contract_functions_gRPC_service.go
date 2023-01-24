@@ -1,10 +1,10 @@
 package api
 
 import (
+	"bitbucket.org/artie_inc/contract-service/contracts"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
+	"bitbucket.org/artie_inc/contract-service/utils"
 	"context"
-	"contract-service/contracts"
-	pb "contract-service/proto"
-	"contract-service/utils"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"

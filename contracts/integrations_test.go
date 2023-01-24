@@ -2,10 +2,10 @@ package contracts
 
 import (
 	"context"
-	pb "contract-service/proto"
-	"contract-service/signing"
-	"contract-service/storage"
-	"contract-service/utils"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
+	"bitbucket.org/artie_inc/contract-service/signing"
+	"bitbucket.org/artie_inc/contract-service/storage"
+	"bitbucket.org/artie_inc/contract-service/utils"
 	"encoding/hex"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"

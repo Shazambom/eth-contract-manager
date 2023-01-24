@@ -1,9 +1,9 @@
 package main
 
 import (
-	"contract-service/contracts"
-	"contract-service/signing"
-	"contract-service/storage"
+	"bitbucket.org/artie_inc/contract-service/contracts"
+	"bitbucket.org/artie_inc/contract-service/signing"
+	"bitbucket.org/artie_inc/contract-service/storage"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"google.golang.org/grpc"

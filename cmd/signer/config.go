@@ -1,7 +1,7 @@
 package main
 
 import (
-	"contract-service/utils"
+	"bitbucket.org/artie_inc/contract-service/utils"
 	"fmt"
 	"strconv"
 )

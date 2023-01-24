@@ -1,4 +1,4 @@
-module contract-service
+module bitbucket.org/artie_inc/contract-service
 
 go 1.19
 

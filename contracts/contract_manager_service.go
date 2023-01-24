@@ -17,8 +17,8 @@ import (
 )
 
 type ContractManagerService struct {
-	repo storage.ContractRepository
-	signer pb.SigningServiceClient
+	repo    storage.ContractRepository
+	signer  pb.SigningServiceClient
 	txnRepo storage.TransactionRepository
 }
 
@@ -29,8 +29,8 @@ type ABIArg struct {
 
 func NewContractTransactionHandler(repo storage.ContractRepository, signer pb.SigningServiceClient, txnRepo storage.TransactionRepository) ContractTransactionHandler {
 	return &ContractManagerService{
-		repo:   repo,
-		signer: signer,
+		repo:    repo,
+		signer:  signer,
 		txnRepo: txnRepo,
 	}
 }
@@ -124,8 +124,8 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 
 	//We subtract 1 from abiArgs because there is an implicit signature value that is added by the service
 	//TODO Decide the structure or argument structure to allow the service to pack txns without a signature (if that is needed)
-	if len(abiArgs) - 1 != len(arguments) {
-		return nil, nil, errors.New(fmt.Sprintf("argument length mismatch abi: %d argument length recieved: %d", len(abiArgs) - 1, len(arguments)))
+	if len(abiArgs)-1 != len(arguments) {
+		return nil, nil, errors.New(fmt.Sprintf("argument length mismatch abi: %d argument length recieved: %d", len(abiArgs)-1, len(arguments)))
 	}
 
 	argBytes := [][]byte{}
@@ -136,10 +136,9 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 		hashArgMap[arg.Name] = i
 	}
 
-
 	args := []interface{}{}
 	for i, arg := range arguments {
-		var finalArg interface {}
+		var finalArg interface{}
 		switch abiArgs[i].Type {
 		case "uint":
 			bigInt, ok := math.ParseBig256(string(arg))
@@ -150,7 +149,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(bigInt.Bytes(), 32)
 			}
-		case "uint8" :
+		case "uint8":
 			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
@@ -159,16 +158,16 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
 			}
-		case "uint16" :
+		case "uint16":
 			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
 			}
-			finalArg =  uint16(intVar)
+			finalArg = uint16(intVar)
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
 			}
-		case "uint32" :
+		case "uint32":
 			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
@@ -177,7 +176,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
 			}
-		case "uint64" :
+		case "uint64":
 			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
@@ -186,7 +185,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
 			}
-		case "uint256" :
+		case "uint256":
 			bigInt, ok := math.ParseBig256(string(arg))
 			if !ok {
 				return nil, nil, errors.New("Unable to parse uint256")
@@ -195,7 +194,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(bigInt.Bytes(), 32)
 			}
-		case "int256" :
+		case "int256":
 			bigInt, ok := math.ParseBig256(string(arg))
 			if !ok {
 				return nil, nil, errors.New("Unable to parse uint256")
@@ -204,7 +203,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(bigInt.Bytes(), 32)
 			}
-		case "int8" :
+		case "int8":
 			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
@@ -213,7 +212,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
 			}
-		case "int16" :
+		case "int16":
 			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
@@ -222,7 +221,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
 			}
-		case "int32" :
+		case "int32":
 			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
@@ -231,7 +230,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
 			}
-		case "int64" :
+		case "int64":
 			intVar, intConvErr := strconv.Atoi(string(arg))
 			if intConvErr != nil {
 				return nil, nil, intConvErr
@@ -240,14 +239,14 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = common.LeftPadBytes(big.NewInt(int64(intVar)).Bytes(), 32)
 			}
-		case "address" :
+		case "address":
 			var data [160]byte
 			copy(data[:], arg)
 			finalArg = data
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = arg
 			}
-		case "bool" :
+		case "bool":
 			//TODO this is likely wrong, pls fix
 			finalArg = string(arg) == "true"
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
@@ -305,7 +304,7 @@ func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Met
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = arg
 			}
-		default :
+		default:
 			finalArg = arg
 			if hashInd, in := hashArgMap[abiArgs[i].Name]; in {
 				argBytes[hashInd] = arg

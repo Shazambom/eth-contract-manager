@@ -1,9 +1,9 @@
 package storage
 
 import (
+	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"bytes"
 	"compress/gzip"
-	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -14,24 +14,24 @@ import (
 
 type Transaction struct {
 	ContractAddress string `json:"contract_address"`
-	ABIPackedTxn []byte `json:"abi_packed_txn"`
-	UserAddress string `json:"user_address"`
-	Hash string `json:"hash"`
-	IsComplete bool `json:"is_complete"`
-	Value	string `json:"value"`
+	ABIPackedTxn    []byte `json:"abi_packed_txn"`
+	UserAddress     string `json:"user_address"`
+	Hash            string `json:"hash"`
+	IsComplete      bool   `json:"is_complete"`
+	Value           string `json:"value"`
 }
 
-func NewTransaction(contractAddress, userAddress, hash string, txn []byte, value string) (*Transaction, error){
+func NewTransaction(contractAddress, userAddress, hash string, txn []byte, value string) (*Transaction, error) {
 	if _, ok := math.ParseBig256(value); !ok {
 		return nil, errors.New("Error parsing value from string " + value + " is an invalid amount of wei")
 	}
 	return &Transaction{
 		ContractAddress: contractAddress,
-		ABIPackedTxn: txn,
-		UserAddress: userAddress,
-		Hash: hash,
-		IsComplete: false,
-		Value: value,
+		ABIPackedTxn:    txn,
+		UserAddress:     userAddress,
+		Hash:            hash,
+		IsComplete:      false,
+		Value:           value,
 	}, nil
 }
 
@@ -50,15 +50,14 @@ func (token *Transaction) FromRPC(txn *pb.Transaction) error {
 
 func (token *Transaction) ToRPC() *pb.Transaction {
 	return &pb.Transaction{
-		PackedArgs: token.ABIPackedTxn,
-		Hash:       token.Hash,
+		PackedArgs:      token.ABIPackedTxn,
+		Hash:            token.Hash,
 		ContractAddress: token.ContractAddress,
-		UserAddress: token.UserAddress,
-		IsComplete: token.IsComplete,
-		Value: token.Value,
+		UserAddress:     token.UserAddress,
+		IsComplete:      token.IsComplete,
+		Value:           token.Value,
 	}
 }
-
 
 func (token *Transaction) ToString() (string, error) {
 	byteArr, err := json.Marshal(token)

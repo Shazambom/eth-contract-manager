@@ -13,12 +13,11 @@ import (
 )
 
 type ContractIntegrationRPC struct {
-	Server *grpc.Server
+	Server  *grpc.Server
 	Channel chan string
 	pb.UnimplementedContractIntegrationServer
 	TransactionService *contracts.TransactionClient
 }
-
 
 func NewContractIntegrationRPCService(port int, opts []grpc.ServerOption, transactionService *contracts.TransactionClient) (*ContractIntegrationRPC, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
@@ -44,7 +43,6 @@ func NewContractIntegrationRPCService(port int, opts []grpc.ServerOption, transa
 	}()
 	return server, nil
 }
-
 
 func (cRPC *ContractIntegrationRPC) BuildClaimTransaction(ctx context.Context, req *pb.ClaimRequest) (*pb.MintResponse, error) {
 	args := [][]byte{}

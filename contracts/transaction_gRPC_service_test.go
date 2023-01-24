@@ -28,19 +28,18 @@ func TestNewTransactionServer(t *testing.T) {
 	assert.IsType(t, &TransactionRPCService{}, transactionServer)
 }
 
-
 func TestTransactionRPCService_GetContract(t *testing.T) {
 	mockTransactionHandler, transactionServer, ctx := newTestingTransactionServer(t)
 	defer transactionServer.Server.GracefulStop()
 	address := "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 	contract := &storage.Contract{
-		Address:      address,
-		ABI:          claimAbi_Flattened,
-		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+		Address: address,
+		ABI:     claimAbi_Flattened,
+		Functions: map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "tokenId", Type: "uint256"},
 		}}},
-		ContractOwner:        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+		ContractOwner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
 	}
 
 	mockTransactionHandler.EXPECT().GetContract(ctx, address).Return(contract, nil)
@@ -70,13 +69,13 @@ func TestTransactionRPCService_ConstructTransaction(t *testing.T) {
 	assert.Nil(t, nonceErr)
 	contractAddress := "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 	contract := &storage.Contract{
-		Address:      contractAddress,
-		ABI:          claimAbi_Flattened,
-		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+		Address: contractAddress,
+		ABI:     claimAbi_Flattened,
+		Functions: map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "tokenId", Type: "uint256"},
 		}}},
-		ContractOwner:        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+		ContractOwner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
 	}
 	txnReq := &pb.TransactionRequest{
 		SenderInHash:    true,
@@ -97,8 +96,6 @@ func TestTransactionRPCService_ConstructTransaction(t *testing.T) {
 	mockTransactionHandler.EXPECT().GetContract(ctx, contractAddress).Return(contract, nil)
 	mockTransactionHandler.EXPECT().BuildTransaction(ctx, txnReq.SenderInHash, txnReq.MessageSender, txnReq.FunctionName, txnReq.Args, txnReq.Value, contract).Return(transaction, nil)
 	mockTransactionHandler.EXPECT().StoreTransaction(ctx, transaction).Return(nil)
-
-
 
 	txn, err := transactionServer.ConstructTransaction(ctx, txnReq)
 	assert.Nil(t, err)
@@ -123,13 +120,10 @@ func TestTransactionRPCService_ConstructTransaction_ErrGetContract(t *testing.T)
 
 	mockTransactionHandler.EXPECT().GetContract(ctx, contractAddress).Return(nil, transactionHandlerErr)
 
-
-
 	txn, err := transactionServer.ConstructTransaction(ctx, txnReq)
 	assert.Nil(t, txn)
 	assert.Equal(t, transactionHandlerErr, err)
 }
-
 
 func TestTransactionRPCService_ConstructTransaction_ErrBuildTransaction(t *testing.T) {
 	mockTransactionHandler, transactionServer, ctx := newTestingTransactionServer(t)
@@ -139,13 +133,13 @@ func TestTransactionRPCService_ConstructTransaction_ErrBuildTransaction(t *testi
 	transactionHandlerErr := errors.New("some transaction handler error")
 	contractAddress := "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 	contract := &storage.Contract{
-		Address:      contractAddress,
-		ABI:          claimAbi_Flattened,
-		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+		Address: contractAddress,
+		ABI:     claimAbi_Flattened,
+		Functions: map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "tokenId", Type: "uint256"},
 		}}},
-		ContractOwner:        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+		ContractOwner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
 	}
 	txnReq := &pb.TransactionRequest{
 		SenderInHash:    true,
@@ -159,13 +153,10 @@ func TestTransactionRPCService_ConstructTransaction_ErrBuildTransaction(t *testi
 	mockTransactionHandler.EXPECT().GetContract(ctx, contractAddress).Return(contract, nil)
 	mockTransactionHandler.EXPECT().BuildTransaction(ctx, txnReq.SenderInHash, txnReq.MessageSender, txnReq.FunctionName, txnReq.Args, txnReq.Value, contract).Return(nil, transactionHandlerErr)
 
-
-
 	txn, err := transactionServer.ConstructTransaction(ctx, txnReq)
 	assert.Nil(t, txn)
 	assert.Equal(t, transactionHandlerErr, err)
 }
-
 
 func TestTransactionRPCService_ConstructTransaction_ErrStoringTxn(t *testing.T) {
 	mockTransactionHandler, transactionServer, ctx := newTestingTransactionServer(t)
@@ -175,13 +166,13 @@ func TestTransactionRPCService_ConstructTransaction_ErrStoringTxn(t *testing.T) 
 	assert.Nil(t, nonceErr)
 	contractAddress := "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 	contract := &storage.Contract{
-		Address:      contractAddress,
-		ABI:          claimAbi_Flattened,
-		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+		Address: contractAddress,
+		ABI:     claimAbi_Flattened,
+		Functions: map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "tokenId", Type: "uint256"},
 		}}},
-		ContractOwner:        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+		ContractOwner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
 	}
 	txnReq := &pb.TransactionRequest{
 		SenderInHash:    true,
@@ -202,8 +193,6 @@ func TestTransactionRPCService_ConstructTransaction_ErrStoringTxn(t *testing.T) 
 	mockTransactionHandler.EXPECT().GetContract(ctx, contractAddress).Return(contract, nil)
 	mockTransactionHandler.EXPECT().BuildTransaction(ctx, txnReq.SenderInHash, txnReq.MessageSender, txnReq.FunctionName, txnReq.Args, txnReq.Value, contract).Return(transaction, nil)
 	mockTransactionHandler.EXPECT().StoreTransaction(ctx, transaction).Return(transactionHandlerErr)
-
-
 
 	txn, err := transactionServer.ConstructTransaction(ctx, txnReq)
 	assert.Nil(t, txn)
@@ -244,7 +233,6 @@ func TestTransactionRPCService_GetTransactions_ErrGettingTxns(t *testing.T) {
 	assert.Nil(t, txns)
 	assert.Equal(t, transactionHandlerErr, err)
 }
-
 
 func TestTransactionRPCService_GetAllTransactions(t *testing.T) {
 	mockTransactionHandler, transactionServer, ctx := newTestingTransactionServer(t)
@@ -297,7 +285,7 @@ func TestTransactionRPCService_CompleteTransaction(t *testing.T) {
 	msgSender := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 	req := &pb.KeyTransactionRequest{
 		Address: msgSender,
-		Hash: "0xce11e286abab09c3ad05f1f9fff4daaf4f5139214a1f4746661018f0b855f075",
+		Hash:    "0xce11e286abab09c3ad05f1f9fff4daaf4f5139214a1f4746661018f0b855f075",
 	}
 
 	mockTransactionHandler.EXPECT().CompleteTransaction(ctx, msgSender, req.Hash).Return(nil)
@@ -307,7 +295,6 @@ func TestTransactionRPCService_CompleteTransaction(t *testing.T) {
 	assert.NotNil(t, empty)
 }
 
-
 func TestTransactionRPCService_CompleteTransaction_Err(t *testing.T) {
 	mockTransactionHandler, transactionServer, ctx := newTestingTransactionServer(t)
 	defer transactionServer.Server.GracefulStop()
@@ -316,7 +303,7 @@ func TestTransactionRPCService_CompleteTransaction_Err(t *testing.T) {
 	msgSender := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 	req := &pb.KeyTransactionRequest{
 		Address: msgSender,
-		Hash: "0xce11e286abab09c3ad05f1f9fff4daaf4f5139214a1f4746661018f0b855f075",
+		Hash:    "0xce11e286abab09c3ad05f1f9fff4daaf4f5139214a1f4746661018f0b855f075",
 	}
 
 	mockTransactionHandler.EXPECT().CompleteTransaction(ctx, msgSender, req.Hash).Return(transactionHandlerErr)
@@ -326,7 +313,6 @@ func TestTransactionRPCService_CompleteTransaction_Err(t *testing.T) {
 	assert.Equal(t, transactionHandlerErr, err)
 }
 
-
 func TestTransactionRPCService_DeleteTransaction(t *testing.T) {
 	mockTransactionHandler, transactionServer, ctx := newTestingTransactionServer(t)
 	defer transactionServer.Server.GracefulStop()
@@ -334,7 +320,7 @@ func TestTransactionRPCService_DeleteTransaction(t *testing.T) {
 	msgSender := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 	req := &pb.KeyTransactionRequest{
 		Address: msgSender,
-		Hash: "0xce11e286abab09c3ad05f1f9fff4daaf4f5139214a1f4746661018f0b855f075",
+		Hash:    "0xce11e286abab09c3ad05f1f9fff4daaf4f5139214a1f4746661018f0b855f075",
 	}
 
 	mockTransactionHandler.EXPECT().DeleteTransaction(ctx, msgSender, req.Hash).Return(nil)
@@ -343,7 +329,6 @@ func TestTransactionRPCService_DeleteTransaction(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, empty)
 }
-
 
 func TestTransactionRPCService_DeleteTransaction_Err(t *testing.T) {
 	mockTransactionHandler, transactionServer, ctx := newTestingTransactionServer(t)

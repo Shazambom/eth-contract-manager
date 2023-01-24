@@ -10,7 +10,7 @@ import (
 
 func main() {
 	cfg, cfgErr := NewConfig()
-	if cfgErr != nil{
+	if cfgErr != nil {
 		log.Fatal(cfgErr)
 	}
 	txnClient, clientErr := contracts.NewTransactionClient(cfg.TxnHost, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
@@ -23,4 +23,3 @@ func main() {
 	}
 	log.Fatal(<-claimService.Channel)
 }
-

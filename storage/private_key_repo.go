@@ -10,20 +10,19 @@ import (
 )
 
 type PrivateKeyRepo struct {
-	db *dynamodb.DynamoDB
+	db        *dynamodb.DynamoDB
 	tableName string
 }
 
 type PrivateKeyConfig struct {
 	TableName string
-	CFG []*aws.Config
+	CFG       []*aws.Config
 }
 
 type ContractKeyPair struct {
 	ContractAddress string `json:"ContractAddress"`
-	PrivateKey string `json:"PrivateKey"`
+	PrivateKey      string `json:"PrivateKey"`
 }
-
 
 func NewPrivateKeyRepository(config PrivateKeyConfig) (PrivateKeyRepository, error) {
 	sess, err := session.NewSession(config.CFG...)

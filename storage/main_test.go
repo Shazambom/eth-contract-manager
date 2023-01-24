@@ -10,20 +10,20 @@ import (
 )
 
 var dynamoCfg = &aws.Config{
-	Endpoint:         aws.String("localhost:8000"),
-	Region:           aws.String("us-east-1"),
-	Credentials:      credentials.NewStaticCredentials("xxx","yyy", ""),
-	DisableSSL:       aws.Bool(true),
+	Endpoint:    aws.String("localhost:8000"),
+	Region:      aws.String("us-east-1"),
+	Credentials: credentials.NewStaticCredentials("xxx", "yyy", ""),
+	DisableSSL:  aws.Bool(true),
 }
 
 var ctx = context.Background()
 
 var s3cfg = &aws.Config{
-	Endpoint: aws.String("localhost:4566"),
-	Region: aws.String("us-east-1"),
-	Credentials: credentials.NewStaticCredentials("xxx", "yyy", ""),
+	Endpoint:         aws.String("localhost:4566"),
+	Region:           aws.String("us-east-1"),
+	Credentials:      credentials.NewStaticCredentials("xxx", "yyy", ""),
 	S3ForcePathStyle: aws.Bool(true),
-	DisableSSL: aws.Bool(true),
+	DisableSSL:       aws.Bool(true),
 }
 var testBucketName = "buckety"
 

@@ -16,7 +16,6 @@ func getTestPort() int {
 	return portCounter
 }
 
-
 func TestMain(m *testing.M) {
 	code := m.Run()
 

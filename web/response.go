@@ -7,10 +7,9 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 )
 
-
 type Response struct {
-	Token string `json:"token"`
-	QueueNumber int64 `json:"queue_number"`
+	Token       string `json:"token"`
+	QueueNumber int64  `json:"queue_number"`
 }
 
 type ErrorResponse struct {

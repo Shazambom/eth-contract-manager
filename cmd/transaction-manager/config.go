@@ -7,15 +7,15 @@ import (
 )
 
 type Config struct {
-	Port int
-	ContractTableName string
+	Port                 int
+	ContractTableName    string
 	TransactionTableName string
-	AWSEndpoint string
-	AWSRegion string
-	AccessKeyID string
-	SecretAccessKey string
-	SSLEnabled bool
-	SignerEndpoint string
+	AWSEndpoint          string
+	AWSRegion            string
+	AccessKeyID          string
+	SecretAccessKey      string
+	SSLEnabled           bool
+	SignerEndpoint       string
 }
 
 func NewConfig() (Config, error) {
@@ -29,15 +29,15 @@ func NewConfig() (Config, error) {
 		return Config{}, convErr
 	}
 	return Config{
-		Port: prt,
-		ContractTableName: contractTableName,
+		Port:                 prt,
+		ContractTableName:    contractTableName,
 		TransactionTableName: transactionTableName,
-		AWSEndpoint: awsEndpoint,
-		AWSRegion: awsRegion,
-		AccessKeyID: awsKeyId,
-		SecretAccessKey: awsSecret,
-		SSLEnabled: sslEnabled == "true",
-		SignerEndpoint: signerEndpoint,
+		AWSEndpoint:          awsEndpoint,
+		AWSRegion:            awsRegion,
+		AccessKeyID:          awsKeyId,
+		SecretAccessKey:      awsSecret,
+		SSLEnabled:           sslEnabled == "true",
+		SignerEndpoint:       signerEndpoint,
 	}, envErr
 }
 

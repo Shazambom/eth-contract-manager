@@ -1,9 +1,9 @@
 package signing
 
 import (
-	"context"
 	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"bitbucket.org/artie_inc/contract-service/storage"
+	"context"
 	"errors"
 	"fmt"
 	"google.golang.org/grpc"
@@ -13,13 +13,12 @@ import (
 )
 
 type SignerRPCService struct {
-	Server *grpc.Server
+	Server  *grpc.Server
 	Channel chan string
 	pb.UnimplementedSigningServiceServer
 	Handler SigningService
-	Repo storage.PrivateKeyRepository
+	Repo    storage.PrivateKeyRepository
 }
-
 
 func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService, repo storage.PrivateKeyRepository) (*SignerRPCService, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
@@ -45,7 +44,6 @@ func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService,
 	}()
 	return server, nil
 }
-
 
 func (sRPC *SignerRPCService) SignTxn(ctx context.Context, req *pb.SignatureRequest) (*pb.SignatureResponse, error) {
 	log.Printf("Signing transaction\ncontext: %+v\nargs: %+v\n", ctx, req.Args)
@@ -78,7 +76,7 @@ func (sRPC *SignerRPCService) BatchSignTxn(ctx context.Context, req *pb.BatchSig
 	return &pb.BatchSignatureResponse{SignatureResponses: responses}, nil
 }
 
-func (sRPC *SignerRPCService) GenerateNewKey(ctx context.Context, req *pb.KeyManagementRequest)  (*pb.KeyManagementResponse, error) {
+func (sRPC *SignerRPCService) GenerateNewKey(ctx context.Context, req *pb.KeyManagementRequest) (*pb.KeyManagementResponse, error) {
 	privKey, addr, err := sRPC.Handler.GenerateKey()
 	if err != nil {
 		log.Println(err)
@@ -92,7 +90,7 @@ func (sRPC *SignerRPCService) GenerateNewKey(ctx context.Context, req *pb.KeyMan
 	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: addr}, nil
 }
 
-func (sRPC *SignerRPCService) DeleteKey(ctx context.Context, req *pb.KeyManagementRequest)  (*pb.KeyManagementResponse, error) {
+func (sRPC *SignerRPCService) DeleteKey(ctx context.Context, req *pb.KeyManagementRequest) (*pb.KeyManagementResponse, error) {
 	err := sRPC.Repo.DeletePrivateKey(ctx, req.ContractAddress)
 	if err != nil {
 		log.Println(err)
@@ -101,7 +99,7 @@ func (sRPC *SignerRPCService) DeleteKey(ctx context.Context, req *pb.KeyManageme
 	return &pb.KeyManagementResponse{ContractAddress: req.ContractAddress, PublicKey: ""}, nil
 }
 
-func (sRPC *SignerRPCService) GetKey(ctx context.Context, req *pb.KeyManagementRequest)  (*pb.KeyManagementResponse, error) {
+func (sRPC *SignerRPCService) GetKey(ctx context.Context, req *pb.KeyManagementRequest) (*pb.KeyManagementResponse, error) {
 	privKey, getErr := sRPC.Repo.GetPrivateKey(ctx, req.ContractAddress)
 	if getErr != nil {
 		log.Println(getErr)

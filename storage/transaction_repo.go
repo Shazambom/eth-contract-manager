@@ -10,13 +10,13 @@ import (
 )
 
 type TransactionRepo struct {
-	db *dynamodb.DynamoDB
+	db        *dynamodb.DynamoDB
 	tableName string
 }
 
 type TransactionConfig struct {
 	TableName string
-	CFG []*aws.Config
+	CFG       []*aws.Config
 }
 
 func NewTransactionRepo(config TransactionConfig) (TransactionRepository, error) {
@@ -31,12 +31,12 @@ func NewTransactionRepo(config TransactionConfig) (TransactionRepository, error)
 func (tr *TransactionRepo) StoreTransaction(ctx context.Context, token Transaction) error {
 	_, err := tr.db.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
-			"value": {S: aws.String(token.Value)},
-			"abi_packed_txn": {B: token.ABIPackedTxn},
+			"value":            {S: aws.String(token.Value)},
+			"abi_packed_txn":   {B: token.ABIPackedTxn},
 			"contract_address": {S: aws.String(token.ContractAddress)},
-			"user_address": {S: aws.String(token.UserAddress)},
-			"hash": {S: aws.String(token.Hash)},
-			"is_complete": {BOOL: aws.Bool(token.IsComplete)},
+			"user_address":     {S: aws.String(token.UserAddress)},
+			"hash":             {S: aws.String(token.Hash)},
+			"is_complete":      {BOOL: aws.Bool(token.IsComplete)},
 		},
 		TableName: aws.String(tr.tableName),
 	})
@@ -63,36 +63,34 @@ func (tr *TransactionRepo) queryTransactionsTable(ctx context.Context, input *dy
 
 func (tr *TransactionRepo) GetTransactions(ctx context.Context, address string) ([]*Transaction, error) {
 	return tr.queryTransactionsTable(ctx, &dynamodb.QueryInput{
-		TableName: aws.String(tr.tableName),
-		IndexName: aws.String("user_address"),
+		TableName:              aws.String(tr.tableName),
+		IndexName:              aws.String("user_address"),
 		KeyConditionExpression: aws.String("user_address = :v_addr"),
-		FilterExpression: aws.String("is_complete = :ic"),
+		FilterExpression:       aws.String("is_complete = :ic"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":v_addr": {S: aws.String(address)},
-			":ic": {BOOL: aws.Bool(false)},
+			":ic":     {BOOL: aws.Bool(false)},
 		},
 	})
 }
-
 
 func (tr *TransactionRepo) GetAllTransactions(ctx context.Context, address string) ([]*Transaction, error) {
 	return tr.queryTransactionsTable(ctx, &dynamodb.QueryInput{
-		TableName: aws.String(tr.tableName),
-		IndexName: aws.String("user_address"),
+		TableName:              aws.String(tr.tableName),
+		IndexName:              aws.String("user_address"),
 		KeyConditionExpression: aws.String("user_address = :v_addr"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":v_addr": {S: aws.String(address)},
 		},
 	})
 }
-
 
 func (tr *TransactionRepo) DeleteTransaction(ctx context.Context, address, hash string) error {
 	_, err := tr.db.DeleteItemWithContext(ctx, &dynamodb.DeleteItemInput{
 		TableName: aws.String(tr.tableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"user_address": {S: aws.String(address)},
-			"hash": {S: aws.String(hash)},
+			"hash":         {S: aws.String(hash)},
 		},
 	})
 	return err
@@ -100,15 +98,15 @@ func (tr *TransactionRepo) DeleteTransaction(ctx context.Context, address, hash 
 
 func (tr *TransactionRepo) CompleteTransaction(ctx context.Context, address, hash string) error {
 	_, err := tr.db.UpdateItemWithContext(ctx, &dynamodb.UpdateItemInput{
-		UpdateExpression:            aws.String("SET is_complete = :ic"),
-		ExpressionAttributeValues:   map[string]*dynamodb.AttributeValue{
+		UpdateExpression: aws.String("SET is_complete = :ic"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":ic": {BOOL: aws.Bool(true)},
 		},
 		Key: map[string]*dynamodb.AttributeValue{
 			"user_address": {S: aws.String(address)},
-			"hash": {S: aws.String(hash)},
+			"hash":         {S: aws.String(hash)},
 		},
-		TableName:                   aws.String(tr.tableName),
+		TableName: aws.String(tr.tableName),
 	})
 	return err
 }

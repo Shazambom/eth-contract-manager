@@ -1,8 +1,8 @@
 package signing
 
 import (
-	"context"
 	pb "bitbucket.org/artie_inc/contract-service/proto"
+	"context"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -11,12 +11,11 @@ import (
 )
 
 type VerifierRPCService struct {
-	Server *grpc.Server
+	Server  *grpc.Server
 	Channel chan string
 	pb.UnimplementedVerificationServiceServer
 	Handler SigningService
 }
-
 
 func NewVerifierServer(port int, opts []grpc.ServerOption, handler SigningService) (*VerifierRPCService, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
@@ -42,7 +41,6 @@ func NewVerifierServer(port int, opts []grpc.ServerOption, handler SigningServic
 	}()
 	return server, nil
 }
-
 
 func (vRPC *VerifierRPCService) Verify(ctx context.Context, req *pb.SignatureVerificationRequest) (*pb.SignatureVerificationResponse, error) {
 	log.Printf("Verifying\ncontext: %+v\nmessage: %s\nsignature: %s\naddress: %s\n", ctx, req.Message, req.Signature, req.Address)

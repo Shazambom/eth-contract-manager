@@ -7,13 +7,13 @@ import (
 )
 
 type Config struct {
-	Port int
-	TableName string
-	AWSEndpoint string
-	AWSRegion string
-	AccessKeyID string
+	Port            int
+	TableName       string
+	AWSEndpoint     string
+	AWSRegion       string
+	AccessKeyID     string
 	SecretAccessKey string
-	SSLEnabled bool
+	SSLEnabled      bool
 }
 
 func NewConfig() (Config, error) {
@@ -27,13 +27,13 @@ func NewConfig() (Config, error) {
 		return Config{}, convErr
 	}
 	return Config{
-		Port: prt,
-		TableName: tableName,
-		AWSEndpoint: awsEndpoint,
-		AWSRegion: awsRegion,
-		AccessKeyID: awsKeyId,
+		Port:            prt,
+		TableName:       tableName,
+		AWSEndpoint:     awsEndpoint,
+		AWSRegion:       awsRegion,
+		AccessKeyID:     awsKeyId,
 		SecretAccessKey: awsSecret,
-		SSLEnabled: sslEnabled == "true",
+		SSLEnabled:      sslEnabled == "true",
 	}, envErr
 }
 

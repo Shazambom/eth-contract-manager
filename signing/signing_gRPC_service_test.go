@@ -1,9 +1,9 @@
 package signing
 
 import (
-	"context"
 	"bitbucket.org/artie_inc/contract-service/mocks"
 	pb "bitbucket.org/artie_inc/contract-service/proto"
+	"context"
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -112,7 +112,6 @@ func TestSignerRPCService_SignTxn(t *testing.T) {
 func TestSignerRPCService_SignTxn_PrivateKeyErr(t *testing.T) {
 	_, mockPrivateKeyRepo, signerServer, ctx := newTestingSignerServer(t)
 	defer signerServer.Server.GracefulStop()
-
 
 	err := errors.New("testing error for testing")
 	args := [][]byte{[]byte("some arguments or something")}

@@ -6,9 +6,9 @@ package mocks
 
 import (
 	context "context"
-	storage "contract-service/storage"
 	reflect "reflect"
 
+	storage "bitbucket.org/artie_inc/contract-service/storage"
 	gomock "github.com/golang/mock/gomock"
 )
 

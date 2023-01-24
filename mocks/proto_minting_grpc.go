@@ -6,9 +6,9 @@ package mocks
 
 import (
 	context "context"
-	pb "contract-service/proto"
 	reflect "reflect"
 
+	pb "bitbucket.org/artie_inc/contract-service/proto"
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
 )

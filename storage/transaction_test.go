@@ -1,7 +1,7 @@
 package storage
 
 import (
-	pb "contract-service/proto"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

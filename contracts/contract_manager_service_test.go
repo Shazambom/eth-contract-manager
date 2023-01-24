@@ -1,12 +1,12 @@
 package contracts
 
 import (
+	"bitbucket.org/artie_inc/contract-service/mocks"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
+	"bitbucket.org/artie_inc/contract-service/signing"
+	"bitbucket.org/artie_inc/contract-service/storage"
+	"bitbucket.org/artie_inc/contract-service/utils"
 	"context"
-	"contract-service/mocks"
-	pb "contract-service/proto"
-	"contract-service/signing"
-	"contract-service/storage"
-	"contract-service/utils"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"

@@ -6,8 +6,8 @@
 package contracts
 
 import (
-	"contract-service/proto"
-	"contract-service/storage"
+	"bitbucket.org/artie_inc/contract-service/proto"
+	"bitbucket.org/artie_inc/contract-service/storage"
 	"google.golang.org/grpc"
 )
 

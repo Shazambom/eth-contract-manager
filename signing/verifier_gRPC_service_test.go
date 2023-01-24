@@ -1,9 +1,9 @@
 package signing
 
 import (
+	"bitbucket.org/artie_inc/contract-service/mocks"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"context"
-	"contract-service/mocks"
-	pb "contract-service/proto"
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

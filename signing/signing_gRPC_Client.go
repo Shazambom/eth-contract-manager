@@ -1,7 +1,7 @@
 package signing
 
 import (
-	pb "contract-service/proto"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"google.golang.org/grpc"
 )
 

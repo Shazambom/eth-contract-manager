@@ -1,9 +1,9 @@
 package web
 
 import (
-	"contract-service/contracts"
-	pb "contract-service/proto"
-	"contract-service/storage"
+	"bitbucket.org/artie_inc/contract-service/contracts"
+	pb "bitbucket.org/artie_inc/contract-service/proto"
+	"bitbucket.org/artie_inc/contract-service/storage"
 	"fmt"
 	"net/http"
 )

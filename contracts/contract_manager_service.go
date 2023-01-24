@@ -1,9 +1,9 @@
 package contracts
 
 import (
-	"context"
 	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"bitbucket.org/artie_inc/contract-service/storage"
+	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -107,8 +107,6 @@ func (cms *ContractManagerService) BuildTransaction(ctx context.Context, senderI
 	log.Println("Transaction created")
 	return storage.NewTransaction(contract.Address, msgSender, signature.Hash, packed, value)
 }
-
-//TODO Arguments can just be strings, why do they have to be bytes? Replace arguments with just strings across everything
 
 func (cms *ContractManagerService) UnpackArgs(arguments [][]byte, method abi.Method, hashibleFunc storage.Function) ([]interface{}, [][]byte, error) {
 	//All of this splitting logic is to nicely organize the arguments, names and types

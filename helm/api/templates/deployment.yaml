@@ -33,18 +33,25 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PORT
+              value: {{.Values.env.PORT}}
+            - name: TXN_HOST
+              value: {{.Values.env.TXN_HOST}}
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
+            - name: grpc
+              containerPort: {{ .Values.env.PORT }}
               protocol: TCP
           livenessProbe:
-            httpGet:
-              path: /
-              port: http
+              exec:
+                command:
+                  - /bin/grpc_health_probe
+                  - -addr=: {{.Values.env.PORT}}
           readinessProbe:
-            httpGet:
-              path: /
-              port: http
+            exec:
+              command:
+                - /bin/grpc_health_probe
+                - -addr=: {{.Values.env.PORT}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

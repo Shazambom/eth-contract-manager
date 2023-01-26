@@ -33,18 +33,28 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PORT
+              value: {{.Values.env.PORT}}
+            - name: ALIVE_PORT
+              value: {{.Values.env.ALIVE_PORT}}
+            - name: TXN_HOST
+              value: {{.Values.env.TXN_HOST}}
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.env.PORT }}
+              protocol: TCP
+            - name: alive
+              containerPort: {{.Values.env.ALIVE_PORT}}
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /
-              port: http
+              port: alive
           readinessProbe:
             httpGet:
               path: /
-              port: http
+              port: alive
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: signer
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -38,7 +38,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8081
 
 ingress:
   enabled: false
@@ -67,6 +67,14 @@ resources: {}
   # requests:
 #   cpu: 100m
 #   memory: 128Mi
+
+env:
+  TABLE_NAME: "ContractPrivateKeyRepository"
+  AWS_ENDPOINT: "dynamodb:8000"
+  AWS_REGION: "us-east-1"
+  AWS_ACCESS_KEY_ID: "xxx"
+  AWS_SECRET_ACCESS_KEY: "yyy"
+  SSL_ENABLED: "no"
 
 autoscaling:
   enabled: false

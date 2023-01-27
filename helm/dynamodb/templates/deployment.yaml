@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "api.fullname" . }}
+  name: {{ include "dynamodb.fullname" . }}
   labels:
-    {{- include "api.labels" . | nindent 4 }}
+    {{- include "dynamodb.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "api.selectorLabels" . | nindent 6 }}
+      {{- include "dynamodb.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,13 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "api.selectorLabels" . | nindent 8 }}
+        {{- include "dynamodb.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "api.serviceAccountName" . }}
+      serviceAccountName: {{ include "dynamodb.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -33,25 +33,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: PORT
-              value: "{{.Values.service.port}}"
-            - name: TXN_HOST
-              value: {{.Values.env.TXN_HOST}}
           ports:
-            - name: grpc
-              containerPort: {{.Values.service.port}}
+            - name: http
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
-          livenessProbe:
-            exec:
-              command:
-                - /bin/grpc_health_probe
-                - -addr=:{{.Values.service.port}}
-          readinessProbe:
-            exec:
-              command:
-                - /bin/grpc_health_probe
-                - -addr=:{{.Values.service.port}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

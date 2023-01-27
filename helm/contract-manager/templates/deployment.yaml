@@ -47,21 +47,21 @@ spec:
             - name: SSL_ENABLED
               value: {{.Values.env.SSL_ENABLED}}
             - name: PORT
-              value: {{.Values.env.PORT}}
+              value: "{{.Values.service.port}}"
           ports:
             - name: grpc
-              containerPort: {{ .Values.env.PORT }}
+              containerPort: {{.Values.service.port}}
               protocol: TCP
           livenessProbe:
             exec:
               command:
                 - /bin/grpc_health_probe
-                - -addr=: {{.Values.env.PORT}}
+                - -addr=:{{.Values.service.port}}
           readinessProbe:
             exec:
               command:
                 - /bin/grpc_health_probe
-                - -addr=: {{.Values.env.PORT}}
+                - -addr=:{{.Values.service.port}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

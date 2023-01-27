@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: contract-api
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -38,7 +38,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8085
 
 ingress:
   enabled: false
@@ -67,6 +67,9 @@ resources: {}
   # requests:
 #   cpu: 100m
 #   memory: 128Mi
+
+env:
+  TXN_HOST: "transaction-manager:8083"
 
 autoscaling:
   enabled: false

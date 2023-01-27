@@ -35,14 +35,14 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: PORT
-              value: {{.Values.env.PORT}}
+              value: "{{.Values.service.port}}"
             - name: ALIVE_PORT
-              value: {{.Values.env.ALIVE_PORT}}
+              value: "{{.Values.env.ALIVE_PORT}}"
             - name: TXN_HOST
               value: {{.Values.env.TXN_HOST}}
           ports:
             - name: http
-              containerPort: {{ .Values.env.PORT }}
+              containerPort: {{.Values.service.port}}
               protocol: TCP
             - name: alive
               containerPort: {{.Values.env.ALIVE_PORT}}

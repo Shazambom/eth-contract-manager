@@ -1,8 +1,13 @@
 #!/bin/bash
 
-OLDCONTEXT=(kubectl config current-context)
+OLDCONTEXT=$(kubectl config current-context)
 kubectl config use-context docker-desktop
-minikube start
+echo -n "Using the kubernetes context:"
+kubectl config current-context
+echo -n "....... "
+sleep 5
+echo "starting."
+minikube delete && minikube start
 eval $(minikube docker-env)
 
 ./scripts/build.sh
@@ -23,12 +28,18 @@ helm repo update
 
 kubectl create namespace pong-dev
 
-helm install nats nats/nats -n pong-dev
+helm install dynamodb -f ./helm/dynamodb/values.yaml ./helm/dynamodb -n pong-dev
 sleep 3
 helm install signer -f ./helm/signer/values-dev.yaml ./helm/signer -n pong-dev
 helm install contract-manager -f ./helm/contract-manager/values-dev.yaml ./helm/contract-manager -n pong-dev
 helm install transaction-manager -f ./helm/transaction-manager/values-dev.yaml ./helm/transaction-manager -n pong-dev
 helm install contract-api -f ./helm/api/values-dev.yaml ./helm/api -n pong-dev
-helm install contract-web -f ./helm/api/values-dev.yaml ./helm/contract-web -n pong-dev
+helm install contract-web -f ./helm/api/values-dev.yaml ./helm/web -n pong-dev
+
+kubectl port-forward service/signer 8081:8081
+kubectl port-forward service/contract-manager 8082:8082
+kubectl port-forward service/transaction-manager 8083:8083
+kubectl port-forward service/contract-web 8084:8084
+kubectl port-forward service/contract-api 8085:8085
 
 kubectl config use-context "$OLDCONTEXT"

@@ -1,5 +1,5 @@
 apiVersion: v2
-name: web
+name: contract-web
 description: the web api routes for the contract management service, any exposed REST route lives here
 
 # A chart can be either an 'application' or a 'library' chart.

@@ -1,21 +1,21 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "dynamodb.fullname" . }}
   labels:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    app: {{ template "name" . }}
+    app: {{ template "dynamodb.name" . }}
   annotations:
     "helm.sh/hook": post-install
 spec:
   template:
     metadata:
-      name: {{ template "fullname" . }}
+      name: {{ template "dynamodb.fullname" . }}
       labels:
         release: {{ .Release.Name }}
-        app: {{ template "name" . }}
+        app: {{ template "dynamodb.name" . }}
     spec:
       restartPolicy: OnFailure
       containers:
@@ -29,4 +29,4 @@ spec:
       volumes:
         - name: bootstrap-script
           configMap:
-            name: {{ template "fullname" . }}
+            name: {{ template "dynamodb.fullname" . }}

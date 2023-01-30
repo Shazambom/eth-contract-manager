@@ -49,11 +49,11 @@ spec:
             - name: AWS_SECRET_ACCESS_KEY
               value: {{.Values.env.AWS_SECRET_ACCESS_KEY}}
             - name: SSL_ENABLED
-              value: {{.Values.env.SSL_ENABLED}}
+              value: "{{.Values.env.SSL_ENABLED}}"
             - name: PORT
               value: "{{.Values.service.port}}"
           ports:
-            - name: grpc
+            - name: http
               containerPort: {{.Values.service.port}}
               protocol: TCP
           livenessProbe:

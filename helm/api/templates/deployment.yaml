@@ -39,7 +39,7 @@ spec:
             - name: TXN_HOST
               value: {{.Values.env.TXN_HOST}}
           ports:
-            - name: grpc
+            - name: http
               containerPort: {{.Values.service.port}}
               protocol: TCP
           livenessProbe:

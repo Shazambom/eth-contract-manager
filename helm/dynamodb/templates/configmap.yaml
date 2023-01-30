@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "dynamodb.fullname" . }}
   labels:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    app: {{ template "name" . }}
+    app: {{ template "dynamodb.name" . }}
 data:
   bootstrap.sh: |-
     #!/bin/bash
-    AWS_ENDPOINT="http://{{ template "fullname" . }}:{{ .Values.Service.Port }}"
+    AWS_ENDPOINT="http://{{ template "dynamodb.fullname" . }}:{{ .Values.service.port }}"
 
     echo "########### Creating profile ###########"
     aws configure set aws_access_key_id xxx

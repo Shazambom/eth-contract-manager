@@ -13,6 +13,16 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+environment: "local"
+
+
+proxy:
+  fqdn: local.artie.com
+
+letsEncrypt:
+  env: staging
+  url: https://acme-staging-v02.api.letsencrypt.org/directory
+  email: mike.fogg@artie.com
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -38,10 +48,10 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8084
 
 ingress:
-  enabled: false
+  enabled: true
   className: ""
   annotations: {}
   # kubernetes.io/ingress.class: nginx

@@ -13,6 +13,7 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+environment: "local"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -76,7 +77,7 @@ env:
   AWS_ENDPOINT: "dynamodb:8000"
   AWS_ACCESS_KEY_ID: "xxx"
   AWS_SECRET_ACCESS_KEY: "yyy"
-  SSL_ENABLED: "no"
+  SSL_ENABLED: "false"
 
 autoscaling:
   enabled: false

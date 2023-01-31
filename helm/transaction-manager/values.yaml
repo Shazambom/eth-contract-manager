@@ -5,14 +5,15 @@
 replicaCount: 1
 
 image:
-  repository: nginx
-  pullPolicy: IfNotPresent
+  repository: 227429870588.dkr.ecr.us-west-2.amazonaws.com/platform/transaction-manager
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+environment: "prod"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -38,7 +39,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8083
 
 ingress:
   enabled: false
@@ -68,10 +69,21 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+
+env:
+  CONTRACT_TABLE_NAME: "Contracts"
+  TRANSACTION_TABLE_NAME: "Transactions"
+  SIGNER_HOST: "signer:8081"
+  AWS_REGION: "us-west-2"
+  AWS_ENDPOINT: "dynamodb:8000"
+  AWS_ACCESS_KEY_ID: "xxx"
+  AWS_SECRET_ACCESS_KEY: "yyy"
+  SSL_ENABLED: "false"
+
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
-  maxReplicas: 100
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 

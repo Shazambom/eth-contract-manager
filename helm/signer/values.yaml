@@ -13,6 +13,7 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+environment: "prod"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -38,7 +39,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8081
 
 ingress:
   enabled: false
@@ -67,6 +68,16 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
+
+
+env:
+  TABLE_NAME: "ContractPrivateKeyRepository"
+  AWS_ENDPOINT: "dynamodb:8000"
+  AWS_REGION: "us-west-2"
+  #TODO Convert this to a secret and handle it in the config if its empty
+  AWS_ACCESS_KEY_ID: "xxx"
+  AWS_SECRET_ACCESS_KEY: "yyy"
+  SSL_ENABLED: "false"
 
 autoscaling:
   enabled: true

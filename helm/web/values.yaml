@@ -5,14 +5,30 @@
 replicaCount: 1
 
 image:
-  repository: nginx
-  pullPolicy: IfNotPresent
+  repository: 227429870588.dkr.ecr.us-west-2.amazonaws.com/platform/contract-web
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+environment: "prod"
+
+#TODO Should this be changed to something like contracts.artie.com?
+proxy:
+  fqdn: pong.artie.com
+
+letsEncrypt:
+  env: prod # letsencrypt-prod is rate-limited
+  url: https://acme-v02.api.letsencrypt.org/directory
+  email: mike.fogg@artie.com
+  route53:
+    #TODO Should these values be secrets?
+    hostedZoneID: Z2IG29DI79NZAN
+    region: us-west-2
+    accessKeyID: AKIATJ47ANP6DX7WQLAY
+    role: arn:aws:iam::227429870588:role/cert-manager-pong-dev2
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -38,7 +54,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8084
 
 ingress:
   enabled: false
@@ -68,10 +84,15 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+
+env:
+  ALIVE_PORT: "8080"
+  TXN_HOST: "transaction-manager:8083"
+
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
-  maxReplicas: 100
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 

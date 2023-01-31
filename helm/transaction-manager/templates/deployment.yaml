@@ -37,9 +37,9 @@ spec:
             - name: SIGNER_HOST
               value: {{.Values.env.SIGNER_HOST}}
             - name: CONTRACT_TABLE_NAME
-              value: {{.Values.env.CONTRACT_TABLE_NAME}}
+              value: {{.Values.environment}}_{{.Values.env.CONTRACT_TABLE_NAME}}
             - name: TRANSACTION_TABLE_NAME
-              value: {{.Values.env.TRANSACTION_TABLE_NAME}}
+              value: {{.Values.environment}}_{{.Values.env.TRANSACTION_TABLE_NAME}}
             - name: AWS_ENDPOINT
               value: {{.Values.env.AWS_ENDPOINT}}
             - name: AWS_REGION

@@ -35,7 +35,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: TABLE_NAME
-              value: {{.Values.env.TABLE_NAME}}
+              value: {{.Values.environment}}_{{.Values.env.TABLE_NAME}}
             - name: AWS_ENDPOINT
               value: {{.Values.env.AWS_ENDPOINT}}
             - name: AWS_REGION

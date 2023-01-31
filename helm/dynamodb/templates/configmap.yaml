@@ -23,7 +23,7 @@ data:
     set -x
 
     echo "Constructing Contract Table"
-    aws $AWS_ENDPOINT \
+    aws --endpoint-url $AWS_ENDPOINT \
         dynamodb create-table \
           --region us-east-1 \
           --table-name Contracts \
@@ -47,11 +47,11 @@ data:
                   }
                 ]"
 
-    aws $AWS_ENDPOINT \
+    aws --endpoint-url $AWS_ENDPOINT \
         dynamodb describe-table --region us-east-1  --table-name Contracts --output table
 
     echo "Constructing Private Key Table"
-    aws $AWS_ENDPOINT \
+    aws --endpoint-url $AWS_ENDPOINT \
         dynamodb create-table \
           --region us-east-1 \
           --table-name ContractPrivateKeyRepository \
@@ -60,10 +60,10 @@ data:
           --key-schema AttributeName=ContractAddress,KeyType=HASH \
           --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 
-    aws $AWS_ENDPOINT \
+    aws --endpoint-url $AWS_ENDPOINT \
         dynamodb describe-table --table-name ContractPrivateKeyRepository --output table --region us-east-1
 
-    aws $AWS_ENDPOINT \
+    aws --endpoint-url $AWS_ENDPOINT \
         dynamodb create-table \
           --region us-east-1 \
           --table-name Transactions \
@@ -89,10 +89,10 @@ data:
                   }
                 ]"
 
-    aws $AWS_ENDPOINT \
+    aws --endpoint-url $AWS_ENDPOINT \
         dynamodb describe-table --table-name Transactions --output table --region us-east-1
 
-    aws $AWS_ENDPOINT \
+    aws --endpoint-url $AWS_ENDPOINT \
         dynamodb list-tables --region us-east-1
 
     set +x

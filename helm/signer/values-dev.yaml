@@ -69,6 +69,7 @@ resources: {}
 #   cpu: 100m
 #   memory: 128Mi
 
+#TODO figure out how to route connections to dynamo and other pods accross all services
 env:
   TABLE_NAME: "ContractPrivateKeyRepository"
   AWS_ENDPOINT: "dynamodb:8000"

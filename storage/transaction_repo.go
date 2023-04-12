@@ -28,7 +28,7 @@ func NewTransactionRepo(config TransactionConfig) (TransactionRepository, error)
 	return repo, nil
 }
 
-func (tr *TransactionRepo) StoreTransaction(ctx context.Context, token Token) error {
+func (tr *TransactionRepo) StoreTransaction(ctx context.Context, token Transaction) error {
 	_, err := tr.db.PutItemWithContext(ctx, &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"value": {S: aws.String(token.Value)},
@@ -43,14 +43,14 @@ func (tr *TransactionRepo) StoreTransaction(ctx context.Context, token Token) er
 	return err
 }
 
-func (tr *TransactionRepo) queryTransactionsTable(ctx context.Context, input *dynamodb.QueryInput) ([]*Token, error) {
+func (tr *TransactionRepo) queryTransactionsTable(ctx context.Context, input *dynamodb.QueryInput) ([]*Transaction, error) {
 	result, err := tr.db.QueryWithContext(ctx, input)
 	if err != nil {
 		return nil, err
 	}
-	tokens := []*Token{}
+	tokens := []*Transaction{}
 	for _, item := range result.Items {
-		token := Token{}
+		token := Transaction{}
 		marshalErr := dynamodbattribute.UnmarshalMap(item, &token)
 		if marshalErr != nil {
 			log.Println(marshalErr.Error())
@@ -61,7 +61,7 @@ func (tr *TransactionRepo) queryTransactionsTable(ctx context.Context, input *dy
 	return tokens, nil
 }
 
-func (tr *TransactionRepo) GetTransactions(ctx context.Context, address string) ([]*Token, error) {
+func (tr *TransactionRepo) GetTransactions(ctx context.Context, address string) ([]*Transaction, error) {
 	return tr.queryTransactionsTable(ctx, &dynamodb.QueryInput{
 		TableName: aws.String(tr.tableName),
 		IndexName: aws.String("user_address"),
@@ -75,7 +75,7 @@ func (tr *TransactionRepo) GetTransactions(ctx context.Context, address string) 
 }
 
 
-func (tr *TransactionRepo) GetAllTransactions(ctx context.Context, address string) ([]*Token, error) {
+func (tr *TransactionRepo) GetAllTransactions(ctx context.Context, address string) ([]*Transaction, error) {
 	return tr.queryTransactionsTable(ctx, &dynamodb.QueryInput{
 		TableName: aws.String(tr.tableName),
 		IndexName: aws.String("user_address"),

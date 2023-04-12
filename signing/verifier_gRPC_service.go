@@ -34,17 +34,21 @@ func NewVerifierServer(port int, opts []grpc.ServerOption, handler SigningServic
 		log.Println("SignerServer serving clients now")
 		defer server.Server.GracefulStop()
 		serviceErr := server.Server.Serve(lis)
-		server.Channel <- serviceErr.Error()
+		if serviceErr != nil {
+			server.Channel <- serviceErr.Error()
+		} else {
+			server.Channel <- "gRPC Service has stopped"
+		}
 	}()
 	return server, nil
 }
 
 
 func (vRPC *VerifierRPCService) Verify(ctx context.Context, req *pb.SignatureVerificationRequest) (*pb.SignatureVerificationResponse, error) {
-	log.Printf("Verifying\ncontext: %+v\nmessage:%s\nsignature%s\naddress:%s\n", ctx, req.Message, req.Signature, req.Address)
+	log.Printf("Verifying\ncontext: %+v\nmessage: %s\nsignature: %s\naddress: %s\n", ctx, req.Message, req.Signature, req.Address)
 	if err := vRPC.Handler.Verify(req.Message, req.Signature, req.Address); err != nil {
 		log.Println(err)
-		return &pb.SignatureVerificationResponse{Success: false}, err
+		return &pb.SignatureVerificationResponse{Success: false}, nil
 	}
 	return &pb.SignatureVerificationResponse{Success: true}, nil
 }

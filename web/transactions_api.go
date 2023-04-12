@@ -37,13 +37,15 @@ func (t *TransactionAPI) GetTransactionsFromAddress(ctx *gin.Context) {
 	transactions, err := t.client.Client.GetTransactions(ctx, &pb.Address{Address: ctx.Param("address")})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, "")
+		return
 	}
-	tokens := []*storage.Token{}
+	tokens := []*storage.Transaction{}
 	for _, txn := range transactions.Transactions {
-		token := &storage.Token{}
+		token := &storage.Transaction{}
 		tokenErr := token.FromRPC(txn)
 		if tokenErr != nil {
 			ctx.JSON(http.StatusInternalServerError, tokenErr)
+			return
 		}
 		tokens = append(tokens, token)
 	}

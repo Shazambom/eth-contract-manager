@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.29
 	github.com/ethereum/go-ethereum v1.10.18
 	github.com/gin-gonic/gin v1.8.2
+	github.com/golang/mock v1.3.1
 	github.com/google/uuid v1.3.0
 	github.com/google/wire v0.5.0
 	github.com/stretchr/testify v1.8.1

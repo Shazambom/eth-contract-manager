@@ -34,7 +34,11 @@ func NewTransactionServer(port int, opts []grpc.ServerOption, handler ContractTr
 		log.Println("TransactionService serving clients now")
 		defer server.Server.GracefulStop()
 		serviceErr := server.Server.Serve(lis)
-		server.Channel <- serviceErr.Error()
+		if serviceErr != nil {
+			server.Channel <- serviceErr.Error()
+		} else {
+			server.Channel <- "gRPC Service has stopped"
+		}
 	}()
 	return server, nil
 }
@@ -61,7 +65,7 @@ func (ts *TransactionRPCService) ConstructTransaction(ctx context.Context, req *
 		return nil, tokenErr
 	}
 
-	storeErr := ts.TransactionManager.StoreToken(ctx, token)
+	storeErr := ts.TransactionManager.StoreTransaction(ctx, token)
 	if storeErr != nil {
 		log.Println(storeErr.Error())
 		return nil, storeErr

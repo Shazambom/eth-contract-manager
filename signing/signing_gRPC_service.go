@@ -37,7 +37,11 @@ func NewSignerServer(port int, opts []grpc.ServerOption, handler SigningService,
 		log.Println("SignerServer serving clients now")
 		defer server.Server.GracefulStop()
 		serviceErr := server.Server.Serve(lis)
-		server.Channel <- serviceErr.Error()
+		if serviceErr != nil {
+			server.Channel <- serviceErr.Error()
+		} else {
+			server.Channel <- "gRPC Service has stopped"
+		}
 	}()
 	return server, nil
 }

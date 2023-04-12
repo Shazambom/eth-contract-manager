@@ -1,0 +1,18 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: {{ .Values.environment }}-proxy
+spec:
+  ingressClassName: contour
+  virtualhost:
+    fqdn:  {{ .Values.proxy.fqdn }}
+    tls:
+      secretName: {{ .Values.environment }} # defined by pong-ingress.yaml, created by cert-manager
+  routes:
+    - conditions:
+        - prefix: / # matches everything else
+      services:
+        - name: {{ .Values.environment }}-contract-web
+          port: 80
+      loadBalancerPolicy:
+        strategy: WeightedLeastRequest

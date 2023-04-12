@@ -93,8 +93,6 @@ services:
       dockerfile: ./build/transaction-manager/Dockerfile
     restart: always
     environment:
-      REDIS_ENDPOINT: "redis:6379"
-      REDIS_PASSWORD: "pass"
       CONTRACT_TABLE_NAME: "Contracts"
       TRANSACTION_TABLE_NAME: "Transactions"
       SIGNER_HOST: "signer:8081"
@@ -104,7 +102,6 @@ services:
       AWS_SECRET_ACCESS_KEY: "yyy"
       SSL_ENABLED: "false"
       PORT: 8083
-      COUNT_KEY: "Count"
     ports:
       - "8083:8083"
     networks:

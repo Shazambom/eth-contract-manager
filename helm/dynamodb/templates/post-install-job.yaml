@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "dynamodb.fullname" . }}
+  labels:
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app: {{ template "dynamodb.name" . }}
+  annotations:
+    "helm.sh/hook": post-install
+spec:
+  template:
+    metadata:
+      name: {{ template "dynamodb.fullname" . }}
+      labels:
+        release: {{ .Release.Name }}
+        app: {{ template "dynamodb.name" . }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: bootstrap-tables
+          image: {{ .Values.TableBootstrap.Image.Repository }}:{{ .Values.TableBootstrap.Image.Tag }}
+          imagePullPolicy: {{ .Values.TableBootstrap.Image.PullPolicy }}
+          command: ["sh", "/tmp/bootstrap.sh"]
+          volumeMounts:
+            - name: bootstrap-script
+              mountPath: /tmp
+      volumes:
+        - name: bootstrap-script
+          configMap:
+            name: {{ template "dynamodb.fullname" . }}

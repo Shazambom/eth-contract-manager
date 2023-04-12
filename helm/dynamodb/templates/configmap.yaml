@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "dynamodb.fullname" . }}
+  labels:
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app: {{ template "dynamodb.name" . }}
+data:
+  bootstrap.sh: |-
+    #!/bin/bash
+    AWS_ENDPOINT="http://{{ template "dynamodb.fullname" . }}:{{ .Values.service.port }}"
+
+    echo "########### Creating profile ###########"
+    aws configure set aws_access_key_id xxx
+    aws configure set aws_secret_access_key yyy
+    aws configure set region us-east-1
+
+    echo "########### Listing profile ###########"
+    aws configure list
+
+    set -x
+
+    sleep 45
+    echo "Constructing Contract Table"
+    aws --endpoint-url $AWS_ENDPOINT \
+        dynamodb create-table \
+          --region us-east-1 \
+          --table-name local_Contracts \
+          --attribute-definitions \
+            AttributeName=Address,AttributeType=S \
+            AttributeName=ContractOwner,AttributeType=S \
+          --key-schema AttributeName=Address,KeyType=HASH \
+          --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+          --global-secondary-indexes \
+                "[
+                  {
+                    \"IndexName\": \"ContractOwner\",
+                    \"KeySchema\": [{\"AttributeName\":\"ContractOwner\",\"KeyType\":\"HASH\"}],
+                    \"Projection\":{
+                        \"ProjectionType\":\"ALL\"
+                    },
+                     \"ProvisionedThroughput\": {
+                        \"ReadCapacityUnits\": 5,
+                        \"WriteCapacityUnits\": 5
+                    }
+                  }
+                ]"
+
+    aws --endpoint-url $AWS_ENDPOINT \
+        dynamodb describe-table --region us-east-1  --table-name local_Contracts --output table
+
+    echo "Constructing Private Key Table"
+    aws --endpoint-url $AWS_ENDPOINT \
+        dynamodb create-table \
+          --region us-east-1 \
+          --table-name local_ContractPrivateKeyRepository \
+          --attribute-definitions \
+            AttributeName=ContractAddress,AttributeType=S \
+          --key-schema AttributeName=ContractAddress,KeyType=HASH \
+          --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+
+    aws --endpoint-url $AWS_ENDPOINT \
+        dynamodb describe-table --table-name local_ContractPrivateKeyRepository --output table --region us-east-1
+
+    aws --endpoint-url $AWS_ENDPOINT \
+        dynamodb create-table \
+          --region us-east-1 \
+          --table-name local_Transactions \
+          --attribute-definitions \
+            AttributeName=user_address,AttributeType=S \
+            AttributeName=hash,AttributeType=S \
+          --key-schema \
+            AttributeName=user_address,KeyType=HASH \
+            AttributeName=hash,KeyType=RANGE \
+          --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+          --global-secondary-indexes \
+                "[
+                  {
+                    \"IndexName\": \"user_address\",
+                    \"KeySchema\": [{\"AttributeName\":\"user_address\",\"KeyType\":\"HASH\"}],
+                    \"Projection\":{
+                        \"ProjectionType\":\"ALL\"
+                    },
+                     \"ProvisionedThroughput\": {
+                        \"ReadCapacityUnits\": 5,
+                        \"WriteCapacityUnits\": 5
+                    }
+                  }
+                ]"
+
+    aws --endpoint-url $AWS_ENDPOINT \
+        dynamodb describe-table --table-name local_Transactions --output table --region us-east-1
+
+    aws --endpoint-url $AWS_ENDPOINT \
+        dynamodb list-tables --region us-east-1
+
+    set +x

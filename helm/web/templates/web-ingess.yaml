@@ -1,0 +1,31 @@
+{{- if ne .Values.environment "local" }}
+# This Ingress tells cert-manager to create the "pong" secret, which is used by pong-httpproxy.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.environment }}-web-api
+  labels:
+    app: {{ .Values.environment }}-web-api
+  annotations:
+    cert-manager.io/issuer: letsencrypt-{{ .Values.letsEncrypt.env }}
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    kubernetes.io/tls-acme: "true"
+spec:
+
+  tls:
+    - secretName: {{ .Values.environment }}
+      hosts:
+        - {{ .Values.proxy.fqdn }}
+  # 'rules' is a required field, but Contour will use the rules in pong-httpproxy.yaml instead
+  rules:
+    - host: {{ .Values.proxy.fqdn }}
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: {{ .Values.environment }}-web-api-service
+                port:
+                  number: 80
+  {{ end }}

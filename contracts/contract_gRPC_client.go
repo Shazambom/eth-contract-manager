@@ -7,7 +7,7 @@ import (
 
 type ContractClient struct {
 	Connection *grpc.ClientConn
-	Client pb.ContractManagementClient
+	Client     pb.ContractManagementClient
 }
 
 func NewContractClient(host string, opts []grpc.DialOption) (*ContractClient, error) {
@@ -17,7 +17,6 @@ func NewContractClient(host string, opts []grpc.DialOption) (*ContractClient, er
 	}
 	return &ContractClient{Connection: conn, Client: pb.NewContractManagementClient(conn)}, nil
 }
-
 
 func (c *ContractClient) DisconnectGracefully() error {
 	closeConnErr := c.Connection.Close()

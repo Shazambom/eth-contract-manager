@@ -9,8 +9,6 @@ import (
 	"log"
 )
 
-
-
 func main() {
 	cfg, cfgErr := NewConfig()
 	if cfgErr != nil {
@@ -19,11 +17,11 @@ func main() {
 	log.Printf("Loading SignatureHandler with Config: \n%s\n", cfg.String())
 	server, err := signing.InitializeSigningServer(cfg.Port, []grpc.ServerOption{grpc.EmptyServerOption{}}, storage.PrivateKeyConfig{
 		TableName: cfg.TableName,
-		CFG:       []*aws.Config{{
-			Endpoint:         aws.String(cfg.AWSEndpoint),
-			Region:           aws.String(cfg.AWSRegion),
-			Credentials:      credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
-			DisableSSL:       aws.Bool(!cfg.SSLEnabled),
+		CFG: []*aws.Config{{
+			Endpoint:    aws.String(cfg.AWSEndpoint),
+			Region:      aws.String(cfg.AWSRegion),
+			Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+			DisableSSL:  aws.Bool(!cfg.SSLEnabled),
 		}},
 	})
 	if err != nil {
@@ -31,4 +29,3 @@ func main() {
 	}
 	log.Fatal(<-server.Channel)
 }
-

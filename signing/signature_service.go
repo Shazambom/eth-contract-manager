@@ -45,7 +45,7 @@ func (s *SignatureHandler) SignMessage(signingKey, message string) (string, stri
 		signature[crypto.RecoveryIDOffset] += 27 // Transform yellow paper V from 0/1 to 27/28
 	}
 
-	return "0x"+hex.EncodeToString(hash.Bytes()), "0x"+hex.EncodeToString(signature), nil
+	return "0x" + hex.EncodeToString(hash.Bytes()), "0x" + hex.EncodeToString(signature), nil
 }
 
 func (s *SignatureHandler) SignTxn(signingKey string, args [][]byte) (string, string, error) {
@@ -67,7 +67,7 @@ func (s *SignatureHandler) SignTxn(signingKey string, args [][]byte) (string, st
 		signature[crypto.RecoveryIDOffset] += 27 // Transform yellow paper V from 0/1 to 27/28
 	}
 
-	return "0x"+hex.EncodeToString(hash.Bytes()), "0x"+hex.EncodeToString(signature), nil
+	return "0x" + hex.EncodeToString(hash.Bytes()), "0x" + hex.EncodeToString(signature), nil
 }
 
 func (s *SignatureHandler) VerifyFromHash(signature []byte, hash common.Hash, address string) error {
@@ -106,7 +106,7 @@ func (s *SignatureHandler) PrivateKeyToAddress(privateKey string) (address strin
 	}
 	publicKeyECDSA, ok := key.Public().(*ecdsa.PublicKey)
 	if !ok {
-		return  "", errors.New("error building public key")
+		return "", errors.New("error building public key")
 	}
 	return crypto.PubkeyToAddress(*publicKeyECDSA).Hex(), nil
 }

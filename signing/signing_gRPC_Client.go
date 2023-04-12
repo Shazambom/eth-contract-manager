@@ -6,7 +6,7 @@ import (
 )
 
 type Client struct {
-	Connection *grpc.ClientConn
+	Connection    *grpc.ClientConn
 	SigningClient pb.SigningServiceClient
 }
 
@@ -18,7 +18,6 @@ func NewClient(host string, opts []grpc.DialOption) (*Client, error) {
 	return &Client{Connection: conn, SigningClient: pb.NewSigningServiceClient(conn)}, nil
 }
 
-
 func (c *Client) DisconnectGracefully() error {
 	closeConnErr := c.Connection.Close()
 	if closeConnErr != nil {
@@ -26,4 +25,3 @@ func (c *Client) DisconnectGracefully() error {
 	}
 	return nil
 }
-

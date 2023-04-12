@@ -31,13 +31,13 @@ func TestContractRPCService_Get(t *testing.T) {
 	defer contractServer.Server.GracefulStop()
 	address := "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 	contract := &storage.Contract{
-		Address:      address,
-		ABI:          claimAbi_Flattened,
-		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+		Address: address,
+		ABI:     claimAbi_Flattened,
+		Functions: map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "tokenId", Type: "uint256"},
 		}}},
-		ContractOwner:        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+		ContractOwner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
 	}
 
 	mockContractManager.EXPECT().GetContract(ctx, address).Return(contract, nil)
@@ -65,13 +65,13 @@ func TestContractRPCService_Store(t *testing.T) {
 	defer contractServer.Server.GracefulStop()
 	address := "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 	contract := &storage.Contract{
-		Address:      address,
-		ABI:          claimAbi_Flattened,
-		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+		Address: address,
+		ABI:     claimAbi_Flattened,
+		Functions: map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "tokenId", Type: "uint256"},
 		}}},
-		ContractOwner:        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+		ContractOwner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
 	}
 
 	mockContractManager.EXPECT().StoreContract(ctx, contract).Return(nil)
@@ -87,13 +87,13 @@ func TestContractRPCService_Store_ReturnErr(t *testing.T) {
 	address := "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 	contractManagerErr := errors.New("some contract management error")
 	contract := &storage.Contract{
-		Address:      address,
-		ABI:          claimAbi_Flattened,
-		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+		Address: address,
+		ABI:     claimAbi_Flattened,
+		Functions: map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "tokenId", Type: "uint256"},
 		}}},
-		ContractOwner:        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+		ContractOwner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
 	}
 	mockContractManager.EXPECT().StoreContract(ctx, contract).Return(contractManagerErr)
 
@@ -107,7 +107,6 @@ func TestContractRPCService_Delete(t *testing.T) {
 	defer contractServer.Server.GracefulStop()
 	address := "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
 	contractOwner := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-
 
 	mockContractManager.EXPECT().DeleteContract(ctx, address, contractOwner).Return(nil)
 
@@ -141,23 +140,23 @@ func TestContractRPCService_List(t *testing.T) {
 	defer contractServer.Server.GracefulStop()
 	owner := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 	contractSeasonSale := &storage.Contract{
-		Address:      "0xEA917326e8A95299c02655fe947962C43a11487f",
-		ABI: testAbi,
-		Functions:   map[string]storage.Function{"mint": {Arguments: []storage.Argument{
+		Address: "0xEA917326e8A95299c02655fe947962C43a11487f",
+		ABI:     testAbi,
+		Functions: map[string]storage.Function{"mint": {Arguments: []storage.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "numberOfTokens", Type: "uint256"},
 			{Name: "transactionNumber", Type: "uint256"},
 		}}},
-		ContractOwner:        owner,
+		ContractOwner: owner,
 	}
 	contractClaim := &storage.Contract{
-		Address:      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-		ABI:          claimAbi_Flattened,
-		Functions:    map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
+		Address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+		ABI:     claimAbi_Flattened,
+		Functions: map[string]storage.Function{"mintArtie": {Arguments: []storage.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "tokenId", Type: "uint256"},
 		}}},
-		ContractOwner:        owner,
+		ContractOwner: owner,
 	}
 
 	mockContractManager.EXPECT().ListContracts(ctx, owner).Return([]*storage.Contract{contractClaim, contractSeasonSale}, nil)

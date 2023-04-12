@@ -94,6 +94,3 @@ func TestSignatureHandler_SignMessage_and_Verify_ImpersonatingAddress(t *testing
 	assert.Nil(t, signingErr)
 	assert.Error(t, s.Verify(message, signature, wrongAddr))
 }
-
-
-

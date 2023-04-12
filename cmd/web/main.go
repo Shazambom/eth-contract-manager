@@ -12,7 +12,6 @@ func main() {
 	errChan := make(chan string)
 	probe := web.NewProbe()
 
-
 	cfg, cfgErr := NewConfig()
 	if cfgErr != nil {
 		log.Fatal(cfgErr)
@@ -28,4 +27,3 @@ func main() {
 	probe.Serve(cfg.AlivePort, errChan)
 	log.Fatal(<-errChan)
 }
-

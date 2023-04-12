@@ -11,10 +11,7 @@ import (
 	"strings"
 )
 
-
-
-
-func GetEnvVars() (rdsEndpoint, rdsPwd, secretKey, gURL, siteKey, projectID, contractAddress, signingKey string, abi []string, maxCount , maxIncr int, validOrigins []string, envErr error) {
+func GetEnvVars() (rdsEndpoint, rdsPwd, secretKey, gURL, siteKey, projectID, contractAddress, signingKey string, abi []string, maxCount, maxIncr int, validOrigins []string, envErr error) {
 	if enabled := os.Getenv("ENABLED"); enabled != "true" {
 		return "", "", "", "", "", "", "", "", nil, 0, 0, nil, errors.New("Lambda not Enabled")
 	}
@@ -27,7 +24,6 @@ func GetEnvVars() (rdsEndpoint, rdsPwd, secretKey, gURL, siteKey, projectID, con
 		return "", "", "", "", "", "", "", "", nil, 0, 0, nil, envErr
 	}
 	maxIncr, envErr = strconv.Atoi(os.Getenv("MAX_INCR"))
-
 
 	return os.Getenv("REDIS_ENDPOINT"),
 		os.Getenv("REDIS_PWD"),
@@ -50,7 +46,7 @@ func GetEnvVar(key string) (string, error) {
 	return val, nil
 }
 
-func GetEnvVarBatch(keys []string, vars... *string) error {
+func GetEnvVarBatch(keys []string, vars ...*string) error {
 	for i, key := range keys {
 		val, keyErr := GetEnvVar(key)
 		if keyErr != nil {
@@ -79,11 +75,11 @@ func GetNonceBytes() ([]byte, error) {
 
 func GetNonce() (string, error) {
 	UUID := uuid.New()
-	UUIDBytes, uuidErr  := UUID.MarshalBinary()
+	UUIDBytes, uuidErr := UUID.MarshalBinary()
 	if uuidErr != nil {
 		return "", uuidErr
 	}
-	return "0x"+hex.EncodeToString(UUIDBytes), nil
+	return "0x" + hex.EncodeToString(UUIDBytes), nil
 }
 
 func MergeChannels(cs ...<-chan string) <-chan string {
@@ -91,7 +87,7 @@ func MergeChannels(cs ...<-chan string) <-chan string {
 	out := make(chan string)
 	for _, c := range cs {
 		go func(c <-chan string) {
-			out <- <- c
+			out <- <-c
 		}(c)
 	}
 	return out

@@ -10,35 +10,32 @@ import (
 )
 
 type GoogleResponse struct {
-	Event GoogleEvent      `json:"event"`
-	Name  string           `json:"name"`
-	Reasons []string `json:"reasons"`
-	Score float64          `json:"score"`
-	Token GoogleTokenProps `json:"tokenProperties"`
-
+	Event   GoogleEvent      `json:"event"`
+	Name    string           `json:"name"`
+	Reasons []string         `json:"reasons"`
+	Score   float64          `json:"score"`
+	Token   GoogleTokenProps `json:"tokenProperties"`
 }
 
 type GoogleTokenProps struct {
-	Action string `json:"action"`
-	CreateTime time.Time `json:"createTime"`
-	HostName string `json:"hostname"`
-	InvalidReason string `json:"invalidReason"`
-	Valid bool `json:"valid"`
+	Action        string    `json:"action"`
+	CreateTime    time.Time `json:"createTime"`
+	HostName      string    `json:"hostname"`
+	InvalidReason string    `json:"invalidReason"`
+	Valid         bool      `json:"valid"`
 }
 
 type GoogleEvent struct {
-	Token string `json:"token"`
-	SiteKey string `json:"siteKey"`
+	Token          string `json:"token"`
+	SiteKey        string `json:"siteKey"`
 	ExpectedAction string `json:"expectedAction"`
-	IPAddress string `json:"userIpAddress"`
-	UserAgent string `json:"userAgent"`
+	IPAddress      string `json:"userIpAddress"`
+	UserAgent      string `json:"userAgent"`
 }
 
 type GoogleReq struct {
 	Event GoogleEvent `json:"event"`
 }
-
-
 
 func VerifyCaptcha(gURL, projectID, apiKey, siteKey, token, IP, userAgent, referer string) (*GoogleResponse, error) {
 	url := gURL + "projects/" + projectID + "/assessments?key=" + apiKey
@@ -47,8 +44,8 @@ func VerifyCaptcha(gURL, projectID, apiKey, siteKey, token, IP, userAgent, refer
 		Token:          token,
 		SiteKey:        siteKey,
 		ExpectedAction: "challenge",
-		IPAddress: IP,
-		UserAgent: userAgent,
+		IPAddress:      IP,
+		UserAgent:      userAgent,
 	}}
 
 	marshGReq, marshalErr := json.Marshal(gReq)

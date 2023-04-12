@@ -1,8 +1,8 @@
 package contracts
 
 import (
-	"context"
 	pb "bitbucket.org/artie_inc/contract-service/proto"
+	"context"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -10,9 +10,8 @@ import (
 	"net"
 )
 
-
 type TransactionRPCService struct {
-	Server *grpc.Server
+	Server  *grpc.Server
 	Channel chan string
 	pb.UnimplementedTransactionServiceServer
 	TransactionManager ContractTransactionHandler
@@ -42,7 +41,6 @@ func NewTransactionServer(port int, opts []grpc.ServerOption, handler ContractTr
 	}()
 	return server, nil
 }
-
 
 func (ts *TransactionRPCService) GetContract(ctx context.Context, address *pb.Address) (*pb.Contract, error) {
 	contract, err := ts.TransactionManager.GetContract(ctx, address.Address)

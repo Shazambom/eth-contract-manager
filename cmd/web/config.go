@@ -7,8 +7,8 @@ import (
 )
 
 type Config struct {
-	TxnHost string
-	Port int
+	TxnHost   string
+	Port      int
 	AlivePort int
 }
 
@@ -27,13 +27,13 @@ func NewConfig() (Config, error) {
 		return Config{}, aliveErr
 	}
 	return Config{
-		TxnHost: txnHost,
-		Port:    prt,
+		TxnHost:   txnHost,
+		Port:      prt,
 		AlivePort: alivePort,
 	}, nil
 }
 
-func (c *Config) String()string {
+func (c *Config) String() string {
 	return fmt.Sprintf("{\n\tPort: %d\n\tAlivePort: %d\n\tTxnHost: %s}\n",
 		c.Port, c.AlivePort, c.TxnHost)
 }

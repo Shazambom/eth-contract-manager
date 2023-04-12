@@ -9,7 +9,6 @@ import (
 )
 import "github.com/gin-gonic/gin"
 
-
 type TransactionAPI struct {
 	client *contracts.TransactionClient
 	router *gin.Engine
@@ -26,7 +25,7 @@ func (t *TransactionAPI) Serve(port int, err chan string) {
 	t.router.GET(
 		"/transactions/:address",
 		t.GetTransactionsFromAddress,
-		)
+	)
 
 	go func() {
 		err <- t.router.Run(fmt.Sprintf(":%d", port)).Error()

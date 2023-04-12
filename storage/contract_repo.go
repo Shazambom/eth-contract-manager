@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"context"
 	pb "bitbucket.org/artie_inc/contract-service/proto"
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,33 +13,34 @@ import (
 )
 
 type ContractRepo struct {
-	db *dynamodb.DynamoDB
+	db        *dynamodb.DynamoDB
 	tableName string
 }
 
 type ContractConfig struct {
 	TableName string
-	CFG []*aws.Config
+	CFG       []*aws.Config
 }
+
 //TODO Implement Ownership using signatures. The contract owner will be an address and a signature must be passed to modify stuff about a contract.
 
 //TODO Add descriptive fields to a contract, maybe an image url and a description field for the contract
 // also add an Enabled field that can disable and enable contracts from being used by any service other than the owner
 
 type Contract struct {
-	Address string `json:"Address"`
-	ABI string `json:"ABI"`
-	Functions map[string]Function `json:"Functions"`
-	ContractOwner string `json:"ContractOwner"`
+	Address       string              `json:"Address"`
+	ABI           string              `json:"ABI"`
+	Functions     map[string]Function `json:"Functions"`
+	ContractOwner string              `json:"ContractOwner"`
 }
 
 //TODO Remove this mess and figure out how to easily marshal maps and objects into a dynamo table and then unmarshal it.
 // Having 2 structs to represent the same object is just messy.
 
 type dynamoContract struct {
-	Address string `json:"Address"`
-	ABI string `json:"ABI"`
-	Functions string `json:"Functions"`
+	Address       string `json:"Address"`
+	ABI           string `json:"ABI"`
+	Functions     string `json:"Functions"`
 	ContractOwner string `json:"ContractOwner"`
 }
 
@@ -56,7 +57,7 @@ func (c *Contract) fromDynamo(dContract *dynamoContract) error {
 	return nil
 }
 
-func (c *Contract) ToRPC() (*pb.Contract) {
+func (c *Contract) ToRPC() *pb.Contract {
 	functions := map[string]*pb.Function{}
 	for key, val := range c.Functions {
 		function := &pb.Function{Arguments: []*pb.Argument{}}
@@ -69,17 +70,17 @@ func (c *Contract) ToRPC() (*pb.Contract) {
 		functions[key] = function
 	}
 	return &pb.Contract{
-		Address:      c.Address,
-		Abi:          c.ABI,
-		Functions: 	  functions,
-		Owner:        c.ContractOwner,
+		Address:   c.Address,
+		Abi:       c.ABI,
+		Functions: functions,
+		Owner:     c.ContractOwner,
 	}
 }
 
-func (c *Contract) FromRPC(contract *pb.Contract) () {
+func (c *Contract) FromRPC(contract *pb.Contract) {
 	functions := map[string]Function{}
 	if contract.Functions != nil {
-		for key, val := range contract.Functions{
+		for key, val := range contract.Functions {
 			function := Function{Arguments: []Argument{}}
 			for _, arg := range val.Arguments {
 				function.Arguments = append(function.Arguments, Argument{
@@ -123,7 +124,6 @@ func (cr *ContractRepo) GetContract(ctx context.Context, contractAddress string)
 	contract := Contract{}
 	dContract := dynamoContract{}
 
-
 	if unmarshalErr := dynamodbattribute.UnmarshalMap(result.Item, &dContract); unmarshalErr != nil {
 		return nil, unmarshalErr
 	}
@@ -135,8 +135,8 @@ func (cr *ContractRepo) GetContract(ctx context.Context, contractAddress string)
 
 func (cr *ContractRepo) GetContractsByOwner(ctx context.Context, owner string) ([]*Contract, error) {
 	result, err := cr.db.QueryWithContext(ctx, &dynamodb.QueryInput{
-		TableName: aws.String(cr.tableName),
-		IndexName: aws.String("ContractOwner"),
+		TableName:              aws.String(cr.tableName),
+		IndexName:              aws.String("ContractOwner"),
 		KeyConditionExpression: aws.String("ContractOwner = :v_owner"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":v_owner": {S: aws.String(owner)},
@@ -162,7 +162,6 @@ func (cr *ContractRepo) GetContractsByOwner(ctx context.Context, owner string) (
 	}
 	return contracts, nil
 }
-
 
 func (cr *ContractRepo) UpsertContract(ctx context.Context, contract *Contract) error {
 	funcStr, marshalErr := json.Marshal(contract.Functions)

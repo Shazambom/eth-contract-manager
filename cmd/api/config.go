@@ -1,14 +1,14 @@
 package main
 
 import (
-"bitbucket.org/artie_inc/contract-service/utils"
-"fmt"
-"strconv"
+	"bitbucket.org/artie_inc/contract-service/utils"
+	"fmt"
+	"strconv"
 )
 
 type Config struct {
 	TxnHost string
-	Port int
+	Port    int
 }
 
 func NewConfig() (Config, error) {
@@ -27,7 +27,7 @@ func NewConfig() (Config, error) {
 	}, nil
 }
 
-func (c *Config) String()string {
+func (c *Config) String() string {
 	return fmt.Sprintf("{\n\tPort: %d\n\tTxnHost: %s}\n",
 		c.Port, c.TxnHost)
 }

@@ -23,10 +23,10 @@ func main() {
 	}
 
 	awsConfig := &aws.Config{
-		Endpoint:         aws.String(cfg.AWSEndpoint),
-		Region:           aws.String(cfg.AWSRegion),
-		Credentials:      credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
-		DisableSSL:       aws.Bool(!cfg.SSLEnabled),
+		Endpoint:    aws.String(cfg.AWSEndpoint),
+		Region:      aws.String(cfg.AWSRegion),
+		Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		DisableSSL:  aws.Bool(!cfg.SSLEnabled),
 	}
 
 	transactionRPC, gRPCErr := contracts.InitializeTransactionServer(

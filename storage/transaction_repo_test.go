@@ -111,7 +111,7 @@ func TestTransactionRepo_GetTransactions(t *testing.T) {
 				token.Value == template.Value &&
 				token.Hash == template.Hash &&
 				string(token.ABIPackedTxn) == string(template.ABIPackedTxn) &&
-				token.IsComplete == template.IsComplete{
+				token.IsComplete == template.IsComplete {
 				found = true
 			}
 		}
@@ -174,7 +174,7 @@ func TestTransactionRepo_CompleteTransaction(t *testing.T) {
 				token.Value == template.Value &&
 				token.Hash == template.Hash &&
 				string(token.ABIPackedTxn) == string(template.ABIPackedTxn) &&
-				token.IsComplete == template.IsComplete{
+				token.IsComplete == template.IsComplete {
 				found = true
 			}
 		}
@@ -289,4 +289,3 @@ func TestTransactionRepo_GetAllTransactions(t *testing.T) {
 		assert.True(t, found)
 	}
 }
-

@@ -1,11 +1,11 @@
 package contracts
 
 import (
-	"context"
 	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"bitbucket.org/artie_inc/contract-service/signing"
 	"bitbucket.org/artie_inc/contract-service/storage"
 	"bitbucket.org/artie_inc/contract-service/utils"
+	"context"
 	"encoding/hex"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
@@ -28,11 +28,11 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 
 	txnDB, txnDBErr := storage.NewTransactionRepo(storage.TransactionConfig{
 		TableName: "Transactions",
-		CFG:       []*aws.Config{{
-			Endpoint:         aws.String("localhost:8000"),
-			Region:           aws.String("us-east-1"),
-			Credentials:      credentials.NewStaticCredentials("xxx","yyy", ""),
-			DisableSSL:       aws.Bool(true),
+		CFG: []*aws.Config{{
+			Endpoint:    aws.String("localhost:8000"),
+			Region:      aws.String("us-east-1"),
+			Credentials: credentials.NewStaticCredentials("xxx", "yyy", ""),
+			DisableSSL:  aws.Bool(true),
 		}},
 	})
 	assert.Nil(t, txnDBErr)
@@ -52,14 +52,14 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 
 	//Contract using the abi for the Season01 Artie Sale contract: https://etherscan.io/address/0x8c539b123424dbb7949b9f683ac466fbadfb0699
 	contract := &pb.Contract{
-		Address:      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-		Abi: testAbi,
-		Functions:   map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
+		Address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+		Abi:     testAbi,
+		Functions: map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
 			{Name: "nonce", Type: "bytes16"},
 			{Name: "numberOfTokens", Type: "uint256"},
 			{Name: "transactionNumber", Type: "uint256"},
 		}}},
-		Owner:        "Owner",
+		Owner: "Owner",
 	}
 	fmt.Printf("%+v\n", contract)
 	//Storing the contract and registering it with the contract service
@@ -68,7 +68,6 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 		fmt.Println(storeErrr)
 	}
 	assert.Nil(t, storeErrr)
-
 
 	//Generating a signing key for the above contract
 	newKey, keyErr := signerClient.SigningClient.GenerateNewKey(ctx, &pb.KeyManagementRequest{ContractAddress: contract.Address})
@@ -84,12 +83,12 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 
 	//Building a transaction for the "mint" function by passing in the nonce, the num requested, and the transaction number
 	_, transactionErr := transactionClient.Client.ConstructTransaction(ctx, &pb.TransactionRequest{
-		SenderInHash: true,
-		MessageSender: msgSender,
-		FunctionName:  "mint",
-		Args:          [][]byte{nonceBytes, []byte("3"), []byte("1")},
-		ContractAddress:      contract.Address,
-		Value: "450000000000000000",
+		SenderInHash:    true,
+		MessageSender:   msgSender,
+		FunctionName:    "mint",
+		Args:            [][]byte{nonceBytes, []byte("3"), []byte("1")},
+		ContractAddress: contract.Address,
+		Value:           "450000000000000000",
 	})
 	if transactionErr != nil {
 		fmt.Println(transactionErr)
@@ -97,12 +96,11 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	assert.Nil(t, transactionErr)
 	fmt.Printf("%+v\n", [][]byte{nonceBytes, []byte("3"), []byte("1")})
 
-
 	//Checking that the token was processed correctly, the transaction was signed, and the token was placed in redis
 	tokens, tokenErr := txnDB.GetTransactions(ctx, msgSender)
 	assert.Nil(t, tokenErr)
 	fmt.Printf("Transaction: %+v\n", tokens[0])
-	args := [][]byte{nonceBytes, common.LeftPadBytes(big.NewInt(int64(3)).Bytes(),32), common.LeftPadBytes(big.NewInt(int64(1)).Bytes(),32)}
+	args := [][]byte{nonceBytes, common.LeftPadBytes(big.NewInt(int64(3)).Bytes(), 32), common.LeftPadBytes(big.NewInt(int64(1)).Bytes(), 32)}
 
 	fmt.Println(len(args))
 	for _, arg := range args {
@@ -124,12 +122,10 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	fmt.Println(tokens[0].Hash)
 	fmt.Println(builtHash)
 
-
 	//Manually signing the transaction with the signer service to ensure that the signature is the same in the live gRPC service and the signature service
 	resp, signatureErr := signerClient.SigningClient.SignTxn(ctx, &pb.SignatureRequest{ContractAddress: contract.Address, Args: args})
 	assert.Nil(t, signatureErr)
 	fmt.Printf("%+v\n", resp)
-
 
 	//Decoding the ABIPackedTxn data to ensure every field is packed as expected
 	funcDef, abiErr := abi.JSON(strings.NewReader(testAbi))
@@ -151,7 +147,7 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	assert.Nil(t, unpackErr)
 	fmt.Println(unpacked)
 
-	unpackedSignature := hex.EncodeToString((unpacked[len(unpacked) - 1]).([]byte))
+	unpackedSignature := hex.EncodeToString((unpacked[len(unpacked)-1]).([]byte))
 	fmt.Println(unpackedSignature)
 	fmt.Println(resp.Signature[2:])
 	assert.Equal(t, resp.Signature[2:], unpackedSignature)
@@ -168,4 +164,3 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	assert.Equal(t, big.NewInt(3), (unpacked[1]).(*big.Int))
 	assert.Equal(t, big.NewInt(1), (unpacked[2]).(*big.Int))
 }
-

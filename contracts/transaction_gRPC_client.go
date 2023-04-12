@@ -7,7 +7,7 @@ import (
 
 type TransactionClient struct {
 	Connection *grpc.ClientConn
-	Client pb.TransactionServiceClient
+	Client     pb.TransactionServiceClient
 }
 
 func NewTransactionClient(host string, opts []grpc.DialOption) (*TransactionClient, error) {
@@ -17,7 +17,6 @@ func NewTransactionClient(host string, opts []grpc.DialOption) (*TransactionClie
 	}
 	return &TransactionClient{Connection: conn, Client: pb.NewTransactionServiceClient(conn)}, nil
 }
-
 
 func (c *TransactionClient) DisconnectGracefully() error {
 	closeConnErr := c.Connection.Close()

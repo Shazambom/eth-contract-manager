@@ -7,8 +7,6 @@ import (
 	"testing"
 )
 
-
-
 func TestNewPrivateKeyRepository(t *testing.T) {
 	assert.IsType(t, &PrivateKeyRepo{}, pkr)
 	inter := reflect.TypeOf((*PrivateKeyRepository)(nil)).Elem()

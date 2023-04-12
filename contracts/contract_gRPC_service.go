@@ -1,9 +1,9 @@
 package contracts
 
 import (
-	"context"
 	pb "bitbucket.org/artie_inc/contract-service/proto"
 	"bitbucket.org/artie_inc/contract-service/storage"
+	"context"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -11,9 +11,8 @@ import (
 	"net"
 )
 
-
 type ContractRPCService struct {
-	Server *grpc.Server
+	Server  *grpc.Server
 	Channel chan string
 	pb.UnimplementedContractManagementServer
 	ContractManager ContractManagerHandler

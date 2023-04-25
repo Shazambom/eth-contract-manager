@@ -1,0 +1,193 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: contract-service-pipeline-
+  namespace: argo
+spec:
+  entrypoint: main
+  podGC:
+    strategy: OnPodSuccess
+  volumeClaimTemplates:
+    - metadata:
+        name: docker
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: build
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: workdir
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  templates:
+    - name: main
+      inputs:
+        parameters:
+          - name: full-name
+            value: "FULLNAME"
+          - name: repository
+            value: "REPOSITORY"
+          - name: branch
+            value: "BRANCH"
+      steps:
+        - - name: clone
+            templateRef:
+              name: git-clone-workflow
+              template: git-clone
+              clusterScope: true
+            arguments:
+              parameters:
+                - name: full-name
+                  value: "{{inputs.parameters.full-name}}"
+                - name: repository
+                  value: "{{inputs.parameters.repository}}"
+                - name: branch
+                  value: "{{inputs.parameters.branch}}"
+        - - name: build-binaries
+            template: build-bin
+            arguments:
+              parameters:
+                - name: repository
+                  value: "{{inputs.parameters.repository}}"
+        - - name: docker-login
+            template: docker-login
+        - - name: build-api
+            template: build-image
+            arguments:
+              parameters:
+                - name: image
+                  value: "api"
+                - name: path
+                  value: "test"
+                - name: commit
+                  value: "{{steps.clone.outputs.parameters.commit}}"
+        - - name: build-contract-manager
+            template: build-image
+            arguments:
+              parameters:
+                - name: image
+                  value: "contract-manager"
+                - name: path
+                  value: "test"
+                - name: commit
+                  value: "{{steps.clone.outputs.parameters.commit}}"
+        - - name: build-signer
+            template: build-image
+            arguments:
+              parameters:
+                - name: image
+                  value: "signer"
+                - name: path
+                  value: "test"
+                - name: commit
+                  value: "{{steps.clone.outputs.parameters.commit}}"
+        - - name: build-transaction-manager
+            template: build-image
+            arguments:
+              parameters:
+                - name: image
+                  value: "transaction-manager"
+                - name: path
+                  value: "test"
+                - name: commit
+                  value: "{{steps.clone.outputs.parameters.commit}}"
+        - - name: build-web
+            template: build-image
+            arguments:
+              parameters:
+                - name: image
+                  value: "web"
+                - name: path
+                  value: "test"
+                - name: commit
+                  value: "{{steps.clone.outputs.parameters.commit}}"
+
+    - name: build-bin
+      inputs:
+        parameters:
+          - name: repository
+      container:
+        image: golang:1.19-alpine
+        command: [sh, -c]
+        args: ["cd /mnt/vol/{{inputs.parameters.repository}} && chmod +rwx ./scripts/build.sh && ./scripts/build.sh && cp -r build /mnt/build/build && cp -r cmd /mnt/build/cmd"]
+        volumeMounts:
+          - name: workdir
+            mountPath: /mnt/vol
+          - name: build
+            mountPath: /mnt/build
+    - name: docker-login
+      container:
+        image: shazambom/dind:latest
+        command: [sh, -c]
+        args: ["aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 227429870588.dkr.ecr.us-west-2.amazonaws.com && sudo cp /root/.docker/config.json /mnt/vol/config.json && chmod +r /mnt/vol/config.json"]
+        volumeMounts:
+          - name: docker
+            mountPath: /mnt/vol
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: ecr-access
+                key: key
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ecr-access
+                key: secret
+    - name: build-image
+      inputs:
+        parameters:
+          - name: image
+          - name: path
+            value: "test"
+          - name: commit
+            value: "default"
+      container:
+        image: moby/buildkit:v0.11.6-rootless
+        command:
+          - buildctl-daemonless.sh
+        args:
+          - build
+          - --frontend
+          - dockerfile.v0
+          - --local
+          - context=.
+          - --local
+          - dockerfile=./build/{{inputs.parameters.image}}
+          - --output
+          - type=image,name=227429870588.dkr.ecr.us-west-2.amazonaws.com/platform/contract-service/{{inputs.parameters.image}}:{{inputs.parameters.path}}-{{inputs.parameters.commit}},push=true
+        volumeMounts:
+          - name: docker
+            mountPath: /.docker
+          - name: build
+            mountPath: /mnt/build
+        workingDir: /mnt/build
+        env:
+          - name: BUILDKITD_FLAGS
+            value: --oci-worker-no-process-sandbox
+          - name: DOCKER_CONFIG
+            value: /.docker
+    - name: test
+      inputs:
+        parameters:
+          - name: repository
+      container:
+        image: shazambom/dind:latest
+        command: [sh, -c]
+        args: ["sleep 17 && cd /mnt/vol/{{inputs.parameters.repository}} && chmod +rwx ./scripts/build.sh && chmod +rwx ./scripts/run_tests.sh && ./scripts/run_tests.sh"]
+        volumeMounts:
+          - name: workdir
+            mountPath: /mnt/vol

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./scripts/build_tag_docker.sh
+sudo ./scripts/build_tag_docker.sh
 
 OLDCONTEXT=$(kubectl config current-context)
 minikube delete && minikube start
@@ -31,7 +31,6 @@ helm install contract-manager -f ./helm/contract-manager/values-dev.yaml ./helm/
 helm install transaction-manager -f ./helm/transaction-manager/values-dev.yaml ./helm/transaction-manager -n pong-dev
 helm install contract-api -f ./helm/api/values-dev.yaml ./helm/api -n pong-dev
 helm install contract-web -f ./helm/web/values-dev.yaml ./helm/web -n pong-dev
-
 
 echo "Opening ports..."
 sleep 10

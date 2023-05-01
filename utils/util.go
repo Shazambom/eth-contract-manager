@@ -46,6 +46,14 @@ func GetEnvVar(key string) (string, error) {
 	return val, nil
 }
 
+func GetEnvVarWithDefault(key, defaultVal string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		return defaultVal
+	}
+	return val
+}
+
 func GetEnvVarBatch(keys []string, vars ...*string) error {
 	for i, key := range keys {
 		val, keyErr := GetEnvVar(key)

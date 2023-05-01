@@ -27,26 +27,26 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	ctx := context.Background()
 
 	txnDB, txnDBErr := storage.NewTransactionRepo(storage.TransactionConfig{
-		TableName: "Transactions",
+		TableName: utils.GetEnvVarWithDefault("TEST_TRANSACTIONS_TABLE_NAME","Transactions"),
 		CFG: []*aws.Config{{
-			Endpoint:    aws.String("localhost:8000"),
-			Region:      aws.String("us-east-1"),
-			Credentials: credentials.NewStaticCredentials("xxx", "yyy", ""),
+			Endpoint:    aws.String(utils.GetEnvVarWithDefault("TEST_DYANMO_ENDPOINT","localhost:8000")),
+			Region:      aws.String(utils.GetEnvVarWithDefault("TEST_AWS_REGION", "us-east-1")),
+			Credentials: credentials.NewStaticCredentials(utils.GetEnvVarWithDefault("TEST_AWS_ACCESS_KEY_ID", "xxx"), utils.GetEnvVarWithDefault("TEST_AWS_SECRET_ACCESS_KEY", "yyy"), ""),
 			DisableSSL:  aws.Bool(true),
 		}},
 	})
 	assert.Nil(t, txnDBErr)
 
 	//GRPC Clients for the contract, transaction, and signer services
-	contractClient, contractConnErr := NewContractClient("localhost:8082", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	contractClient, contractConnErr := NewContractClient(utils.GetEnvVarWithDefault("TEST_CONTRACT_SERVICE_HOST","localhost:8082"), []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	assert.Nil(t, contractConnErr)
 	defer contractClient.DisconnectGracefully()
 
-	transactionClient, transactionConnErr := NewTransactionClient("localhost:8083", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	transactionClient, transactionConnErr := NewTransactionClient(utils.GetEnvVarWithDefault("TEST_TRANSACTION_SERVICE_HOST","localhost:8083"), []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	assert.Nil(t, transactionConnErr)
 	defer transactionClient.DisconnectGracefully()
 
-	signerClient, signerConnErr := signing.NewClient("localhost:8081", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	signerClient, signerConnErr := signing.NewClient(utils.GetEnvVarWithDefault("TEST_SIGNING_SERVICE_HOST","localhost:8081"), []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	assert.Nil(t, signerConnErr)
 	defer signerClient.DisconnectGracefully()
 

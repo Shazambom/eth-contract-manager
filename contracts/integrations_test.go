@@ -23,6 +23,10 @@ import (
 )
 
 func TestStore_And_TransactionFlow(t *testing.T) {
+	runIntegrations := utils.GetEnvVarWithDefault("TEST_RUN_INTEGRATIONS", "true")
+	if runIntegrations != "true" {
+		return
+	}
 	//Initializing all services needed for creating a contract, building a transaction, and signing it along with services to directly check that everything was stored properly
 	ctx := context.Background()
 

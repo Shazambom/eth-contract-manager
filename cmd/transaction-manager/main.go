@@ -22,10 +22,14 @@ func main() {
 		log.Fatal(clientErr)
 	}
 
+	awsCredentials := credentials.NewEnvCredentials()
+	if cfg.AccessKeyID != "" && cfg.SecretAccessKey != "" {
+		awsCredentials = credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, "")
+	}
 	awsConfig := &aws.Config{
 		Endpoint:    aws.String(cfg.AWSEndpoint),
 		Region:      aws.String(cfg.AWSRegion),
-		Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		Credentials: awsCredentials,
 		DisableSSL:  aws.Bool(!cfg.SSLEnabled),
 	}
 

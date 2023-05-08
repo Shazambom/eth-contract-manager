@@ -198,9 +198,9 @@ spec:
         parameters:
           - name: repository
       container:
-        image: golang:1.19-alpine
+        image: shazambom/dind:latest
         command: [sh, -c]
-        args: ["cd /mnt/vol/{{inputs.parameters.repository}} && go test ./..."]
+        args: ["cd /mnt/vol/{{inputs.parameters.repository}} && go mod tidy && go test ./..."]
         env:
           - name: TEST_RUN_INTEGRATIONS
             value: "false"

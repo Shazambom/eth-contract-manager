@@ -55,7 +55,9 @@ func TestTransactionAPI_GetTransactionsFromAddress(t *testing.T) {
 
 	time.Sleep(time.Second)
 	resp, reqErr := callGetTransactionsFromAddress(port, userAddress)
-	fmt.Println(reqErr.Error())
+	if reqErr != nil {
+		fmt.Println(reqErr.Error())
+	}
 	assert.Nil(t, reqErr)
 
 	respTxn := []*storage.Transaction{}
@@ -77,7 +79,9 @@ func TestTransactionAPI_GetTransactionsFromAddress_ErrGettingTxn(t *testing.T) {
 	time.Sleep(time.Second)
 
 	resp, reqErr := callGetTransactionsFromAddress(port, userAddress)
-	fmt.Println(reqErr.Error())
+	if reqErr != nil {
+		fmt.Println(reqErr.Error())
+	}
 	assert.Nil(t, reqErr)
 	assert.Equal(t, "500 Internal Server Error", resp.Status)
 
@@ -103,7 +107,9 @@ func TestTransactionAPI_GetTransactionsFromAddress_InvalidTransaction(t *testing
 
 	time.Sleep(time.Second)
 	resp, reqErr := callGetTransactionsFromAddress(port, userAddress)
-	fmt.Println(reqErr.Error())
+	if reqErr != nil {
+		fmt.Println(reqErr.Error())
+	}
 	assert.Nil(t, reqErr)
 	assert.Equal(t, "500 Internal Server Error", resp.Status)
 }

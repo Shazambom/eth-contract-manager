@@ -70,9 +70,9 @@ spec:
                   value: "{{inputs.parameters.repository}}"
         - - name: docker-login
             template: docker-login
-            when: "{{inputs.parameters.branch}} == develop || {{inputs.parameters.branch}} == qa || {{inputs.parameters.branch}} == master"
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
         - - name: build-api
-            when: "{{inputs.parameters.branch}} == develop || {{inputs.parameters.branch}} == qa || {{inputs.parameters.branch}} == master"
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             template: build-image
             arguments:
               parameters:
@@ -84,7 +84,7 @@ spec:
                   value: "{{steps.clone.outputs.parameters.commit}}"
         - - name: build-contract-manager
             template: build-image
-            when: "{{inputs.parameters.branch}} == develop || {{inputs.parameters.branch}} == qa || {{inputs.parameters.branch}} == master"
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             arguments:
               parameters:
                 - name: image
@@ -95,7 +95,7 @@ spec:
                   value: "{{steps.clone.outputs.parameters.commit}}"
         - - name: build-signer
             template: build-image
-            when: "{{inputs.parameters.branch}} == develop || {{inputs.parameters.branch}} == qa || {{inputs.parameters.branch}} == master"
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             arguments:
               parameters:
                 - name: image
@@ -106,7 +106,7 @@ spec:
                   value: "{{steps.clone.outputs.parameters.commit}}"
         - - name: build-transaction-manager
             template: build-image
-            when: "{{inputs.parameters.branch}} == develop || {{inputs.parameters.branch}} == qa || {{inputs.parameters.branch}} == master"
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             arguments:
               parameters:
                 - name: image
@@ -117,7 +117,7 @@ spec:
                   value: "{{steps.clone.outputs.parameters.commit}}"
         - - name: build-web
             template: build-image
-            when: "{{inputs.parameters.branch}} == develop || {{inputs.parameters.branch}} == qa || {{inputs.parameters.branch}} == master"
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             arguments:
               parameters:
                 - name: image

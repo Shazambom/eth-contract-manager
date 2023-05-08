@@ -51,8 +51,11 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	defer signerClient.DisconnectGracefully()
 
 	//Contract using the abi for the Season01 Artie Sale contract: https://etherscan.io/address/0x8c539b123424dbb7949b9f683ac466fbadfb0699
+	signingSvc := signing.NewSigningService()
+	_, contractAddr, genContractErr := signingSvc.GenerateKey()
+	assert.Nil(t, genContractErr)
 	contract := &pb.Contract{
-		Address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+		Address: contractAddr,
 		Abi:     testAbi,
 		Functions: map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
 			{Name: "nonce", Type: "bytes16"},
@@ -79,7 +82,8 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	nonceBytes, decodeErr := hex.DecodeString(nonce[2:])
 	assert.Nil(t, decodeErr)
 
-	msgSender := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	_, msgSender, senderGenErr := signingSvc.GenerateKey()
+	assert.Nil(t, senderGenErr)
 
 	//Building a transaction for the "mint" function by passing in the nonce, the num requested, and the transaction number
 	_, transactionErr := transactionClient.Client.ConstructTransaction(ctx, &pb.TransactionRequest{

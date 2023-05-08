@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func newTestTransactionAPI(t *testing.T) (*mocks.MockTransactionServiceClient, *TransactionAPI) {
@@ -52,7 +53,9 @@ func TestTransactionAPI_GetTransactionsFromAddress(t *testing.T) {
 
 	mockTransactionService.EXPECT().GetTransactions(gomock.Any(), &pb.Address{Address: userAddress}).Return(&pb.Transactions{Transactions: []*pb.Transaction{transaction.ToRPC()}}, nil)
 
+	time.Sleep(time.Second)
 	resp, reqErr := callGetTransactionsFromAddress(port, userAddress)
+	fmt.Println(reqErr.Error())
 	assert.Nil(t, reqErr)
 
 	respTxn := []*storage.Transaction{}
@@ -71,8 +74,10 @@ func TestTransactionAPI_GetTransactionsFromAddress_ErrGettingTxn(t *testing.T) {
 	someTransactionErr := errors.New("some transaction error")
 
 	mockTransactionService.EXPECT().GetTransactions(gomock.Any(), &pb.Address{Address: userAddress}).Return(nil, someTransactionErr)
+	time.Sleep(time.Second)
 
 	resp, reqErr := callGetTransactionsFromAddress(port, userAddress)
+	fmt.Println(reqErr.Error())
 	assert.Nil(t, reqErr)
 	assert.Equal(t, "500 Internal Server Error", resp.Status)
 
@@ -96,7 +101,9 @@ func TestTransactionAPI_GetTransactionsFromAddress_InvalidTransaction(t *testing
 
 	mockTransactionService.EXPECT().GetTransactions(gomock.Any(), &pb.Address{Address: userAddress}).Return(&pb.Transactions{Transactions: []*pb.Transaction{transaction.ToRPC()}}, nil)
 
+	time.Sleep(time.Second)
 	resp, reqErr := callGetTransactionsFromAddress(port, userAddress)
+	fmt.Println(reqErr.Error())
 	assert.Nil(t, reqErr)
 	assert.Equal(t, "500 Internal Server Error", resp.Status)
 }

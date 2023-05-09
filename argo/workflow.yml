@@ -181,7 +181,7 @@ spec:
           - --local
           - dockerfile=./build/{{inputs.parameters.image}}
           - --output
-          - type=image,name=227429870588.dkr.ecr.us-west-2.amazonaws.com/platform/contract-service/{{inputs.parameters.image}}:{{inputs.parameters.path}}-{{inputs.parameters.commit}},push=true
+          - type=image,\"name=227429870588.dkr.ecr.us-west-2.amazonaws.com/platform/contract-service/{{inputs.parameters.image}}:{{inputs.parameters.path}}-{{inputs.parameters.commit}},227429870588.dkr.ecr.us-west-2.amazonaws.com/platform/contract-service/{{inputs.parameters.image}}:{{inputs.parameters.path}}\",push=true
         volumeMounts:
           - name: docker
             mountPath: /.docker

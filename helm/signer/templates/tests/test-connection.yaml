@@ -11,5 +11,5 @@ spec:
     - name: grpcurl
       image: networld/grpcurl
       command: ['grpcurl']
-      args: ['{{ include "api.fullname" . }}:{{ .Values.service.port }}', 'list']
+      args: ['{{ include "signer.fullname" . }}:{{ .Values.service.port }}', 'list']
   restartPolicy: Never

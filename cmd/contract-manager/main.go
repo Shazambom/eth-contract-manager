@@ -15,10 +15,14 @@ func main() {
 		log.Fatal(cfgErr)
 	}
 	log.Printf("Loading ContractManager with Config: \n%s\n", cfg.String())
+	awsCredentials := credentials.NewEnvCredentials()
+	if cfg.AccessKeyID != "" && cfg.SecretAccessKey != "" {
+		awsCredentials = credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, "")
+	}
 	contractRPC, contractErr := contracts.InitializeContractServer(cfg.Port, []grpc.ServerOption{grpc.EmptyServerOption{}}, storage.ContractConfig{TableName: cfg.TableName, CFG: []*aws.Config{{
 		Endpoint:    aws.String(cfg.AWSEndpoint),
 		Region:      aws.String(cfg.AWSRegion),
-		Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		Credentials: awsCredentials,
 		DisableSSL:  aws.Bool(!cfg.SSLEnabled),
 	}}})
 	if contractErr != nil {

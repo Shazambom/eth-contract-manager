@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bitbucket.org/artie_inc/contract-service/utils"
 	"context"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -10,22 +11,13 @@ import (
 )
 
 var dynamoCfg = &aws.Config{
-	Endpoint:    aws.String("localhost:8000"),
-	Region:      aws.String("us-east-1"),
-	Credentials: credentials.NewStaticCredentials("xxx", "yyy", ""),
+	Endpoint:    aws.String(utils.GetEnvVarWithDefault("TEST_DYANMO_ENDPOINT", "localhost:8000")),
+	Region:      aws.String(utils.GetEnvVarWithDefault("TEST_AWS_REGION", "us-east-1")),
+	Credentials: credentials.NewStaticCredentials(utils.GetEnvVarWithDefault("TEST_AWS_ACCESS_KEY_ID", "xxx"), utils.GetEnvVarWithDefault("TEST_AWS_SECRET_ACCESS_KEY", "yyy"), ""),
 	DisableSSL:  aws.Bool(true),
 }
 
 var ctx = context.Background()
-
-var s3cfg = &aws.Config{
-	Endpoint:         aws.String("localhost:4566"),
-	Region:           aws.String("us-east-1"),
-	Credentials:      credentials.NewStaticCredentials("xxx", "yyy", ""),
-	S3ForcePathStyle: aws.Bool(true),
-	DisableSSL:       aws.Bool(true),
-}
-var testBucketName = "buckety"
 
 var PrivateKeyRepoConfig = PrivateKeyConfig{
 	TableName: "ContractPrivateKeyRepository",
@@ -47,6 +39,10 @@ var pkr PrivateKeyRepository
 var tr TransactionRepository
 
 func TestMain(m *testing.M) {
+	runIntegrations := utils.GetEnvVarWithDefault("TEST_RUN_INTEGRATIONS", "true")
+	if runIntegrations != "true" {
+		os.Exit(0)
+	}
 	var pkrErr error
 	pkr, pkrErr = NewPrivateKeyRepository(PrivateKeyRepoConfig)
 	if pkrErr != nil {

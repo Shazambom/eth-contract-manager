@@ -23,36 +23,43 @@ import (
 )
 
 func TestStore_And_TransactionFlow(t *testing.T) {
+	runIntegrations := utils.GetEnvVarWithDefault("TEST_RUN_INTEGRATIONS", "true")
+	if runIntegrations != "true" {
+		return
+	}
 	//Initializing all services needed for creating a contract, building a transaction, and signing it along with services to directly check that everything was stored properly
 	ctx := context.Background()
 
 	txnDB, txnDBErr := storage.NewTransactionRepo(storage.TransactionConfig{
-		TableName: "Transactions",
+		TableName: utils.GetEnvVarWithDefault("TEST_TRANSACTIONS_TABLE_NAME","Transactions"),
 		CFG: []*aws.Config{{
-			Endpoint:    aws.String("localhost:8000"),
-			Region:      aws.String("us-east-1"),
-			Credentials: credentials.NewStaticCredentials("xxx", "yyy", ""),
+			Endpoint:    aws.String(utils.GetEnvVarWithDefault("TEST_DYANMO_ENDPOINT","localhost:8000")),
+			Region:      aws.String(utils.GetEnvVarWithDefault("TEST_AWS_REGION", "us-east-1")),
+			Credentials: credentials.NewStaticCredentials(utils.GetEnvVarWithDefault("TEST_AWS_ACCESS_KEY_ID", "xxx"), utils.GetEnvVarWithDefault("TEST_AWS_SECRET_ACCESS_KEY", "yyy"), ""),
 			DisableSSL:  aws.Bool(true),
 		}},
 	})
 	assert.Nil(t, txnDBErr)
 
 	//GRPC Clients for the contract, transaction, and signer services
-	contractClient, contractConnErr := NewContractClient("localhost:8082", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	contractClient, contractConnErr := NewContractClient(utils.GetEnvVarWithDefault("TEST_CONTRACT_SERVICE_HOST","localhost:8082"), []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	assert.Nil(t, contractConnErr)
 	defer contractClient.DisconnectGracefully()
 
-	transactionClient, transactionConnErr := NewTransactionClient("localhost:8083", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	transactionClient, transactionConnErr := NewTransactionClient(utils.GetEnvVarWithDefault("TEST_TRANSACTION_SERVICE_HOST","localhost:8083"), []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	assert.Nil(t, transactionConnErr)
 	defer transactionClient.DisconnectGracefully()
 
-	signerClient, signerConnErr := signing.NewClient("localhost:8081", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	signerClient, signerConnErr := signing.NewClient(utils.GetEnvVarWithDefault("TEST_SIGNING_SERVICE_HOST","localhost:8081"), []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	assert.Nil(t, signerConnErr)
 	defer signerClient.DisconnectGracefully()
 
 	//Contract using the abi for the Season01 Artie Sale contract: https://etherscan.io/address/0x8c539b123424dbb7949b9f683ac466fbadfb0699
+	signingSvc := signing.NewSigningService()
+	_, contractAddr, genContractErr := signingSvc.GenerateKey()
+	assert.Nil(t, genContractErr)
 	contract := &pb.Contract{
-		Address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+		Address: contractAddr,
 		Abi:     testAbi,
 		Functions: map[string]*pb.Function{"mint": {Arguments: []*pb.Argument{
 			{Name: "nonce", Type: "bytes16"},
@@ -79,7 +86,8 @@ func TestStore_And_TransactionFlow(t *testing.T) {
 	nonceBytes, decodeErr := hex.DecodeString(nonce[2:])
 	assert.Nil(t, decodeErr)
 
-	msgSender := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	_, msgSender, senderGenErr := signingSvc.GenerateKey()
+	assert.Nil(t, senderGenErr)
 
 	//Building a transaction for the "mint" function by passing in the nonce, the num requested, and the transaction number
 	_, transactionErr := transactionClient.Client.ConstructTransaction(ctx, &pb.TransactionRequest{

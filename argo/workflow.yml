@@ -56,6 +56,12 @@ spec:
                   value: "{{inputs.parameters.repository}}"
                 - name: branch
                   value: "{{inputs.parameters.branch}}"
+        - - name: test
+            template: test
+            arguments:
+              parameters:
+                - name: repository
+                  value: "{{inputs.parameters.repository}}"
         - - name: build-binaries
             template: build-bin
             arguments:
@@ -64,56 +70,63 @@ spec:
                   value: "{{inputs.parameters.repository}}"
         - - name: docker-login
             template: docker-login
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
         - - name: build-api
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             template: build-image
             arguments:
               parameters:
                 - name: image
                   value: "api"
                 - name: path
-                  value: "test"
+                  value: "{{inputs.parameters.branch}}"
                 - name: commit
                   value: "{{steps.clone.outputs.parameters.commit}}"
         - - name: build-contract-manager
             template: build-image
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             arguments:
               parameters:
                 - name: image
                   value: "contract-manager"
                 - name: path
-                  value: "test"
+                  value: "{{inputs.parameters.branch}}"
                 - name: commit
                   value: "{{steps.clone.outputs.parameters.commit}}"
         - - name: build-signer
             template: build-image
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             arguments:
               parameters:
                 - name: image
                   value: "signer"
                 - name: path
-                  value: "test"
+                  value: "{{inputs.parameters.branch}}"
                 - name: commit
                   value: "{{steps.clone.outputs.parameters.commit}}"
         - - name: build-transaction-manager
             template: build-image
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             arguments:
               parameters:
                 - name: image
                   value: "transaction-manager"
                 - name: path
-                  value: "test"
+                  value: "{{inputs.parameters.branch}}"
                 - name: commit
                   value: "{{steps.clone.outputs.parameters.commit}}"
         - - name: build-web
             template: build-image
+            when: "'{{inputs.parameters.branch}}' == 'develop' || '{{inputs.parameters.branch}}' == 'qa' || '{{inputs.parameters.branch}}' == 'master'"
             arguments:
               parameters:
                 - name: image
                   value: "web"
                 - name: path
-                  value: "test"
+                  value: "{{inputs.parameters.branch}}"
                 - name: commit
                   value: "{{steps.clone.outputs.parameters.commit}}"
+
 
     - name: build-bin
       inputs:
@@ -168,7 +181,7 @@ spec:
           - --local
           - dockerfile=./build/{{inputs.parameters.image}}
           - --output
-          - type=image,name=227429870588.dkr.ecr.us-west-2.amazonaws.com/platform/contract-service/{{inputs.parameters.image}}:{{inputs.parameters.path}}-{{inputs.parameters.commit}},push=true
+          - type=image,\"name=227429870588.dkr.ecr.us-west-2.amazonaws.com/platform/contract-service/{{inputs.parameters.image}}:{{inputs.parameters.path}}-{{inputs.parameters.commit}},227429870588.dkr.ecr.us-west-2.amazonaws.com/platform/contract-service/{{inputs.parameters.image}}:{{inputs.parameters.path}}\",push=true
         volumeMounts:
           - name: docker
             mountPath: /.docker
@@ -187,7 +200,10 @@ spec:
       container:
         image: shazambom/dind:latest
         command: [sh, -c]
-        args: ["sleep 17 && cd /mnt/vol/{{inputs.parameters.repository}} && chmod +rwx ./scripts/build.sh && chmod +rwx ./scripts/run_tests.sh && ./scripts/run_tests.sh"]
+        args: ["cd /mnt/vol/{{inputs.parameters.repository}} && go mod tidy && go test ./..."]
+        env:
+          - name: TEST_RUN_INTEGRATIONS
+            value: "false"
         volumeMounts:
           - name: workdir
             mountPath: /mnt/vol
